@@ -1,0 +1,2859 @@
+{
+  "updated_at": "2026-05-01T10:38:40",
+  "count": 46,
+  "matches": [
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1084",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2022-nissan-serena-highway-star-v-c27-auto/OAG-AD-25780110/",
+        "network_id": "OAG-AD-25780110",
+        "title": "2022 Nissan Serena Highway Star V C27 Auto",
+        "detail_page_title": "2022 Nissan Serena Highway Star V C27 Auto",
+        "year": "2022",
+        "make": "Nissan",
+        "model": "Serena Highway Star V C27 Auto",
+        "price_text": "$30,400",
+        "price": 30400,
+        "odometer_text": "41,090km",
+        "odometer_km": 41090,
+        "dealer_stock_id": "20221084",
+        "dealer_stock_ids": [
+          "20221084"
+        ],
+        "car_code": "1343",
+        "photo_count": 45,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/2lpoox2luysyu1iljka6ku8u0.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/2lpoox2luysyu1iljka6ku8u0.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZN00GFC27243635",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2022 Nissan Serena Hybrid Highway Star V Pro Pilot 8 Seater",
+        "year": "2022",
+        "make": "NISSAN",
+        "model": "Serena",
+        "price_text": "30400",
+        "price": 30400,
+        "odometer_text": "41090",
+        "description": "Stock - 20221084\n\n2022 NISSAN Serena Highway Star V | Hybrid | 41090 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Fog Lights\n\u2022 Rear Wiper\n\u2022 Air Conditioning\n\u2022 Airbags\n\u2022 Power s...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/serena/gfc27/1084",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GFC27-243635/3Q7djCvdDO8zQsShMICvoA/Nissan Serena 5.jpeg",
+        "stock_no": "1084",
+        "stock_candidates": [
+          "1084"
+        ],
+        "chassis": "GFC27-243635",
+        "warranty": {
+          "vehicle_year": "2022",
+          "vehicle_age": 4,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1081",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2021-nissan-serena-highway-star-s-hybrid-c27-auto/OAG-AD-25780111/",
+        "network_id": "OAG-AD-25780111",
+        "title": "2021 Nissan Serena Highway Star S-Hybrid C27 Auto",
+        "detail_page_title": "2021 Nissan Serena Highway Star S-Hybrid C27 Auto",
+        "year": "2021",
+        "make": "Nissan",
+        "model": "Serena Highway Star S-Hybrid C27 Auto",
+        "price_text": "$30,900",
+        "price": 30900,
+        "odometer_text": "46,656km",
+        "odometer_km": 46656,
+        "dealer_stock_id": "20211081",
+        "dealer_stock_ids": [
+          "20211081"
+        ],
+        "car_code": "1341",
+        "photo_count": 39,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/d9rzrdj078rornkm2z33c3z74.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/d9rzrdj078rornkm2z33c3z74.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZM00GFC27224207",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2021 Nissan Serena Hybrid Highway Star V Pro Pilot 8 Seater",
+        "year": "2021",
+        "make": "NISSAN",
+        "model": "Serena",
+        "price_text": "30900",
+        "price": 30900,
+        "odometer_text": "46656",
+        "description": "Stock - 20211081\n\n2021 NISSAN Serena Highway Star V | Hybrid | 46656 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Fog Lights\n\u2022 Rear Wiper\n\u2022 Cruise Control\n\u2022 Pro-Pilot Assist\n\u2022...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/serena/gfc27/1081",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GFC27-224207/3Q7djCvdDO8zQsShMICvoA/Nissan Serena 1.jpeg",
+        "stock_no": "1081",
+        "stock_candidates": [
+          "1081"
+        ],
+        "chassis": "GFC27-224207",
+        "warranty": {
+          "vehicle_year": "2021",
+          "vehicle_age": 5,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1080",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2021-nissan-serena-highway-star-s-hybrid-c27-auto/OAG-AD-25780112/",
+        "network_id": "OAG-AD-25780112",
+        "title": "2021 Nissan Serena Highway Star S-Hybrid C27 Auto",
+        "detail_page_title": "2021 Nissan Serena Highway Star S-Hybrid C27 Auto",
+        "year": "2021",
+        "make": "Nissan",
+        "model": "Serena Highway Star S-Hybrid C27 Auto",
+        "price_text": "$29,400",
+        "price": 29400,
+        "odometer_text": "52,565km",
+        "odometer_km": 52565,
+        "dealer_stock_id": "20211080",
+        "dealer_stock_ids": [
+          "20211080"
+        ],
+        "car_code": "1338",
+        "photo_count": 27,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/blunklb4gxzd22rnozj8adebu.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/blunklb4gxzd22rnozj8adebu.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZM00GFC27230749",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2021 Nissan Serena Hybrid Highway Star Pro Pilot 8 Seater",
+        "year": "2021",
+        "make": "NISSAN",
+        "model": "Serena",
+        "price_text": "29400",
+        "price": 29400,
+        "odometer_text": "52565",
+        "description": "Stock - 20211080\n\n2021 NISSAN Serena Highway Star  | Hybrid | 52565 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Rear Wiper\n\u2022 Reversing Camera\n\u2022 Parking assist camera\n\u2022 Cruise...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/serena/gfc27/1080",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GFC27-230749/3Q7djCvdDO8zQsShMICvoA/Nissan Serena 7.jpeg",
+        "stock_no": "1080",
+        "stock_candidates": [
+          "1080"
+        ],
+        "chassis": "GFC27-230749",
+        "warranty": {
+          "vehicle_year": "2021",
+          "vehicle_age": 5,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1096",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2024-toyota-yaris-x-hybrid-auto-efour/OAG-AD-25780107/",
+        "network_id": "OAG-AD-25780107",
+        "title": "2024 Toyota Yaris X Hybrid Auto eFour",
+        "detail_page_title": "2024 Toyota Yaris X Hybrid Auto eFour",
+        "year": "2024",
+        "make": "Toyota",
+        "model": "Yaris X Hybrid Auto eFour",
+        "price_text": "$28,400",
+        "price": 28400,
+        "odometer_text": "22,539km",
+        "odometer_km": 22539,
+        "dealer_stock_id": "20241096",
+        "dealer_stock_ids": [
+          "20241096"
+        ],
+        "car_code": "1244",
+        "photo_count": 24,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/rtperfq5cdqujjjylpa9uhl.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/rtperfq5cdqujjjylpa9uhl.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZRMXPH170003721",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2024 Toyota Yaris Hybrid X 4WD",
+        "year": "2024",
+        "make": "TOYOTA",
+        "model": "YARIS",
+        "price_text": "28400",
+        "price": 28400,
+        "odometer_text": "22539",
+        "description": "Stock - 20241096\n\n2024 TOYOTA YARIS X 4WD | Hybrid | 22539 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Airbags 6\n\u2022 Cruise Control\n\u2022 Reversing Camera\n\u2022 Push start and keyles...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/yaris/mxph17/1096",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/MXPH17-0003721/3Q7djCvdDO8zQsShMICvoA/Toyota Yaris 1.jpeg",
+        "stock_no": "1096",
+        "stock_candidates": [
+          "1096"
+        ],
+        "chassis": "MXPH17-0003721",
+        "warranty": {
+          "vehicle_year": "2024",
+          "vehicle_age": 2,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1092",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2020-toyota-hiace-dx-lwb-auto/OAG-AD-25780114/",
+        "network_id": "OAG-AD-25780114",
+        "title": "2020 Toyota Hiace DX LWB Auto",
+        "detail_page_title": "2020 Toyota Hiace DX LWB Auto",
+        "year": "2020",
+        "make": "Toyota",
+        "model": "Hiace DX LWB Auto",
+        "price_text": "$31,900",
+        "price": 31900,
+        "odometer_text": "36,000km",
+        "odometer_km": 36000,
+        "dealer_stock_id": "20201092",
+        "dealer_stock_ids": [
+          "20201092"
+        ],
+        "car_code": "1344",
+        "photo_count": 5,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/4tgqdxmf8rknkkd3094k0c3la.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/4tgqdxmf8rknkkd3094k0c3la.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZLTRH2000317052",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2020 Toyota Hiace DX",
+        "year": "2020",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "31900",
+        "price": 31900,
+        "odometer_text": "36000",
+        "description": "Stock - 20201092\n\n2020 TOYOTA Hiace DX | Petrol | 36000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Air Conditioning\n\u2022 Airbags\n\u2022 Power steering\n\u2022 Reversing Camera\n\u2022 Remote Key...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/trh200v/1092",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/TRH200-0317052/3Q7djCvdDO8zQsShMICvoA/1._Reflection_Cleanup_Remove_unwanted_202604291457.jpeg",
+        "stock_no": "1092",
+        "stock_candidates": [
+          "1092"
+        ],
+        "chassis": "TRH200-0317052",
+        "warranty": {
+          "vehicle_year": "2020",
+          "vehicle_age": 6,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1058",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1998-mitsubishi-pajero-mini-x-h53a-auto/OAG-AD-25705796/",
+        "network_id": "OAG-AD-25705796",
+        "title": "1998 Mitsubishi Pajero Mini X H53A Auto",
+        "detail_page_title": "1998 Mitsubishi Pajero Mini X H53A Auto",
+        "year": "1998",
+        "make": "Mitsubishi",
+        "model": "Pajero Mini X H53A Auto",
+        "price_text": "$10,400",
+        "price": 10400,
+        "odometer_text": "61,157km",
+        "odometer_km": 61157,
+        "dealer_stock_id": "19981058",
+        "dealer_stock_ids": [
+          "19981058"
+        ],
+        "car_code": "1261",
+        "photo_count": 19,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/u3tmxa6o0tgqf4919sme1s98.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/u3tmxa6o0tgqf4919sme1s98.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZW00H53A0000467",
+        "registration_plate": "Check with seller",
+        "body_type": "SUV",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1998 Mitsubishi Pajero Mini",
+        "year": "1998",
+        "make": "MITSUBISHI",
+        "model": "Pajero",
+        "price_text": "10400",
+        "price": 10400,
+        "odometer_text": "61157",
+        "description": "Stock - 19981058\n\n1998 MITSUBISHI Pajero Mini | Petrol | 61157 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Rear Wiper\n\u2022 Windshield wiper\n\u2022 Fog Lights\n\u2022 Power Windows\n\u2022 Rece...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mitsubishi/pajero/h53a/1058",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/H53A-0000467/3Q7djCvdDO8zQsShMICvoA/ChatGPT Image Apr 9, 2026, 10_02_59 AM.png",
+        "stock_no": "1058",
+        "stock_candidates": [
+          "1058"
+        ],
+        "chassis": "H53A-0000467",
+        "warranty": {
+          "vehicle_year": "1998",
+          "vehicle_age": 28,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:605",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2013-toyota-hiace-dx-super-lwb-auto-4wd/OAG-AD-24937831/",
+        "network_id": "OAG-AD-24937831",
+        "title": "2013 Toyota Hiace DX Super LWB Auto 4WD",
+        "detail_page_title": "2013 Toyota Hiace DX Super LWB Auto 4WD",
+        "year": "2013",
+        "make": "Toyota",
+        "model": "Hiace DX Super LWB Auto 4WD",
+        "price_text": "$33,900",
+        "price": 33900,
+        "odometer_text": "222,468km",
+        "odometer_km": 222468,
+        "dealer_stock_id": "2013605",
+        "dealer_stock_ids": [
+          "2013605"
+        ],
+        "car_code": "1187",
+        "photo_count": 22,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/3jkj1win68tjfgn0g9wjiwr6t.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/3jkj1win68tjfgn0g9wjiwr6t.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZDTRH2260011595",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2013 Toyota Hiace 4WD Extra High Roof SLWB (Ex Ambulance)",
+        "year": "2013",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "33900",
+        "price": 33900,
+        "odometer_text": "222468",
+        "description": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM\n5-Year Extended Warranty Available!\n\nA reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needin...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/trh226s/605",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/TRH226-0011595/3Q7djCvdDO8zQsShMICvoA/TRH226-0011595-01.jpg",
+        "stock_no": "605",
+        "stock_candidates": [
+          "605"
+        ],
+        "chassis": "TRH226-0011595",
+        "warranty": {
+          "vehicle_year": "2013",
+          "vehicle_age": 13,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:723",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2008-toyota-hiace-super-lwb-auto-4wd/OAG-AD-25508529/",
+        "network_id": "OAG-AD-25508529",
+        "title": "2008 Toyota Hiace Super LWB Auto 4WD",
+        "detail_page_title": "2008 Toyota Hiace Super LWB Auto 4WD",
+        "year": "2008",
+        "make": "Toyota",
+        "model": "Hiace Super LWB Auto 4WD",
+        "price_text": "$32,900",
+        "price": 32900,
+        "odometer_text": "163,439km",
+        "odometer_km": 163439,
+        "dealer_stock_id": "2008723",
+        "dealer_stock_ids": [
+          "2008723"
+        ],
+        "car_code": "1247",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/cxtx1y2b4wafxw0swhdrjtvw3.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/cxtx1y2b4wafxw0swhdrjtvw3.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZ8TRH2260005524",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2008 Toyota Hiace 4WD Extra High Roof SLWB (Ex Ambulance)",
+        "year": "2008",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "32900",
+        "price": 32900,
+        "odometer_text": "163439",
+        "description": "Stock - 2008723\n\n5-Year  Warranty! 2008 TOYOTA Hiace | Petrol | 163439 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Airbags\n\u2022 Power steering\n\u2022 Fog Lights\n\u2022 Power Windows\n\u2022 Apple...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/trh226s/723",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/TRH226-0005524/3Q7djCvdDO8zQsShMICvoA/TRH226-0005524-01.jpg",
+        "stock_no": "723",
+        "stock_candidates": [
+          "723"
+        ],
+        "chassis": "TRH226-0005524",
+        "warranty": {
+          "vehicle_year": "2008",
+          "vehicle_age": 18,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:896",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1991-toyota-hiace-swb-auto/OAG-AD-25532399/",
+        "network_id": "OAG-AD-25532399",
+        "title": "1991 Toyota Hiace SWB Auto",
+        "detail_page_title": "1991 Toyota Hiace SWB Auto",
+        "year": "1991",
+        "make": "Toyota",
+        "model": "Hiace SWB Auto",
+        "price_text": "$37,900",
+        "price": 37900,
+        "odometer_text": "137,631km",
+        "odometer_km": 137631,
+        "dealer_stock_id": "1991896",
+        "dealer_stock_ids": [
+          "1991896"
+        ],
+        "car_code": "1302",
+        "photo_count": 32,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/23iadlu2asx9o7k724hcdr9he.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/23iadlu2asx9o7k724hcdr9he.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZM0LH1190018886",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Diesel",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1991 Toyota Hiace LH119 Part-time Auto 4WD with Low Range - Extra High Roof (Built-in Camper)",
+        "year": "1991",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "37900",
+        "price": 37900,
+        "odometer_text": "137631",
+        "description": "1991 TOYOTA Hiace LH119 Part-time Auto 4WD with Low Range | Extra High Roof Built-in Camper | 137,631 KM\nStock: 1991896\nA rare and adventure-ready Toyota Hiace built-in camper with part-time 4WD and low range. This Ex...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/u-lh119v/896",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/LH1190018886/3Q7djCvdDO8zQsShMICvoA/LH1190018886-01.jpg",
+        "stock_no": "896",
+        "stock_candidates": [
+          "896"
+        ],
+        "chassis": "LH1190018886",
+        "warranty": {
+          "vehicle_year": "1991",
+          "vehicle_age": 35,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:804",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2000-toyota-landcruiser-cygnus-auto-4x4/OAG-AD-25437171/",
+        "network_id": "OAG-AD-25437171",
+        "title": "2000 Toyota Landcruiser Cygnus Auto 4x4",
+        "detail_page_title": "2000 Toyota Landcruiser Cygnus Auto 4x4",
+        "year": "2000",
+        "make": "Toyota",
+        "model": "Landcruiser Cygnus Auto 4x4",
+        "price_text": "$29,900",
+        "price": 29900,
+        "odometer_text": "217,819km",
+        "odometer_km": 217819,
+        "dealer_stock_id": "2000804",
+        "dealer_stock_ids": [
+          "2000804"
+        ],
+        "car_code": "1289",
+        "photo_count": 31,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2plzb82wn186ff00rra20uudb.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/2plzb82wn186ff00rra20uudb.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZYUZJ1000105063",
+        "registration_plate": "Check with seller",
+        "body_type": "SUV",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater (Adjustable Suspension)",
+        "year": "2000",
+        "make": "TOYOTA",
+        "model": "Land Cruiser",
+        "price_text": "29900",
+        "price": 29900,
+        "odometer_text": "217819",
+        "description": "Stock - 2000804\n\n2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater (Adjustable Suspension) | Petrol | 217819 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Height Adjustable Susp...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/land cruiser/uzj100w/804",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/UZJ100-0105063/3Q7djCvdDO8zQsShMICvoA/UZJ100-0105063-01.jpg",
+        "stock_no": "804",
+        "stock_candidates": [
+          "804"
+        ],
+        "chassis": "UZJ100-0105063",
+        "warranty": {
+          "vehicle_year": "2000",
+          "vehicle_age": 26,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:824",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1999-mitsubishi-strada-k74t-auto-4x4-dual-cab/OAG-AD-24984736/",
+        "network_id": "OAG-AD-24984736",
+        "title": "1999 Mitsubishi Strada K74T Auto 4x4 Dual Cab",
+        "detail_page_title": "1999 Mitsubishi Strada K74T Auto 4x4 Dual Cab",
+        "year": "1999",
+        "make": "Mitsubishi",
+        "model": "Strada K74T Auto 4x4 Dual Cab",
+        "price_text": "$34,900",
+        "price": 34900,
+        "odometer_text": "134,795km",
+        "odometer_km": 134795,
+        "dealer_stock_id": "1999824",
+        "dealer_stock_ids": [
+          "1999824"
+        ],
+        "car_code": "1248",
+        "photo_count": 26,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2exe4klgo235auicizlnd014t.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/2exe4klgo235auicizlnd014t.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZX000K741100900",
+        "registration_plate": "Check with seller",
+        "body_type": "Ute",
+        "fuel": "Diesel",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1999 Mitsubishi Strada 4WD Diesel Motorhome",
+        "year": "1999",
+        "make": "MITSUBISHI",
+        "model": "Strada",
+        "price_text": "34900",
+        "price": 34900,
+        "odometer_text": "134795",
+        "description": "Stock - 1999824\n\n1999 MITSUBISHI Strada W-Cab 4WD Diesel | Diesel | 134795 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Power Windows\n\u2022 Air Conditioning\n\u2022 Airbags\n\u2022 Over-Cab Styl...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mitsubishi/strada/k74t/824",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/K741100900/3Q7djCvdDO8zQsShMICvoA/K741100900-01.jpg",
+        "stock_no": "824",
+        "stock_candidates": [
+          "824"
+        ],
+        "chassis": "K741100900",
+        "warranty": {
+          "vehicle_year": "1999",
+          "vehicle_age": 27,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:945",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2021-nissan-note-e-power-x-e13-auto/OAG-AD-25056824/",
+        "network_id": "OAG-AD-25056824",
+        "title": "2021 Nissan Note e-POWER X E13 Auto",
+        "detail_page_title": "2021 Nissan Note e-POWER X E13 Auto",
+        "year": "2021",
+        "make": "Nissan",
+        "model": "Note e-POWER X E13 Auto",
+        "price_text": "$21,900",
+        "price": 21900,
+        "odometer_text": "51,489km",
+        "odometer_km": 51489,
+        "dealer_stock_id": "2021945",
+        "dealer_stock_ids": [
+          "2021945"
+        ],
+        "car_code": "1327",
+        "photo_count": 29,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/4zriksgmofl0oi08oipefhvfq.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/4zriksgmofl0oi08oipefhvfq.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZM0000E13057943",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2021 Nissan Note e-POWER X Hybrid",
+        "year": "2021",
+        "make": "NISSAN",
+        "model": "Note",
+        "price_text": "21900",
+        "price": 21900,
+        "odometer_text": "51489",
+        "description": "Stock - 2021945\n\n5-Year Hybrid Battery Warranty! 2021 NISSAN Note X | Hybrid | 51489 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lan...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/note/e13/945",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/E13-057943/3Q7djCvdDO8zQsShMICvoA/E13-057943-01.jpg",
+        "stock_no": "945",
+        "stock_candidates": [
+          "945"
+        ],
+        "chassis": "E13-057943",
+        "warranty": {
+          "vehicle_year": "2021",
+          "vehicle_age": 5,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:976",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1994-mitsubishi-pajero-exceed-nj-auto-4wd/OAG-AD-25415448/",
+        "network_id": "OAG-AD-25415448",
+        "title": "1994 Mitsubishi Pajero Exceed NJ Auto 4WD",
+        "detail_page_title": "1994 Mitsubishi Pajero Exceed NJ Auto 4WD",
+        "year": "1994",
+        "make": "Mitsubishi",
+        "model": "Pajero Exceed NJ Auto 4WD",
+        "price_text": "$19,900",
+        "price": 19900,
+        "odometer_text": "86,382km",
+        "odometer_km": 86382,
+        "dealer_stock_id": "1994976",
+        "dealer_stock_ids": [
+          "1994976"
+        ],
+        "car_code": "1214",
+        "photo_count": 28,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/edj48uikzw0o35iwfdw6m46kz.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/edj48uikzw0o35iwfdw6m46kz.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZR000V464028233",
+        "registration_plate": "Check with seller",
+        "body_type": "SUV",
+        "fuel": "Diesel",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1994 Mitsubishi Pajero 4WD Diesel (Sunroof and Dual Tone)",
+        "year": "1994",
+        "make": "MITSUBISHI",
+        "model": "Pajero",
+        "price_text": "19900",
+        "price": 19900,
+        "odometer_text": "86382",
+        "description": "Stock - 1994976\n\n1994 Mitsubishi Pajero 4WD (Sunroof and Dual Tone) | Diesel | 86382 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Airbags\n\u2022 Power steering\n\u2022 Sunroof\n\u2022 Power Windo...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mitsubishi/pajero/v46/976",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/V46-4028233/3Q7djCvdDO8zQsShMICvoA/V46-4028233-01.jpg",
+        "stock_no": "976",
+        "stock_candidates": [
+          "976"
+        ],
+        "chassis": "V46-4028233",
+        "warranty": {
+          "vehicle_year": "1994",
+          "vehicle_age": 32,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:987",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1996-toyota-hiace-super-custom-auto/OAG-AD-25751349/",
+        "network_id": "OAG-AD-25751349",
+        "title": "1996 Toyota Hiace Super Custom Auto",
+        "detail_page_title": "1996 Toyota Hiace Super Custom Auto",
+        "year": "1996",
+        "make": "Toyota",
+        "model": "Hiace Super Custom Auto",
+        "price_text": "$46,900",
+        "price": 46900,
+        "odometer_text": "37,073km",
+        "odometer_km": 37073,
+        "dealer_stock_id": "1996987",
+        "dealer_stock_ids": [
+          "1996987"
+        ],
+        "car_code": "1323",
+        "photo_count": 25,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/efuc8acvgtmg1qrxyibbi4l1u.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/efuc8acvgtmg1qrxyibbi4l1u.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZX0LY1110006633",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Diesel",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1996 Toyota Hiace Diesel Fully Furnished Motorhome",
+        "year": "1996",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "46900",
+        "price": 46900,
+        "odometer_text": "37073",
+        "description": "Stock - 1996987\n\n1996 TOYOTA Hiace Motorhome | Diesel | 37073 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power Windows\n\u2022 Power steering\n\u2022 Windshield wiper\n\u2022 Reversing Came...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/ly111/987",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/LY1110003463/3Q7djCvdDO8zQsShMICvoA/Vehicle_composite_reflection_202604101233_5.jpeg",
+        "stock_no": "987",
+        "stock_candidates": [
+          "987"
+        ],
+        "chassis": "LY1110003463",
+        "warranty": {
+          "vehicle_year": "1996",
+          "vehicle_age": 30,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 95.0,
+      "match_reason": "stock_tail3_match:994",
+      "mismatch_fields": [
+        "price"
+      ],
+      "mismatch_messages": [
+        "Price mismatch: Carsales $20,900 vs Carbarn $19,900"
+      ],
+      "mismatch_count": 1,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2000-toyota-mr2-spyder-manual/OAG-AD-25461738/",
+        "network_id": "OAG-AD-25461738",
+        "title": "2000 Toyota MR2 Spyder Manual",
+        "detail_page_title": "2000 Toyota MR2 Spyder Manual",
+        "year": "2000",
+        "make": "Toyota",
+        "model": "MR2 Spyder Manual",
+        "price_text": "$20,900",
+        "price": 20900,
+        "odometer_text": "91,323km",
+        "odometer_km": 91323,
+        "dealer_stock_id": "2000994",
+        "dealer_stock_ids": [
+          "2000994"
+        ],
+        "car_code": "1313",
+        "photo_count": 24,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/3clj9u1o2yjcbb634vz0aojn2.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/3clj9u1o2yjcbb634vz0aojn2.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZY0ZZW300011412",
+        "registration_plate": "Check with seller",
+        "body_type": "Convertible",
+        "fuel": "Petrol",
+        "transmission": "Manual",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2000 Toyota MR-S S Edition 1.8L F5 Manual (MR2 Spyder)",
+        "year": "2000",
+        "make": "TOYOTA",
+        "model": "MR-S",
+        "price_text": "19900",
+        "price": 19900,
+        "odometer_text": "91323",
+        "description": "Stock - 2000994\n\n2000 TOYOTA MR-S S EDITION | Petrol | 92000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Airbags\n\u2022 Power steering\n\u2022 Windshield wiper\n\u2022 Aftermarket Body kit...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/mr-s/zzw30/994",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/ZZW30-0011412/3Q7djCvdDO8zQsShMICvoA/ZZW30-0011412-001.jpg",
+        "stock_no": "994",
+        "stock_candidates": [
+          "994"
+        ],
+        "chassis": "ZZW30-0011412",
+        "warranty": {
+          "vehicle_year": "2000",
+          "vehicle_age": 26,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1007",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2019-toyota-hiace-dx-lwb-auto/OAG-AD-25628782/",
+        "network_id": "OAG-AD-25628782",
+        "title": "2019 Toyota Hiace DX LWB Auto",
+        "detail_page_title": "2019 Toyota Hiace DX LWB Auto",
+        "year": "2019",
+        "make": "Toyota",
+        "model": "Hiace DX LWB Auto",
+        "price_text": "$36,900",
+        "price": 36900,
+        "odometer_text": "13,000km",
+        "odometer_km": 13000,
+        "dealer_stock_id": "20191007",
+        "dealer_stock_ids": [
+          "20191007"
+        ],
+        "car_code": "1254",
+        "photo_count": 26,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/48h2q4y2t5m09pzhk8vygb5sd.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/48h2q4y2t5m09pzhk8vygb5sd.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZKTRH2000310024",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2019 Toyota Hiace High Roof DX Package (Low KM)",
+        "year": "2019",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "36900",
+        "price": 36900,
+        "odometer_text": "13000",
+        "description": "Stock - 20191007\n\n2019 TOYOTA Hiace DX | Petrol | 13000 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Airbags\n\u2022 Power steering\n\u2022 Power Windows\n\u2022 Traction Contro...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/trh200k/1007",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/TRH200-0310024/3Q7djCvdDO8zQsShMICvoA/qbKM1tpGSk-1-plate-1772770338067.jpg",
+        "stock_no": "1007",
+        "stock_candidates": [
+          "1007"
+        ],
+        "chassis": "TRH200-0310024",
+        "warranty": {
+          "vehicle_year": "2019",
+          "vehicle_age": 7,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1021",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2020-honda-vezel-hybrid-z-honda-sensing-auto/OAG-AD-25730316/",
+        "network_id": "OAG-AD-25730316",
+        "title": "2020 Honda Vezel Hybrid Z Honda Sensing Auto",
+        "detail_page_title": "2020 Honda Vezel Hybrid Z Honda Sensing Auto",
+        "year": "2020",
+        "make": "Honda",
+        "model": "Vezel Hybrid Z Honda Sensing Auto",
+        "price_text": "$27,900",
+        "price": 27900,
+        "odometer_text": "51,676km",
+        "odometer_km": 51676,
+        "dealer_stock_id": "20201021",
+        "dealer_stock_ids": [
+          "20201021"
+        ],
+        "car_code": "1153",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/cte9bg4kzzhb4200hpfao3l5q.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/cte9bg4kzzhb4200hpfao3l5q.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZL000RU31405237",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2020 Honda Vezel Z Hybrid (Honda SENSING)",
+        "year": "2020",
+        "make": "HONDA",
+        "model": "Vezel",
+        "price_text": "27900",
+        "price": 27900,
+        "odometer_text": "51676",
+        "description": "Stock - 20211021\n\n2020 Honda Vezel Z Hybrid (Honda SENSING)  | Hybrid | 51676 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Depar...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/honda/vezel/ru3/1021",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RU3-1405237/3Q7djCvdDO8zQsShMICvoA/UrX7rDFTSo-2-plate-1775467442397.jpg",
+        "stock_no": "1021",
+        "stock_candidates": [
+          "1021"
+        ],
+        "chassis": "RU3-1405237",
+        "warranty": {
+          "vehicle_year": "2020",
+          "vehicle_age": 6,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1054",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2017-honda-odyssey-hybrid-absolute-auto/OAG-AD-25705793/",
+        "network_id": "OAG-AD-25705793",
+        "title": "2017 Honda Odyssey Hybrid Absolute Auto",
+        "detail_page_title": "2017 Honda Odyssey Hybrid Absolute Auto",
+        "year": "2017",
+        "make": "Honda",
+        "model": "Odyssey Hybrid Absolute Auto",
+        "price_text": "$28,900",
+        "price": 28900,
+        "odometer_text": "77,158km",
+        "odometer_km": 77158,
+        "dealer_stock_id": "20171054",
+        "dealer_stock_ids": [
+          "20171054"
+        ],
+        "car_code": "1279",
+        "photo_count": 22,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/4qp16hppiirmbh8lsqo5527vl.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/4qp16hppiirmbh8lsqo5527vl.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZH000RC41027907",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2017 Honda Odyssey EX Hybrid (Honda Sensing)",
+        "year": "2017",
+        "make": "HONDA",
+        "model": "Odyssey",
+        "price_text": "28900",
+        "price": 28900,
+        "odometer_text": "77158",
+        "description": "Stock - 20171054\n\n2017 HONDA Odyssey EX  | Hybrid | 77158 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warning\n\u2022 Front Vehicle Colli...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/honda/odyssey/rc4/1054",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RC4-1027907/3Q7djCvdDO8zQsShMICvoA/Wx1xGDNrSH-1.jpg",
+        "stock_no": "1054",
+        "stock_candidates": [
+          "1054"
+        ],
+        "chassis": "RC4-1027907",
+        "warranty": {
+          "vehicle_year": "2017",
+          "vehicle_age": 9,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1057",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2019-honda-vezel-hybrid-z-honda-sensing-auto-4wd/OAG-AD-25754119/",
+        "network_id": "OAG-AD-25754119",
+        "title": "2019 Honda Vezel Hybrid Z Honda Sensing Auto 4WD",
+        "detail_page_title": "2019 Honda Vezel Hybrid Z Honda Sensing Auto 4WD",
+        "year": "2019",
+        "make": "Honda",
+        "model": "Vezel Hybrid Z Honda Sensing Auto 4WD",
+        "price_text": "$28,900",
+        "price": 28900,
+        "odometer_text": "16,396km",
+        "odometer_km": 16396,
+        "dealer_stock_id": "20191057",
+        "dealer_stock_ids": [
+          "20191057"
+        ],
+        "car_code": "1304",
+        "photo_count": 22,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/5c01a5a428919ec2da7f8a2374a1232f.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/5c01a5a428919ec2da7f8a2374a1232f.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZK000RU31360659",
+        "registration_plate": "Check with seller",
+        "body_type": "SUV",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2019 Honda Vezel X Hybrid (Honda Sensing) Low KM",
+        "year": "2019",
+        "make": "HONDA",
+        "model": "Vezel",
+        "price_text": "28900",
+        "price": 28900,
+        "odometer_text": "16396",
+        "description": "Stock - 20191057\n\n2019 HONDA Vezel X | Hybrid | 16396 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warning\n\u2022 Front Vehicle Collision...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/honda/vezel/ru3/1057",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RU3-1360659/3Q7djCvdDO8zQsShMICvoA/Ui5fqEajSx-8.jpg",
+        "stock_no": "1057",
+        "stock_candidates": [
+          "1057"
+        ],
+        "chassis": "RU3-1360659",
+        "warranty": {
+          "vehicle_year": "2019",
+          "vehicle_age": 7,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1056",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2017-honda-odyssey-hybrid-absolute-auto/OAG-AD-25744494/",
+        "network_id": "OAG-AD-25744494",
+        "title": "2017 Honda Odyssey Hybrid Absolute Auto",
+        "detail_page_title": "2017 Honda Odyssey Hybrid Absolute Auto",
+        "year": "2017",
+        "make": "Honda",
+        "model": "Odyssey Hybrid Absolute Auto",
+        "price_text": "$24,900",
+        "price": 24900,
+        "odometer_text": "112,678km",
+        "odometer_km": 112678,
+        "dealer_stock_id": "20171056",
+        "dealer_stock_ids": [
+          "20171056"
+        ],
+        "car_code": "1287",
+        "photo_count": 26,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2n9p4qerq0wdbz4jemlroudun.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/2n9p4qerq0wdbz4jemlroudun.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZH000RC41023465",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2017 Honda Odyssey Hybrid (Honda Sensing)",
+        "year": "2017",
+        "make": "HONDA",
+        "model": "Odyssey",
+        "price_text": "24900",
+        "price": 24900,
+        "odometer_text": "112678",
+        "description": "Stock - 20171056\n\n2017 HONDA Odyssey Absolute | Hybrid | 112678 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warning\n\u2022 Front Vehicle...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/honda/odyssey/rc4/1056",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RC4-1023465/3Q7djCvdDO8zQsShMICvoA/You_made_the_202604221129.jpg",
+        "stock_no": "1056",
+        "stock_candidates": [
+          "1056"
+        ],
+        "chassis": "RC4-1023465",
+        "warranty": {
+          "vehicle_year": "2017",
+          "vehicle_age": 9,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1043",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2017-honda-odyssey-hybrid-absolute-auto/OAG-AD-25744498/",
+        "network_id": "OAG-AD-25744498",
+        "title": "2017 Honda Odyssey Hybrid Absolute Auto",
+        "detail_page_title": "2017 Honda Odyssey Hybrid Absolute Auto",
+        "year": "2017",
+        "make": "Honda",
+        "model": "Odyssey Hybrid Absolute Auto",
+        "price_text": "$28,900",
+        "price": 28900,
+        "odometer_text": "69,040km",
+        "odometer_km": 69040,
+        "dealer_stock_id": "20171043",
+        "dealer_stock_ids": [
+          "20171043"
+        ],
+        "car_code": "1219",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/btil99wxs3u6bcfm2wtafa2tq.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/btil99wxs3u6bcfm2wtafa2tq.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZH000RC41029909",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2017 Honda Odyssey Hybrid (Honda Sensing)",
+        "year": "2017",
+        "make": "HONDA",
+        "model": "Odyssey",
+        "price_text": "28900",
+        "price": 28900,
+        "odometer_text": "69040",
+        "description": "Stock - 20171043\n\n2017 HONDA Odyssey Absolute | Hybrid | 69040 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Half Leather Seats\n\u2022 Reversing Camera\n\u2022 Front Vehicle Collision W...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/honda/odyssey/rc4/1043",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RC4-1029909/3Q7djCvdDO8zQsShMICvoA/L8M8y0DLQ9-6.jpg",
+        "stock_no": "1043",
+        "stock_candidates": [
+          "1043"
+        ],
+        "chassis": "RC4-1029909",
+        "warranty": {
+          "vehicle_year": "2017",
+          "vehicle_age": 9,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1039",
+      "mismatch_fields": [
+        "odometer"
+      ],
+      "mismatch_messages": [
+        "Odometer mismatch: Carsales 59,222km vs Carbarn 59,230km"
+      ],
+      "mismatch_count": 1,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2017-mercedes-benz-e-class-e43-amg-auto-4matic/OAG-AD-25653306/",
+        "network_id": "OAG-AD-25653306",
+        "title": "2017 Mercedes-Benz E-Class E43 AMG Auto 4MATIC",
+        "detail_page_title": "2017 Mercedes-Benz E-Class E43 AMG Auto 4MATIC",
+        "year": "2017",
+        "make": "Mercedes-Benz",
+        "model": "E-Class E43 AMG Auto 4MATIC",
+        "price_text": "$52,900",
+        "price": 52900,
+        "odometer_text": "59,222km",
+        "odometer_km": 59222,
+        "dealer_stock_id": "20171039",
+        "dealer_stock_ids": [
+          "20171039"
+        ],
+        "car_code": "1202",
+        "photo_count": 33,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/3blqygm1ex38rjidjzuo0bz2g.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/3blqygm1ex38rjidjzuo0bz2g.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "WDD2132642A333293",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2017 Mercedes-Benz AMG E-Class E43 4Matic 4WD (Luxury Wagon)",
+        "year": "2017",
+        "make": "MERCEDES-BENZ",
+        "model": "E-Class",
+        "price_text": "52900",
+        "price": 52900,
+        "odometer_text": "59230",
+        "description": "Stock - 20171039\n\n2017 MERCEDES-BENZ E-Class E43 4Matic 4WD STATIONWAGON  | Petrol | 59222 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Half Leather Seats\n\u2022 360 Parking Assist Ca...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mercedes-benz/e-class/w213/1039",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/WDD2132642A333293/3Q7djCvdDO8zQsShMICvoA/b6ZbmtQER_-3.jpg",
+        "stock_no": "1039",
+        "stock_candidates": [
+          "1039"
+        ],
+        "chassis": "WDD2132642A333293",
+        "warranty": {
+          "vehicle_year": "2017",
+          "vehicle_age": 9,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1076",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2016-mercedes-benz-e-class-e400-auto-4matic/OAG-AD-25780115/",
+        "network_id": "OAG-AD-25780115",
+        "title": "2016 Mercedes-Benz E-Class E400 Auto 4MATIC",
+        "detail_page_title": "2016 Mercedes-Benz E-Class E400 Auto 4MATIC",
+        "year": "2016",
+        "make": "Mercedes-Benz",
+        "model": "E-Class E400 Auto 4MATIC",
+        "price_text": "$34,900",
+        "price": 34900,
+        "odometer_text": "60,000km",
+        "odometer_km": 60000,
+        "dealer_stock_id": "20161076",
+        "dealer_stock_ids": [
+          "20161076"
+        ],
+        "car_code": "1336",
+        "photo_count": 6,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/1ici3de71znpxasvjuqec71vp.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/1ici3de71znpxasvjuqec71vp.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "WDD2132712A176208",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2016 Mercedes Benz E-class E400 4matic 4WD (Luxury Wagon)",
+        "year": "2016",
+        "make": "MERCEDES-BENZ",
+        "model": "E-Class",
+        "price_text": "34900",
+        "price": 34900,
+        "odometer_text": "60000",
+        "description": "Stock - 20161075\n\n2016 MERCEDES BENZ E-Class E400 4Matic Stationwagon | Petrol | 60000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Airbags\n\u2022 Rear Wiper\n\u2022 Full Leather Seat\n\u2022 R...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mercedes-benz/e-class/w213/1076",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/WDD2132712A176208/3Q7djCvdDO8zQsShMICvoA/Remove_the_reflections_202604201308.png",
+        "stock_no": "1076",
+        "stock_candidates": [
+          "1076"
+        ],
+        "chassis": "WDD2132712A176208",
+        "warranty": {
+          "vehicle_year": "2016",
+          "vehicle_age": 10,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1018",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1995-mitsubishi-gto-auto-4wd/OAG-AD-25521014/",
+        "network_id": "OAG-AD-25521014",
+        "title": "1995 Mitsubishi GTO Auto 4WD",
+        "detail_page_title": "1995 Mitsubishi GTO Auto 4WD",
+        "year": "1995",
+        "make": "Mitsubishi",
+        "model": "GTO Auto 4WD",
+        "price_text": "$33,900",
+        "price": 33900,
+        "odometer_text": "18,052km",
+        "odometer_km": 18052,
+        "dealer_stock_id": "19951018",
+        "dealer_stock_ids": [
+          "19951018"
+        ],
+        "car_code": "1190",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/c2ai4nksf5y7w8dcs7ogw324b.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/c2ai4nksf5y7w8dcs7ogw324b.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZS00Z16A0100673",
+        "registration_plate": "Check with seller",
+        "body_type": "Coupe",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1995 Mitsubishi GTO 4WD 3.0L Automatic | Low KM",
+        "year": "1995",
+        "make": "MITSUBISHI",
+        "model": "GTO",
+        "price_text": "33900",
+        "price": 33900,
+        "odometer_text": "18052",
+        "description": "Stock - 19951018\n\n1995 Mitsubishi GTO 4WD 3.0L Automatic | Low KM | Petrol | 18000 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Power driver's seat\n\u2022 Overdrive\n\u2022 Air Conditioning...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mitsubishi/gto/e-z16a/1018",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/Z16A-0100673/3Q7djCvdDO8zQsShMICvoA/Z16A-0100673-01.jpg",
+        "stock_no": "1018",
+        "stock_candidates": [
+          "1018"
+        ],
+        "chassis": "Z16A-0100673",
+        "warranty": {
+          "vehicle_year": "1995",
+          "vehicle_age": 31,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1032",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/1997-mitsubishi-delica-spacegear-exceed-pe8w-auto-4x4/OAG-AD-25649682/",
+        "network_id": "OAG-AD-25649682",
+        "title": "1997 Mitsubishi Delica Spacegear Exceed PE8W Auto 4x4",
+        "detail_page_title": "1997 Mitsubishi Delica Spacegear Exceed PE8W Auto 4x4",
+        "year": "1997",
+        "make": "Mitsubishi",
+        "model": "Delica Spacegear Exceed PE8W Auto 4x4",
+        "price_text": "$17,400",
+        "price": 17400,
+        "odometer_text": "171,718km",
+        "odometer_km": 171718,
+        "dealer_stock_id": "19971032",
+        "dealer_stock_ids": [
+          "19971032"
+        ],
+        "car_code": "1332",
+        "photo_count": 20,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/5l8cb5ujue1ridzf20euamfqn.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/5l8cb5ujue1ridzf20euamfqn.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZV00PE8W0213867",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Diesel",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "1997 Mitsubishi Delica Space Gear 4WD Exceed (8 Seater)",
+        "year": "1997",
+        "make": "MITSUBISHI",
+        "model": "Delica",
+        "price_text": "17400",
+        "price": 17400,
+        "odometer_text": "171718",
+        "description": "Stock - 19971032\n\n1997 MITSUBISHI Delica Space Gear 4WD Exceed  | Diesel | 171718 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Airbags\n\u2022 Power steering\n\u2022 Rear...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/mitsubishi/delica/pe8w/1032",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/PE8W-0213867/3Q7djCvdDO8zQsShMICvoA/94bc9a43-ed0a-4dea-a17e-ef325f04d40c.png",
+        "stock_no": "1032",
+        "stock_candidates": [
+          "1032"
+        ],
+        "chassis": "PE8W-0213867",
+        "warranty": {
+          "vehicle_year": "1997",
+          "vehicle_age": 29,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1028",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2023-nissan-aura-g-fe13-auto/OAG-AD-25705491/",
+        "network_id": "OAG-AD-25705491",
+        "title": "2023 Nissan Aura G FE13 Auto",
+        "detail_page_title": "2023 Nissan Aura G FE13 Auto",
+        "year": "2023",
+        "make": "Nissan",
+        "model": "Aura G FE13 Auto",
+        "price_text": "$31,900",
+        "price": 31900,
+        "odometer_text": "24,830km",
+        "odometer_km": 24830,
+        "dealer_stock_id": "20231028",
+        "dealer_stock_ids": [
+          "20231028"
+        ],
+        "car_code": "1229",
+        "photo_count": 25,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/jacc50w49yedvwcl446o18y3.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/jacc50w49yedvwcl446o18y3.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZP000FE13370242",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2023 Nissan Aura Hybrid G Leather Edition",
+        "year": "2023",
+        "make": "NISSAN",
+        "model": "AURA",
+        "price_text": "31900",
+        "price": 31900,
+        "odometer_text": "24830",
+        "description": "Stock - 20241028\n\n2023 NISSAN AURA G Leather Edition | Hybrid | 24811 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Power Windows\n\u2022 Foldable Rear Seat\n\u2022 Traction Control System\n\u2022...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/aura/fe13/1028",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/FE13-370242/3Q7djCvdDO8zQsShMICvoA/wOawLmqASf-5-plate-1773812214637.jpg",
+        "stock_no": "1028",
+        "stock_candidates": [
+          "1028"
+        ],
+        "chassis": "FE13-370242",
+        "warranty": {
+          "vehicle_year": "2023",
+          "vehicle_age": 3,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1027",
+      "mismatch_fields": [
+        "odometer"
+      ],
+      "mismatch_messages": [
+        "Odometer mismatch: Carsales 6,241km vs Carbarn 6,268km"
+      ],
+      "mismatch_count": 1,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2023-nissan-aura-g-fe13-auto/OAG-AD-25649687/",
+        "network_id": "OAG-AD-25649687",
+        "title": "2023 Nissan Aura G FE13 Auto",
+        "detail_page_title": "2023 Nissan Aura G FE13 Auto",
+        "year": "2023",
+        "make": "Nissan",
+        "model": "Aura G FE13 Auto",
+        "price_text": "$31,400",
+        "price": 31400,
+        "odometer_text": "6,241km",
+        "odometer_km": 6241,
+        "dealer_stock_id": "20231027",
+        "dealer_stock_ids": [
+          "20231027"
+        ],
+        "car_code": "1267",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/60140c49vxqz9bni7iyx9u4tx.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/60140c49vxqz9bni7iyx9u4tx.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZP000FE13303732",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2023 Nissan Aura Hybrid G Leather Edition (Low KM)",
+        "year": "2023",
+        "make": "NISSAN",
+        "model": "AURA",
+        "price_text": "31400",
+        "price": 31400,
+        "odometer_text": "6268",
+        "description": "Stock - 20231027\n\n2023 NISSAN AURA G Leather Edition | Hybrid | 6241 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warn...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/aura/fe13/1027",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/FE13-303732/3Q7djCvdDO8zQsShMICvoA/o0RU_8GoSJ-5.jpg",
+        "stock_no": "1027",
+        "stock_candidates": [
+          "1027"
+        ],
+        "chassis": "FE13-303732",
+        "warranty": {
+          "vehicle_year": "2023",
+          "vehicle_age": 3,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1059",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2022-nissan-serena-x-c27-auto/OAG-AD-25705790/",
+        "network_id": "OAG-AD-25705790",
+        "title": "2022 Nissan Serena X C27 Auto",
+        "detail_page_title": "2022 Nissan Serena X C27 Auto",
+        "year": "2022",
+        "make": "Nissan",
+        "model": "Serena X C27 Auto",
+        "price_text": "$27,900",
+        "price": 27900,
+        "odometer_text": "51,829km",
+        "odometer_km": 51829,
+        "dealer_stock_id": "20221059",
+        "dealer_stock_ids": [
+          "20221059"
+        ],
+        "car_code": "1284",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/dzgpopgq7dtoyunalx8x5ggbn.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/dzgpopgq7dtoyunalx8x5ggbn.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZN000GC27073541",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2022 Nissan Serena XV Hybrid 8-Seater",
+        "year": "2022",
+        "make": "NISSAN",
+        "model": "Serena",
+        "price_text": "27900",
+        "price": 27900,
+        "odometer_text": "51829",
+        "description": "Stock - 20221059\n\n2022 NISSAN Serena XV | Hybrid | 51829 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Airbags 6\n\u2022 Power Windows\n\u2022 Power steering\n\u2022 Cruise Control\n\u2022 Multi-Fun...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/serena/gc27/1059",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GC27-073541/3Q7djCvdDO8zQsShMICvoA/ChatGPT Image Apr 9, 2026, 12_36_43 PM.jpg",
+        "stock_no": "1059",
+        "stock_candidates": [
+          "1059"
+        ],
+        "chassis": "GC27-073541",
+        "warranty": {
+          "vehicle_year": "2022",
+          "vehicle_age": 4,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1072",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2021-nissan-serena-highway-star-s-hybrid-c27-auto/OAG-AD-25780113/",
+        "network_id": "OAG-AD-25780113",
+        "title": "2021 Nissan Serena Highway Star S-Hybrid C27 Auto",
+        "detail_page_title": "2021 Nissan Serena Highway Star S-Hybrid C27 Auto",
+        "year": "2021",
+        "make": "Nissan",
+        "model": "Serena Highway Star S-Hybrid C27 Auto",
+        "price_text": "$31,900",
+        "price": 31900,
+        "odometer_text": "26,000km",
+        "odometer_km": 26000,
+        "dealer_stock_id": "20211072",
+        "dealer_stock_ids": [
+          "20211072"
+        ],
+        "car_code": "1335",
+        "photo_count": 6,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/6fmivi8khwwbnsx6hfbwqmn9g.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/6fmivi8khwwbnsx6hfbwqmn9g.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZM00GFC27224929",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2021 Nissan Serena Hybrid Highway Star V ProPilot 8 Seater",
+        "year": "2021",
+        "make": "NISSAN",
+        "model": "Serena",
+        "price_text": "31900",
+        "price": 31900,
+        "odometer_text": "26000",
+        "description": "Stock - 20211072\n\n2021 NISSAN Serena Highway Star V | Hybrid | 26000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Traction Control System\n\u2022 Fog Lights\n\u2022 Rear Wiper\n\u2022 Pro-Pilot...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/nissan/serena/gfc27/1072",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GFC27-224929/3Q7djCvdDO8zQsShMICvoA/ChatGPT Image Apr 18, 2026, 03_59_16 PM.png",
+        "stock_no": "1072",
+        "stock_candidates": [
+          "1072"
+        ],
+        "chassis": "GFC27-224929",
+        "warranty": {
+          "vehicle_year": "2021",
+          "vehicle_age": 5,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1065",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2009-subaru-impreza-wrx-sti-a-line-grf-auto-awd/OAG-AD-25705794/",
+        "network_id": "OAG-AD-25705794",
+        "title": "2009 Subaru Impreza WRX STI A Line GRF Auto AWD",
+        "detail_page_title": "2009 Subaru Impreza WRX STI A Line GRF Auto AWD",
+        "year": "2009",
+        "make": "Subaru",
+        "model": "Impreza WRX STI A Line GRF Auto AWD",
+        "price_text": "$22,400",
+        "price": 22400,
+        "odometer_text": "83,499km",
+        "odometer_km": 83499,
+        "dealer_stock_id": "20091065",
+        "dealer_stock_ids": [
+          "20091065"
+        ],
+        "car_code": "1230",
+        "photo_count": 27,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/ffceecdb8c0742e192ce7bfd244383a3.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/ffceecdb8c0742e192ce7bfd244383a3.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZ90000GRF003705",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2009 Subaru Impreza 4WD WRX STI A-Line",
+        "year": "2009",
+        "make": "SUBARU",
+        "model": "Impreza",
+        "price_text": "22400",
+        "price": 22400,
+        "odometer_text": "83499",
+        "description": "Stock - 20091065\n\n2009 SUBARU Impreza WRX STI 4WD | Petrol | 83499 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power steering\n\u2022 Fog Lights\n\u2022 Airbags 8\n\u2022 Multi-Function Stee...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/subaru/impreza/grf/1065",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GRF-003705/3Q7djCvdDO8zQsShMICvoA/pbAxHDg9Qd-1.jpg",
+        "stock_no": "1065",
+        "stock_candidates": [
+          "1065"
+        ],
+        "chassis": "GRF-003705",
+        "warranty": {
+          "vehicle_year": "2009",
+          "vehicle_age": 17,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1070",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2009-subaru-impreza-wrx-sti-a-line-grf-auto-awd/OAG-AD-25744499/",
+        "network_id": "OAG-AD-25744499",
+        "title": "2009 Subaru Impreza WRX STI A Line GRF Auto AWD",
+        "detail_page_title": "2009 Subaru Impreza WRX STI A Line GRF Auto AWD",
+        "year": "2009",
+        "make": "Subaru",
+        "model": "Impreza WRX STI A Line GRF Auto AWD",
+        "price_text": "$21,400",
+        "price": 21400,
+        "odometer_text": "97,848km",
+        "odometer_km": 97848,
+        "dealer_stock_id": "20091070",
+        "dealer_stock_ids": [
+          "20091070"
+        ],
+        "car_code": "1293",
+        "photo_count": 26,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/9dtcwew47affeykmbwrtm5yan.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/9dtcwew47affeykmbwrtm5yan.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZ90000GRF004024",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2009 Subaru Impreza 4WD WRX STI A-Line",
+        "year": "2009",
+        "make": "SUBARU",
+        "model": "Impreza",
+        "price_text": "21400",
+        "price": 21400,
+        "odometer_text": "97848",
+        "description": "Stock - 20091070\n\n2009 SUBARU Impreza WRX STI 4WD | Petrol | 97848 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power steering\n\u2022 Half Leather Seats\n\u2022 Cruise Control\n\u2022 Multi-...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/subaru/impreza/grf/1070",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GRF-004024/3Q7djCvdDO8zQsShMICvoA/Can_you_remove_202604151307.png",
+        "stock_no": "1070",
+        "stock_candidates": [
+          "1070"
+        ],
+        "chassis": "GRF-004024",
+        "warranty": {
+          "vehicle_year": "2009",
+          "vehicle_age": 17,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1073",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2024-suzuki-jimny-xc-auto-4x4/OAG-AD-25744493/",
+        "network_id": "OAG-AD-25744493",
+        "title": "2024 Suzuki Jimny XC Auto 4x4",
+        "detail_page_title": "2024 Suzuki Jimny XC Auto 4x4",
+        "year": "2024",
+        "make": "Suzuki",
+        "model": "Jimny XC Auto 4x4",
+        "price_text": "$31,400",
+        "price": 31400,
+        "odometer_text": "472km",
+        "odometer_km": 472,
+        "dealer_stock_id": "20241073",
+        "dealer_stock_ids": [
+          "20241073"
+        ],
+        "car_code": "1330",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/9oxulqdp4879fvwjsupbypkwx.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/9oxulqdp4879fvwjsupbypkwx.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZR00JB64W327198",
+        "registration_plate": "Check with seller",
+        "body_type": "SUV",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2024 Suzuki Jimny XL Part-time 4WD",
+        "year": "2024",
+        "make": "SUZUKI",
+        "model": "JIMNY",
+        "price_text": "31400",
+        "price": 31400,
+        "odometer_text": "472",
+        "description": "Stock - 20241073\n\n2024 SUZUKI JIMNY XL 4WD | Petrol | 472 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power steering\n\u2022 Airbags 6\n\u2022 Fog Lights\n\u2022 Power Windows\n\u2022 Reversing Ca...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/suzuki/jimny/jb64w/1073",
+        "image_url": "https://www.storage.importautos.com.au/carbarn-studio-output/CoQKpitPSM/CoQKpitPSM-2.jpg",
+        "stock_no": "1073",
+        "stock_candidates": [
+          "1073"
+        ],
+        "chassis": "JB64W-327198",
+        "warranty": {
+          "vehicle_year": "2024",
+          "vehicle_age": 2,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1029",
+      "mismatch_fields": [
+        "odometer"
+      ],
+      "mismatch_messages": [
+        "Odometer mismatch: Carsales 6,000km vs Carbarn 5,881km"
+      ],
+      "mismatch_count": 1,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2024-toyota-prius-z-auto-4wd/OAG-AD-25649699/",
+        "network_id": "OAG-AD-25649699",
+        "title": "2024 Toyota Prius Z Auto 4WD",
+        "detail_page_title": "2024 Toyota Prius Z Auto 4WD",
+        "year": "2024",
+        "make": "Toyota",
+        "model": "Prius Z Auto 4WD",
+        "price_text": "$43,900",
+        "price": 43900,
+        "odometer_text": "6,000km",
+        "odometer_km": 6000,
+        "dealer_stock_id": "20241029",
+        "dealer_stock_ids": [
+          "20241029"
+        ],
+        "car_code": "1307",
+        "photo_count": 25,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/cezvxudmd1phmocokpdgcf22l.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/cars/dealer/cezvxudmd1phmocokpdgcf22l.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZRMXWH654019630",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2024 Toyota Prius 4WD Hybrid G Package (Low KM)",
+        "year": "2024",
+        "make": "TOYOTA",
+        "model": "Prius",
+        "price_text": "43900",
+        "price": 43900,
+        "odometer_text": "5881",
+        "description": "Stock - 20241029\n\n2024 TOYOTA Prius G 4WD | Hybrid | 6000 KM\n\nWe are open every day, including the upcoming Easter holidays.\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Radar Cruise Control\n\u2022 Reversing Camera\n\u2022 Heated Front S...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/prius/mxwh65/1029",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/MXWH65-4019630/3Q7djCvdDO8zQsShMICvoA/Ghw0EkKLTo-1.jpg",
+        "stock_no": "1029",
+        "stock_candidates": [
+          "1029"
+        ],
+        "chassis": "MXWH65-4019630",
+        "warranty": {
+          "vehicle_year": "2024",
+          "vehicle_age": 2,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1009",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2009-toyota-hiace-dx-lwb-auto-4wd/OAG-AD-25744492/",
+        "network_id": "OAG-AD-25744492",
+        "title": "2009 Toyota Hiace DX LWB Auto 4WD",
+        "detail_page_title": "2009 Toyota Hiace DX LWB Auto 4WD",
+        "year": "2009",
+        "make": "Toyota",
+        "model": "Hiace DX LWB Auto 4WD",
+        "price_text": "$26,900",
+        "price": 26900,
+        "odometer_text": "173,000km",
+        "odometer_km": 173000,
+        "dealer_stock_id": "20091009",
+        "dealer_stock_ids": [
+          "20091009"
+        ],
+        "car_code": "1253",
+        "photo_count": 6,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/12vbcb4tmxfun5dn6it0xfdpa.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/12vbcb4tmxfun5dn6it0xfdpa.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZ9KDH2068020379",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Diesel",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2009 Toyota Hiace DX 4WD Diesel",
+        "year": "2009",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "26900",
+        "price": 26900,
+        "odometer_text": "173000",
+        "description": "Stock - 20091009\n\n5-Year  Warranty! 2009 TOYOTA Hiace DX | Diesel | 173000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power steering\n\u2022 Airbags\n\u2022 Power Windows\n\u2022 Rear Wiper...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/kdh206k/1009",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/KDH206-8020379/3Q7djCvdDO8zQsShMICvoA/PaJc3g22Tl-1-plate-1774862739655.jpg",
+        "stock_no": "1009",
+        "stock_candidates": [
+          "1009"
+        ],
+        "chassis": "KDH206-8020379",
+        "warranty": {
+          "vehicle_year": "2009",
+          "vehicle_age": 17,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1042",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2022-toyota-yaris-x-hybrid-auto-efour/OAG-AD-25649683/",
+        "network_id": "OAG-AD-25649683",
+        "title": "2022 Toyota Yaris X Hybrid Auto eFour",
+        "detail_page_title": "2022 Toyota Yaris X Hybrid Auto eFour",
+        "year": "2022",
+        "make": "Toyota",
+        "model": "Yaris X Hybrid Auto eFour",
+        "price_text": "$24,900",
+        "price": 24900,
+        "odometer_text": "61,270km",
+        "odometer_km": 61270,
+        "dealer_stock_id": "20221042",
+        "dealer_stock_ids": [
+          "20221042"
+        ],
+        "car_code": "1311",
+        "photo_count": 27,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/7rprz3h8qs3ebfe0d66vapww2.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/7rprz3h8qs3ebfe0d66vapww2.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZNMXPH150018516",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2022 Toyota Yaris 4WD X Hybrid",
+        "year": "2022",
+        "make": "TOYOTA",
+        "model": "YARIS",
+        "price_text": "24900",
+        "price": 24900,
+        "odometer_text": "61270",
+        "description": "Stock - 20221042\n\n2022 TOYOTA YARIS X 4WD | Hybrid | 61270 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power steering\n\u2022 Airbags 8\n\u2022 Power Windows\n\u2022 Toyota Safety Sense (TSS...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/yaris/mxph15/1042",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/MXPH15-0018516/3Q7djCvdDO8zQsShMICvoA/u8GgAXAxQv-1-plate-1774293761093.jpg",
+        "stock_no": "1042",
+        "stock_candidates": [
+          "1042"
+        ],
+        "chassis": "MXPH15-0018516",
+        "warranty": {
+          "vehicle_year": "2022",
+          "vehicle_age": 4,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1046",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2014-toyota-alphard-240s-type-gold-ii-auto/OAG-AD-25709367/",
+        "network_id": "OAG-AD-25709367",
+        "title": "2014 Toyota Alphard 240S Type Gold II Auto",
+        "detail_page_title": "2014 Toyota Alphard 240S Type Gold II Auto",
+        "year": "2014",
+        "make": "Toyota",
+        "model": "Alphard 240S Type Gold II Auto",
+        "price_text": "$22,900",
+        "price": 22900,
+        "odometer_text": "80,000km",
+        "odometer_km": 80000,
+        "dealer_stock_id": "20141046",
+        "dealer_stock_ids": [
+          "20141046"
+        ],
+        "car_code": "1321",
+        "photo_count": 26,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/7zg99zhz31mus6o1n8tnec5ob.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/7zg99zhz31mus6o1n8tnec5ob.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZE0ANH208355680",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2014 Toyota Alphard S Type Gold II",
+        "year": "2014",
+        "make": "TOYOTA",
+        "model": "Alphard",
+        "price_text": "22900",
+        "price": 22900,
+        "odometer_text": "80000",
+        "description": "Stock - 20141046\n\n2014 TOYOTA Alphard S-Type GOLD II | Petrol | 80000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 ECO Mode for Top-Notch Fuel Savi...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/alphard/anh20/1046",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/ANH20-8355680/3Q7djCvdDO8zQsShMICvoA/Automotive_composite_reflection_202604101457.jpeg",
+        "stock_no": "1046",
+        "stock_candidates": [
+          "1046"
+        ],
+        "chassis": "ANH20-8355680",
+        "warranty": {
+          "vehicle_year": "2014",
+          "vehicle_age": 12,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1040",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2014-toyota-alphard-auto/OAG-AD-25780101/",
+        "network_id": "OAG-AD-25780101",
+        "title": "2014 Toyota Alphard Auto",
+        "detail_page_title": "2014 Toyota Alphard Auto",
+        "year": "2014",
+        "make": "Toyota",
+        "model": "Alphard Auto",
+        "price_text": "$21,900",
+        "price": 21900,
+        "odometer_text": "69,000km",
+        "odometer_km": 69000,
+        "dealer_stock_id": "20141040",
+        "dealer_stock_ids": [
+          "20141040"
+        ],
+        "car_code": "1291",
+        "photo_count": 5,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/70eqqpd1cllf5djupw2963ude.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/70eqqpd1cllf5djupw2963ude.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZE0ANH208323267",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2014 Toyota Vellfire Z",
+        "year": "2014",
+        "make": "TOYOTA",
+        "model": "Vellfire",
+        "price_text": "21900",
+        "price": 21900,
+        "odometer_text": "69000",
+        "description": "Stock - 20141040\n\n2014 TOYOTA Vellfire Z | Petrol | 69000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Airbags\n\u2022 Brake Assist\n\u2022 Fog Lights\n\u2022 Rear Wiper\n\u2022 Airbags 9\n\u2022 Air Condit...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/vellfire/anh20/1040",
+        "image_url": "https://www.storage.importautos.com.au/AuctionPictures/stock/3Q7djCvdDO8zQsShMICvoA/Kyr4-hW9Rb-1-plate-1775124654016.jpg",
+        "stock_no": "1040",
+        "stock_candidates": [
+          "1040"
+        ],
+        "chassis": "ANH20-8323267",
+        "warranty": {
+          "vehicle_year": "2014",
+          "vehicle_age": 12,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1045",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2013-toyota-alphard-240s-type-gold-auto/OAG-AD-25709368/",
+        "network_id": "OAG-AD-25709368",
+        "title": "2013 Toyota Alphard 240S Type Gold Auto",
+        "detail_page_title": "2013 Toyota Alphard 240S Type Gold Auto",
+        "year": "2013",
+        "make": "Toyota",
+        "model": "Alphard 240S Type Gold Auto",
+        "price_text": "$22,900",
+        "price": 22900,
+        "odometer_text": "67,593km",
+        "odometer_km": 67593,
+        "dealer_stock_id": "20131045",
+        "dealer_stock_ids": [
+          "20131045"
+        ],
+        "car_code": "1322",
+        "photo_count": 22,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/awdxan0nba2l7q4h7wun7myja.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/awdxan0nba2l7q4h7wun7myja.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZD0ANH208265684",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2013 Toyota Alphard S Type",
+        "year": "2013",
+        "make": "TOYOTA",
+        "model": "Alphard",
+        "price_text": "22900",
+        "price": 22900,
+        "odometer_text": "67593",
+        "description": "Stock - 20131045\n\n2013 TOYOTA Alphard S | Petrol | 67593 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Airbags 6\n\u2022 Power steering\n\u2022 Multi-Function S...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/alphard/anh20/1045",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/ANH20-8265684/3Q7djCvdDO8zQsShMICvoA/Automotive_composite_reflection_202604101457.jpeg",
+        "stock_no": "1045",
+        "stock_candidates": [
+          "1045"
+        ],
+        "chassis": "ANH20-8265684",
+        "warranty": {
+          "vehicle_year": "2013",
+          "vehicle_age": 13,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1064",
+      "mismatch_fields": [
+        "odometer"
+      ],
+      "mismatch_messages": [
+        "Odometer mismatch: Carsales 28,000km vs Carbarn 27,955km"
+      ],
+      "mismatch_count": 1,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2020-toyota-noah-hybrid-si-auto/OAG-AD-25709542/",
+        "network_id": "OAG-AD-25709542",
+        "title": "2020 Toyota Noah Hybrid SI Auto",
+        "detail_page_title": "2020 Toyota Noah Hybrid SI Auto",
+        "year": "2020",
+        "make": "Toyota",
+        "model": "Noah Hybrid SI Auto",
+        "price_text": "$38,400",
+        "price": 38400,
+        "odometer_text": "28,000km",
+        "odometer_km": 28000,
+        "dealer_stock_id": "20201064",
+        "dealer_stock_ids": [
+          "20201064"
+        ],
+        "car_code": "1326",
+        "photo_count": 23,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/304dx575ndwp7zh4ph1r97s98.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/304dx575ndwp7zh4ph1r97s98.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZL0ZWR800474507",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2020 Toyota Noah X Hybrid 7 Seater",
+        "year": "2020",
+        "make": "TOYOTA",
+        "model": "Noah",
+        "price_text": "38400",
+        "price": 38400,
+        "odometer_text": "27955",
+        "description": "Stock - 20201064\n\n2020 TOYOTA Noah X | Hybrid | 27955 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Toyota Safety Sense (TSS)\n\u2022 Traction Control System\n\u2022 Lane Departure Warni...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/noah/zwr80g/1064",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/ZWR80-0474507/3Q7djCvdDO8zQsShMICvoA/Toyota Noah 5.jpeg",
+        "stock_no": "1064",
+        "stock_candidates": [
+          "1064"
+        ],
+        "chassis": "ZWR80-0474507",
+        "warranty": {
+          "vehicle_year": "2020",
+          "vehicle_age": 6,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1063",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2020-toyota-noah-hybrid-si-auto/OAG-AD-25705795/",
+        "network_id": "OAG-AD-25705795",
+        "title": "2020 Toyota Noah Hybrid SI Auto",
+        "detail_page_title": "2020 Toyota Noah Hybrid SI Auto",
+        "year": "2020",
+        "make": "Toyota",
+        "model": "Noah Hybrid SI Auto",
+        "price_text": "$29,900",
+        "price": 29900,
+        "odometer_text": "79,910km",
+        "odometer_km": 79910,
+        "dealer_stock_id": "20201063",
+        "dealer_stock_ids": [
+          "20201063"
+        ],
+        "car_code": "1331",
+        "photo_count": 27,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/9yh53cwf7i1tfzwyr9e1rxwko.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/9yh53cwf7i1tfzwyr9e1rxwko.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZL0ZWR800475693",
+        "registration_plate": "Check with seller",
+        "body_type": "People Mover",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2020 Toyota Noah X Hybrid 7 Seater",
+        "year": "2020",
+        "make": "TOYOTA",
+        "model": "Noah",
+        "price_text": "29900",
+        "price": 29900,
+        "odometer_text": "79910",
+        "description": "Stock - 20201063\n\n2020 TOYOTA Noah X | Hybrid | 79910 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Cruise Control\n\u2022 Air Conditioning\n\u2022 Reversing Camera\n\u2022 Parking assist camera\n\u2022 Front Vehicle...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/noah/zwr80g/1063",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/ZWR80-0475693/3Q7djCvdDO8zQsShMICvoA/Toyota Noah 1.jpg",
+        "stock_no": "1063",
+        "stock_candidates": [
+          "1063"
+        ],
+        "chassis": "ZWR80-0475693",
+        "warranty": {
+          "vehicle_year": "2020",
+          "vehicle_age": 6,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1098",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2024-toyota-yaris-x-hybrid-auto-efour/OAG-AD-25780106/",
+        "network_id": "OAG-AD-25780106",
+        "title": "2024 Toyota Yaris X Hybrid Auto eFour",
+        "detail_page_title": "2024 Toyota Yaris X Hybrid Auto eFour",
+        "year": "2024",
+        "make": "Toyota",
+        "model": "Yaris X Hybrid Auto eFour",
+        "price_text": "$25,900",
+        "price": 25900,
+        "odometer_text": "38,000km",
+        "odometer_km": 38000,
+        "dealer_stock_id": "20241098",
+        "dealer_stock_ids": [
+          "20241098"
+        ],
+        "car_code": "1133",
+        "photo_count": 6,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2lsim34ub2jlbqnml961i524n.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/2lsim34ub2jlbqnml961i524n.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZRMXPH170003909",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2024 Toyota Yaris 4WD X Hybrid",
+        "year": "2024",
+        "make": "TOYOTA",
+        "model": "YARIS",
+        "price_text": "25900",
+        "price": 25900,
+        "odometer_text": "38000",
+        "description": "Stock - 20241098\n\n2024 TOYOTA YARIS X 4WD | Hybrid | 38000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Toyota Safety Sense (TSS)\n\u2022 Reversing Camera\n\u2022 Airbags 8\n\u2022 Air Conditioning\n\u2022 Power stee...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/yaris/mxph17/1098",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/MXPH17-0003909/3Q7djCvdDO8zQsShMICvoA/Edit_the_provided_202604201530 (1).png",
+        "stock_no": "1098",
+        "stock_candidates": [
+          "1098"
+        ],
+        "chassis": "MXPH17-0003909",
+        "warranty": {
+          "vehicle_year": "2024",
+          "vehicle_age": 2,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1091",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2023-toyota-yaris-x-hybrid-auto-efour/OAG-AD-25780109/",
+        "network_id": "OAG-AD-25780109",
+        "title": "2023 Toyota Yaris X Hybrid Auto eFour",
+        "detail_page_title": "2023 Toyota Yaris X Hybrid Auto eFour",
+        "year": "2023",
+        "make": "Toyota",
+        "model": "Yaris X Hybrid Auto eFour",
+        "price_text": "$24,900",
+        "price": 24900,
+        "odometer_text": "62,000km",
+        "odometer_km": 62000,
+        "dealer_stock_id": "20231091",
+        "dealer_stock_ids": [
+          "20231091"
+        ],
+        "car_code": "1346",
+        "photo_count": 5,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/8cjvhq6sd9cxaakuz3cgd5oax.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/8cjvhq6sd9cxaakuz3cgd5oax.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZPMXPH150025176",
+        "registration_plate": "Check with seller",
+        "body_type": "Hatch",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2023 Toyota Yaris 4WD X Hybrid",
+        "year": "2023",
+        "make": "TOYOTA",
+        "model": "YARIS",
+        "price_text": "24900",
+        "price": 24900,
+        "odometer_text": "62000",
+        "description": "Stock - 20231091\n\n2023 TOYOTA YARIS HYBRID 4WD X HYBRID  | Hybrid | 62000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Cruise Control\n\u2022 Push start and keyless entry\n\u2022 Power...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/yaris/mxph15/1091",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/MXPH15-0025176/3Q7djCvdDO8zQsShMICvoA/Can_you_remove_202604201407.png",
+        "stock_no": "1091",
+        "stock_candidates": [
+          "1091"
+        ],
+        "chassis": "MXPH15-0025176",
+        "warranty": {
+          "vehicle_year": "2023",
+          "vehicle_age": 3,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1069",
+      "mismatch_fields": [
+        "odometer"
+      ],
+      "mismatch_messages": [
+        "Odometer mismatch: Carsales 48,000km vs Carbarn 48,749km"
+      ],
+      "mismatch_count": 1,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2022-toyota-raize-auto/OAG-AD-25709540/",
+        "network_id": "OAG-AD-25709540",
+        "title": "2022 Toyota Raize Auto",
+        "detail_page_title": "2022 Toyota Raize Auto",
+        "year": "2022",
+        "make": "Toyota",
+        "model": "Raize Auto",
+        "price_text": "$27,900",
+        "price": 27900,
+        "odometer_text": "48,000km",
+        "odometer_km": 48000,
+        "dealer_stock_id": "20221069",
+        "dealer_stock_ids": [
+          "20221069"
+        ],
+        "car_code": "1328",
+        "photo_count": 24,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/9qy2uxpks0lssni5kkwlegz8o.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/9qy2uxpks0lssni5kkwlegz8o.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZN0A202A0044734",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2022 Toyota Raize G Hybrid",
+        "year": "2022",
+        "make": "TOYOTA",
+        "model": "Raize",
+        "price_text": "27900",
+        "price": 27900,
+        "odometer_text": "48749",
+        "description": "Stock - 20221069\n\n2022 TOYOTA Raize G | Hybrid | 48749 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Reversing Camera\n\u2022 Airbags\n\u2022 Multi-Function Steering Wheel\n\u2022 Push start and keyless entry\n\u2022...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/raize/a202a/1069",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/A202A-0044734/3Q7djCvdDO8zQsShMICvoA/Toyota Raize 2.jpg",
+        "stock_no": "1069",
+        "stock_candidates": [
+          "1069"
+        ],
+        "chassis": "A202A-0044734",
+        "warranty": {
+          "vehicle_year": "2022",
+          "vehicle_age": 4,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1068",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2022-toyota-raize-auto/OAG-AD-25754029/",
+        "network_id": "OAG-AD-25754029",
+        "title": "2022 Toyota Raize Auto",
+        "detail_page_title": "2022 Toyota Raize Auto",
+        "year": "2022",
+        "make": "Toyota",
+        "model": "Raize Auto",
+        "price_text": "$29,400",
+        "price": 29400,
+        "odometer_text": "27,782km",
+        "odometer_km": 27782,
+        "dealer_stock_id": "20221068",
+        "dealer_stock_ids": [
+          "20221068"
+        ],
+        "car_code": "1268",
+        "photo_count": 30,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/910l8w5z13zmtubvtemdg3kqm.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/910l8w5z13zmtubvtemdg3kqm.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZN0A202A0047296",
+        "registration_plate": "Check with seller",
+        "body_type": "Wagon",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2022 Toyota Raize Z Hybrid",
+        "year": "2022",
+        "make": "TOYOTA",
+        "model": "Raize",
+        "price_text": "29400",
+        "price": 29400,
+        "odometer_text": "27782",
+        "description": "Stock - 20221068\n\n2022 TOYOTA Raize Z | Hybrid | 27782 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Traction Control System\n\u2022 Front Vehicle Collision Warning\n\u2022 Electronic Parking Sensor\n\u2022 Air...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/raize/a202a/1068",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/A202A-0047296/3Q7djCvdDO8zQsShMICvoA/asdasda.png",
+        "stock_no": "1068",
+        "stock_candidates": [
+          "1068"
+        ],
+        "chassis": "A202A-0047296",
+        "warranty": {
+          "vehicle_year": "2022",
+          "vehicle_age": 4,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "identified",
+      "match_score": 100.0,
+      "match_reason": "stock_tail4_match:1075",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2024-toyota-corolla-hybrid-g-auto-awd/OAG-AD-25780108/",
+        "network_id": "OAG-AD-25780108",
+        "title": "2024 Toyota Corolla Hybrid G Auto AWD",
+        "detail_page_title": "2024 Toyota Corolla Hybrid G Auto AWD",
+        "year": "2024",
+        "make": "Toyota",
+        "model": "Corolla Hybrid G Auto AWD",
+        "price_text": "$31,900",
+        "price": 31900,
+        "odometer_text": "14,000km",
+        "odometer_km": 14000,
+        "dealer_stock_id": "20241075",
+        "dealer_stock_ids": [
+          "20241075"
+        ],
+        "car_code": "1347",
+        "photo_count": 4,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/b82hz7u2g4hs02rva9pwfexu5.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/b82hz7u2g4hs02rva9pwfexu5.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "6ZZRZWE2150024058",
+        "registration_plate": "Check with seller",
+        "body_type": "Sedan",
+        "fuel": "Hybrid",
+        "transmission": "Automatic",
+        "error": ""
+      },
+      "carbarn": {
+        "title": "2024 Toyota Corolla G 4WD Hybrid (Low Km)",
+        "year": "2024",
+        "make": "TOYOTA",
+        "model": "Corolla",
+        "price_text": "31900",
+        "price": 31900,
+        "odometer_text": "14000",
+        "description": "Stock - 20241075\n\n2024 TOYOTA Corolla G 4WD | Hybrid | 14000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Foldable Rear Seat\n\u2022 Traction Control System\n\u2022 Brake Assist\n\u2022 Rear Wip...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/corolla/zwe215/1075",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/ZWE215-0024058/3Q7djCvdDO8zQsShMICvoA/Remove_the_human_202604201218.png",
+        "stock_no": "1075",
+        "stock_candidates": [
+          "1075"
+        ],
+        "chassis": "ZWE215-0024058",
+        "warranty": {
+          "vehicle_year": "2024",
+          "vehicle_age": 2,
+          "rule_label": "Up To 10 Years Vehicle",
+          "dealer_warranty": true,
+          "integrity_warranty": true
+        }
+      }
+    },
+    {
+      "status": "not_found",
+      "match_score": 0.0,
+      "match_reason": "stock_tail4_not_found:1088;stock_tail3_not_found:088",
+      "mismatch_fields": [],
+      "mismatch_messages": [],
+      "mismatch_count": 0,
+      "carsales": {
+        "source_url": "https://www.carsales.com.au/cars/details/2013-toyota-estima-aeras-hybrid-auto-4wd/OAG-AD-25780116/",
+        "network_id": "OAG-AD-25780116",
+        "title": "2013 Toyota Estima Aeras Hybrid Auto 4WD",
+        "detail_page_title": "2013 Toyota Estima Aeras Hybrid Auto 4WD",
+        "year": "2013",
+        "make": "Toyota",
+        "model": "Estima Aeras Hybrid Auto 4WD",
+        "price_text": "$26,900",
+        "price": 26900,
+        "odometer_text": "readingprovidedbutdoe",
+        "odometer_km": null,
+        "dealer_stock_id": "20131088",
+        "dealer_stock_ids": [
+          "20131088"
+        ],
+        "car_code": "",
+        "photo_count": null,
+        "first_image_url": "https://carsales.pxcrush.net/carsales/car/dealer/br9pfjd4ojg7tdmratxxzr4mx.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/br9pfjd4ojg7tdmratxxzr4mx.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "vin": "",
+        "registration_plate": "",
+        "body_type": "People Mover, 5 doors, 7 seats",
+        "fuel": "introduced to the en",
+        "transmission": "1 speed Automatic",
+        "error": ""
+      },
+      "carbarn": {}
+    }
+  ]
+}

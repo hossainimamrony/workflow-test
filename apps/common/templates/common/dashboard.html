@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Workflow Dashboard{% endblock %}
+
+{% block content %}
+<section>
+  <h1 style="margin:0;font-size:36px;line-height:1.1;">Unified Workflow Dashboard</h1>
+  <p style="margin:8px 0 0;color:#5b6f8f;max-width:760px;">
+    All workflows now share one navigation and one design system so the platform feels like one professional product.
+  </p>
+</section>
+<section class="hub-grid">
+  <a class="hub-card" href="/workflows/carsale-scraper/">
+    <h2 class="hub-card__title">Carsale Scraper</h2>
+    <p class="hub-card__copy">Run manual URL matching and monitor live progress across inventory checks.</p>
+    <span class="hub-card__cta">Open workflow</span>
+  </a>
+  <a class="hub-card" href="/workflows/real-footage-reels/">
+    <h2 class="hub-card__title">Real Footage Reels</h2>
+    <p class="hub-card__copy">Generate script options first, then produce full reels with controlled run history.</p>
+    <span class="hub-card__cta">Open workflow</span>
+  </a>
+  <a class="hub-card" href="/workflows/global-make-model-video/">
+    <h2 class="hub-card__title">Global Make Model Video</h2>
+    <p class="hub-card__copy">Queue and process make-model video jobs from the same shared workspace.</p>
+    <span class="hub-card__cta">Open workflow</span>
+  </a>
+</section>
+{% endblock %}

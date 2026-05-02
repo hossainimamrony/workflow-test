@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AU Real Footage Reels{% endblock %}
+{% block body_class %}workflow-body workflow-body--real-footage{% endblock %}
+{% block page_shell_class %}page-shell--wide page-shell--flush{% endblock %}
+
+{% block extra_head %}
+<style>
+  form.workflow-form { max-width: none !important; }
+  .vehicle-lookup__control { flex: 1 1 auto; min-width: 0; width: 100%; }
+  .vehicle-lookup__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+</style>
+<link rel="stylesheet" href="{% static 'real_footage_reels/app.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app-shell">
+  <header class="site-header">
+    <div class="site-header__brand">
+      <h1 class="site-title">AU Real Footage Reels</h1>
+      <p class="site-header__subtitle">Script-first reel production workflow with controlled approvals.</p>
+    </div>
+    <nav class="site-nav" aria-label="Run Navigation">
+      <button id="nav-studio" type="button" class="nav-link is-active">Studio</button>
+      <button id="nav-runs" type="button" class="nav-link">Runs</button>
+    </nav>
+  </header>
+  <main class="app-main" id="app-main" data-route-path="{{ request_path|default:'' }}" data-run-id="{{ route_run_id|default:'' }}">
+    <div class="page-intro">
+      <h2 id="page-title" class="page-intro__title">Studio</h2>
+    </div>
+    <section class="panel dashboard-command" id="studio-panel">
+      <div class="dashboard-command__top">
+        <div class="dashboard-command__title"><h3 class="dashboard__panel-title">New Run</h3></div>
+      </div>
+
+      <form id="run-form" class="workflow-form workflow-form--compact">
+        <div class="compact-fields">
+          <label class="field field--span-full vehicle-lookup">
+            <span class="field__label">Inventory Search</span>
+            <div class="vehicle-lookup__head">
+              <div class="vehicle-lookup__control">
+                <input id="inventory-q" class="field__input vehicle-lookup__input" placeholder="Stock ID or title" autocomplete="off">
+                <button id="inventory-clear" type="button" class="vehicle-lookup__clear" aria-label="Clear inventory selection">x</button>
+              </div>
+              <button id="inventory-refresh" class="button button--secondary" type="button">Refresh</button>
+            </div>
+            <div id="inventory-results" class="vehicle-lookup__menu" style="display:none"></div>
+            <small id="inventory-note" class="field__hint"></small>
+          </label>
+
+          <label class="field field--span-full"><span class="field__label">URL</span><input class="field__input" name="url"></label>
+          <label class="field field--span-2"><span class="field__label">Title</span><input class="field__input" name="listingTitle" required></label>
+          <label class="field"><span class="field__label">Stock ID</span><input class="field__input" name="stockId" required></label>
+          <label class="field"><span class="field__label">Price</span><input class="field__input" name="listingPrice"></label>
+          <label class="field field--span-2"><span class="field__label">Description</span><textarea class="field__input field__input--textarea" name="carDescription" rows="5" required></textarea></label>
+          <label class="field field--span-2"><span class="field__label">Price Includes</span><textarea class="field__input field__input--textarea" name="priceIncludes" rows="5"></textarea></label>
+        </div>
+
+        <div class="callout callout--info"><div class="callout__copy"><strong>Flow</strong><p>Step 1 generates 3 script options first (no clip download). Step 2 happens in the run page: approve a script, then generate the full video.</p></div></div>
+
+        <div class="dashboard-command__bottom">
+          <div class="form-actions"><button class="button button--primary" type="submit">Generate Script Options</button></div>
+        </div>
+        <p id="form-status" class="dashboard-command__note"></p>
+      </form>
+
+      <section class="dashboard-job-strip" id="current-job-panel" style="display:none">
+        <div class="dashboard-job-strip__head">
+          <div class="job-summary">
+            <span class="job-summary__cmd">Active Jobs</span>
+            <span id="current-job-status" class="job-summary__status">queued</span>
+          </div>
+          <p id="current-job-meta" class="job-summary__meta"></p>
+        </div>
+        <div id="current-job-list" class="run-table"></div>
+      </section>
+    </section>
+
+    <section class="panel dashboard__library" id="runs-panel">
+      <div class="dashboard__library-head">
+        <h3 class="dashboard__panel-title">Runs</h3>
+        <button id="runs-refresh" class="button button--secondary" type="button">Refresh</button>
+      </div>
+      <div id="runs-list" class="run-table"></div>
+    </section>
+
+    <section class="panel" id="run-detail-panel" style="display:none"></section>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'real_footage_reels/app.js' %}"></script>
+{% endblock %}

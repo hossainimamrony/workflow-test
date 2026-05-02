@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Unified Workflows{% endblock %}</title>
+  <style>
+    :root {
+      --hub-bg: #f3f6fb;
+      --hub-bg-soft: #eaf1ff;
+      --hub-card: #ffffff;
+      --hub-text: #0f1f36;
+      --hub-muted: #5b6f8f;
+      --hub-line: #d6e1f2;
+      --hub-line-strong: #c5d4ea;
+      --hub-primary: #145ad6;
+      --hub-primary-2: #2f7bf4;
+      --hub-shadow: 0 10px 24px rgba(18, 50, 97, 0.1);
+      --hub-radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--hub-text);
+      font-family: "Poppins", "Montserrat", "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(1100px 360px at 10% -18%, #dce8ff 0%, rgba(220, 232, 255, 0) 72%),
+        radial-gradient(980px 300px at 95% -14%, #e8f0ff 0%, rgba(232, 240, 255, 0) 74%),
+        var(--hub-bg);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .global-header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      backdrop-filter: blur(10px);
+      background: rgba(243, 246, 251, 0.84);
+      border-bottom: 1px solid rgba(197, 212, 234, 0.75);
+    }
+
+    .global-header__inner {
+      width: min(1700px, calc(100% - 24px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 4px;
+      flex-wrap: wrap;
+    }
+
+    .global-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--hub-text);
+    }
+
+    .global-brand__dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, var(--hub-primary), var(--hub-primary-2));
+      box-shadow: 0 0 0 5px rgba(21, 89, 207, 0.16);
+    }
+
+    .global-brand__copy {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .global-brand__copy strong {
+      font-size: 15px;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+    }
+
+    .global-brand__copy small {
+      font-size: 11px;
+      color: var(--hub-muted);
+      line-height: 1.1;
+    }
+
+    .global-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .global-nav__link {
+      border: 1px solid var(--hub-line);
+      background: rgba(255, 255, 255, 0.92);
+      color: #2b4470;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: all 0.2s ease;
+    }
+
+    .global-nav__link:hover {
+      border-color: #b5c9e8;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(19, 57, 113, 0.12);
+    }
+
+    .global-nav__link.is-active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(96deg, var(--hub-primary), var(--hub-primary-2));
+      box-shadow: 0 10px 22px rgba(20, 90, 214, 0.26);
+    }
+
+    .global-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--hub-line);
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--hub-muted);
+      font-weight: 700;
+    }
+
+    .global-status__pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #1f9d5c;
+      box-shadow: 0 0 0 5px rgba(31, 157, 92, 0.18);
+    }
+
+    .page-shell {
+      width: min(1280px, calc(100% - 24px));
+      margin: 18px auto 28px;
+      padding: 0;
+    }
+
+    .page-shell--wide {
+      width: min(1700px, calc(100% - 24px));
+    }
+
+    .page-shell--flush {
+      margin-top: 12px;
+    }
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .hub-card {
+      border: 1px solid var(--hub-line);
+      border-radius: var(--hub-radius);
+      background: var(--hub-card);
+      box-shadow: var(--hub-shadow);
+      padding: 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      display: grid;
+      gap: 8px;
+    }
+
+    .hub-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(16, 48, 95, 0.14);
+      border-color: var(--hub-line-strong);
+    }
+
+    .hub-card__title {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .hub-card__copy {
+      margin: 0;
+      color: var(--hub-muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .hub-card__cta {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1d4fab;
+    }
+
+    form { max-width: 680px; }
+
+    button {
+      font: inherit;
+      padding: 0.5rem 1rem;
+    }
+
+    @media (max-width: 1024px) {
+      .hub-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .global-header__inner {
+        width: calc(100% - 18px);
+        padding: 9px 2px;
+      }
+
+      .global-status {
+        display: none;
+      }
+
+      .page-shell,
+      .page-shell--wide {
+        width: calc(100% - 14px);
+        margin-top: 10px;
+      }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}workflow-body{% endblock %}">
+  <header class="global-header">
+    <div class="global-header__inner">
+      <a href="/dashboard/" class="global-brand" aria-label="Unified Workflows Dashboard">
+        <span class="global-brand__dot" aria-hidden="true"></span>
+        <span class="global-brand__copy">
+          <strong>Unified Workflows</strong>
+          <small>Carbarn Operations Suite</small>
+        </span>
+      </a>
+      {% with path=request.path|default:'' %}
+      <nav class="global-nav" aria-label="Top Navigation">
+        <a class="global-nav__link {% if path == '/dashboard/' %}is-active{% endif %}" href="/dashboard/">Dashboard</a>
+        <a class="global-nav__link {% if '/workflows/carsale-scraper/' in path %}is-active{% endif %}" href="/workflows/carsale-scraper/">Carsale Scraper</a>
+        <a class="global-nav__link {% if '/workflows/real-footage-reels/' in path %}is-active{% endif %}" href="/workflows/real-footage-reels/">Real Footage Reels</a>
+        <a class="global-nav__link {% if '/workflows/global-make-model-video/' in path %}is-active{% endif %}" href="/workflows/global-make-model-video/">Global Make Model Video</a>
+      </nav>
+      {% endwith %}
+      <div class="global-status">
+        <span class="global-status__pulse" aria-hidden="true"></span>
+        <span>Shared Project UI</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-shell {% block page_shell_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,765 @@
+import threading
+import time
+import uuid
+import os
+from datetime import datetime, timedelta
+from pathlib import Path
+import json
+import subprocess
+import tempfile
+from urllib.parse import urlencode
+from urllib.request import urlopen, Request
+
+from django.db import OperationalError, ProgrammingError
+from django.utils import timezone
+
+from .models import ReelRenderJob, ReelRun
+
+
+class ReelRenderService:
+    _lock = threading.Lock()
+    _process_lock = threading.Lock()
+    _active_processes: dict[str, subprocess.Popen] = {}
+    _max_parallel_jobs = max(1, int(os.environ.get("REAL_FOOTAGE_MAX_PARALLEL_JOBS", "20") or "20"))
+    _job_slots = threading.BoundedSemaphore(_max_parallel_jobs)
+    _workflow_root = Path(__file__).resolve().parent / "workflow_engine"
+    _cli_path = _workflow_root / "src" / "cli.mjs"
+    _bridge_path = _workflow_root / "scripts" / "django-workflow-bridge.mjs"
+    _runs_root = _workflow_root / "runs"
+    _PHASE_PERCENT = {
+        "queued": 2,
+        "download": 18,
+        "frames": 42,
+        "analyze": 68,
+        "compose": 90,
+        "voiceover": 95,
+        "done": 100,
+        "error": 100,
+    }
+
+    @classmethod
+    def _recover_stale_jobs(cls) -> None:
+        cutoff = timezone.now() - timedelta(minutes=30)
+        stale_qs = ReelRenderJob.objects.filter(status__in=["queued", "running"]).filter(created_at__lt=cutoff)
+        for stale in stale_qs:
+            stale.status = "failed"
+            stale.error = stale.error or "Job marked stale after server restart/timeout."
+            stale.finished_at = timezone.now()
+            stale.save(update_fields=["status", "error", "finished_at"])
+            run_id = str((stale.payload or {}).get("runId", "")).strip()
+            if run_id:
+                ReelRun.objects.filter(run_id=run_id).update(status="failed")
+
+    @classmethod
+    def start_job(cls, payload: dict) -> ReelRenderJob:
+        with cls._lock:
+            try:
+                cls._recover_stale_jobs()
+                normalized_payload = dict(payload or {})
+                command = str(normalized_payload.get("command", "prepare")).strip().lower() or "prepare"
+                resume_run_id = str(normalized_payload.get("resumeRunId", "")).strip()
+                run_id = resume_run_id or f"{datetime.utcnow().strftime('%Y-%m-%dT%H-%M-%S')}-{uuid.uuid4().hex[:4]}"
+                normalized_payload["runId"] = run_id
+                ReelRun.objects.update_or_create(
+                    run_id=run_id,
+                    defaults={
+                        "listing_title": str(normalized_payload.get("listingTitle", "")).strip(),
+                        "stock_id": str(normalized_payload.get("stockId", "")).strip(),
+                        "car_description": str(normalized_payload.get("carDescription", "")).strip(),
+                        "listing_price": str(normalized_payload.get("listingPrice", "")).strip(),
+                        "status": "queued",
+                        "report": {
+                            "pipeline": {
+                                "download": {"done": False},
+                                "frames": {"done": False},
+                                "prepare": {"done": False},
+                                "analyze": {"done": False},
+                                "render": {"done": False},
+                            },
+                            "stats": {"downloads": 0, "frames": 0, "analyzed": 0, "planned": 0},
+                            "runDir": str((cls._runs_root / run_id)),
+                            "command": command,
+                            "voiceoverDraft": {"variants": []},
+                            "voiceoverStatus": "",
+                            "hasVoiceover": False,
+                            "videos": [],
+                        },
+                    },
+                )
+                job = ReelRenderJob.objects.create(
+                    job_id=f"{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}",
+                    command=normalized_payload.get("command", "prepare"),
+                    status="queued",
+                    payload=normalized_payload,
+                    result={"runId": run_id, "progress": {"phase": "queued", "label": "Waiting in queue..", "percent": 2}},
+                )
+            except (OperationalError, ProgrammingError) as exc:
+                raise RuntimeError("Database schema is not up to date. Run migrations.") from exc
+
+        threading.Thread(target=cls._run_job, args=(job.id,), daemon=True).start()
+        return job
+
+    @classmethod
+    def _run_job(cls, db_id: int) -> None:
+        cls._job_slots.acquire()
+        try:
+            job = ReelRenderJob.objects.get(id=db_id)
+            if job.status != "queued":
+                return
+            job.status = "running"
+            job.started_at = timezone.now()
+            job.save(update_fields=["status", "started_at"])
+
+            try:
+                source_url = str(job.payload.get("url", "")).strip()
+                command = str(job.payload.get("command", "run")).strip().lower() or "run"
+                if command in {"run", "prepare", "download"} and not str(job.payload.get("resumeRunId", "")).strip():
+                    if not source_url:
+                        raise RuntimeError("Missing source URL. Please provide a valid listing/album URL.")
+                resume_run_id = str(job.payload.get("resumeRunId", "")).strip()
+                run_id = str(job.payload.get("runId", "")).strip() or resume_run_id or datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")
+                run_dir = cls._runs_root / run_id
+                ReelRun.objects.filter(run_id=run_id).update(status="running")
+
+                if command == "script-draft":
+                    cls._update_progress(job, "voiceover", "Generating script options...")
+                else:
+                    cls._update_progress(job, "download", "Starting workflow process...")
+                if source_url:
+                    cls._append_log(job, f"Source URL: {source_url}")
+                cls._append_log(job, f"Command: {command}")
+                cls._append_log(job, f"Run directory: {run_dir}")
+
+                bridge_result = cls._run_bridge_workflow(job, command=command, run_dir=run_dir, run_id=run_id)
+                report = bridge_result.get("report") if isinstance(bridge_result, dict) else None
+                if not isinstance(report, dict):
+                    report = cls._build_run_report_from_outputs(run_dir, command)
+                bridge_run_dir = str((bridge_result or {}).get("runDir", "")).strip() if isinstance(bridge_result, dict) else ""
+                report_run_dir = str((report or {}).get("runDir", "")).strip() if isinstance(report, dict) else ""
+                resolved_run_dir = bridge_run_dir or report_run_dir
+                if resolved_run_dir:
+                    try:
+                        resolved_path = Path(resolved_run_dir).resolve()
+                        if resolved_path.parent == cls._runs_root.resolve():
+                            run_id = resolved_path.name
+                            run_dir = resolved_path
+                    except Exception:
+                        pass
+
+                run_defaults = {
+                    "listing_title": str(job.payload.get("listingTitle", "")).strip(),
+                    "stock_id": str(job.payload.get("stockId", "")).strip(),
+                    "car_description": str(job.payload.get("carDescription", "")).strip(),
+                    "listing_price": str(job.payload.get("listingPrice", "")).strip(),
+                    "status": "completed",
+                    "report": report,
+                }
+                run, _created = ReelRun.objects.update_or_create(
+                    run_id=run_id,
+                    defaults=run_defaults,
+                )
+
+                cls._update_progress(job, "done", "Completed.")
+                cls._append_log(job, f"Run created: {run.run_id}")
+                job.status = "completed"
+                result = job.result or {}
+                result["runId"] = run.run_id
+                job.result = result
+                job.finished_at = timezone.now()
+                job.save(update_fields=["status", "result", "finished_at"])
+            except Exception as exc:  # noqa: BLE001
+                cls._append_log(job, f"ERROR: {exc}")
+                cls._update_progress(job, "error", "Failed.")
+                job.status = "failed"
+                job.error = str(exc)
+                job.finished_at = timezone.now()
+                job.save(update_fields=["status", "error", "finished_at"])
+                run_id = str(job.payload.get("runId", "")).strip()
+                if run_id:
+                    ReelRun.objects.filter(run_id=run_id).update(status="failed")
+        finally:
+            cls._job_slots.release()
+
+    @classmethod
+    def _append_log(cls, job: ReelRenderJob, message: str) -> None:
+        result = job.result or {}
+        logs = list(result.get("logs", []))
+        logs.append({"at": timezone.now().isoformat(), "message": str(message)})
+        result["logs"] = logs[-250:]
+        job.result = result
+        job.save(update_fields=["result"])
+
+    @classmethod
+    def _run_bridge_workflow(cls, job: ReelRenderJob, *, command: str, run_dir: Path, run_id: str) -> dict:
+        if not cls._bridge_path.exists():
+            raise RuntimeError(f"Workflow bridge not found at: {cls._bridge_path}")
+
+        payload = dict(job.payload or {})
+        payload["command"] = command
+        resume_run_id = str(payload.get("resumeRunId", "")).strip()
+        if resume_run_id:
+            payload["resumeRunId"] = resume_run_id
+        else:
+            payload.pop("resumeRunId", None)
+            payload["outDir"] = str(run_dir)
+        payload["url"] = str(payload.get("url", "")).strip()
+        payload["urls"] = payload.get("urls") or ([payload["url"]] if payload["url"] else [])
+        payload["headless"] = not bool(payload.get("headful", False))
+
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".json", delete=False) as tmp:
+            tmp.write(json.dumps(payload))
+            payload_file = tmp.name
+
+        cmd = [
+            "node",
+            str(cls._bridge_path),
+            "--payload",
+            payload_file,
+        ]
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(cls._workflow_root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        with cls._process_lock:
+            cls._active_processes[job.job_id] = proc
+        result_payload = None
+        bridge_errors: list[str] = []
+        try:
+            stream = proc.stdout
+            if stream is not None:
+                for raw_line in stream:
+                    line = str(raw_line).rstrip("\r\n")
+                    if not line:
+                        continue
+                    if line.startswith("[LOG] "):
+                        cls._append_log(job, line[6:])
+                        cls._infer_progress_from_log(job, line[6:])
+                        continue
+                    if line.startswith("[PROGRESS] "):
+                        try:
+                            progress = json.loads(line[11:])
+                            if isinstance(progress, dict):
+                                cls._update_progress(
+                                    job,
+                                    str(progress.get("phase", "")),
+                                    str(progress.get("label", "")),
+                                )
+                        except Exception:
+                            cls._append_log(job, line)
+                        continue
+                    if line.startswith("[RESULT] "):
+                        try:
+                            parsed = json.loads(line[9:])
+                            if isinstance(parsed, dict):
+                                result_payload = parsed
+                        except Exception:
+                            cls._append_log(job, "Failed parsing bridge result payload.")
+                        continue
+                    if line.startswith("[ERROR] "):
+                        error_line = line[8:].strip()
+                        if error_line:
+                            bridge_errors.append(error_line)
+                        cls._append_log(job, line[8:])
+                        continue
+                    cls._append_log(job, line)
+            proc.wait()
+        finally:
+            with cls._process_lock:
+                cls._active_processes.pop(job.job_id, None)
+            try:
+                Path(payload_file).unlink(missing_ok=True)
+            except Exception:
+                pass
+
+        if proc.returncode != 0:
+            if bridge_errors:
+                raise RuntimeError(bridge_errors[-1])
+            raise RuntimeError(f"Pipeline bridge exited with code {proc.returncode}.")
+        return result_payload or {}
+
+    @classmethod
+    def generate_thumbnail(
+        cls,
+        *,
+        run_id: str,
+        title: str,
+        subtitle: str,
+        reference_image_data_url: str,
+        price: str = "",
+    ) -> dict:
+        if not cls._bridge_path.exists():
+            raise RuntimeError(f"Workflow bridge not found at: {cls._bridge_path}")
+
+        payload = {
+            "command": "thumbnail",
+            "resumeRunId": str(run_id or "").strip(),
+            "title": str(title or "").strip(),
+            "subtitle": str(subtitle or "").strip(),
+            "referenceImageDataUrl": str(reference_image_data_url or "").strip(),
+            "price": str(price or "").strip(),
+            "headless": True,
+        }
+
+        if not payload["resumeRunId"]:
+            raise RuntimeError("Run ID is required.")
+        if not payload["title"]:
+            raise RuntimeError("title is required.")
+        if not payload["subtitle"]:
+            raise RuntimeError("subtitle is required.")
+        if not payload["referenceImageDataUrl"]:
+            raise RuntimeError("referenceImageDataUrl is required.")
+
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".json", delete=False) as tmp:
+            tmp.write(json.dumps(payload))
+            payload_file = tmp.name
+
+        cmd = [
+            "node",
+            str(cls._bridge_path),
+            "--payload",
+            payload_file,
+        ]
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(cls._workflow_root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        result_payload = None
+        bridge_errors: list[str] = []
+        try:
+            stream = proc.stdout
+            if stream is not None:
+                for raw_line in stream:
+                    line = str(raw_line).rstrip("\r\n")
+                    if not line:
+                        continue
+                    if line.startswith("[RESULT] "):
+                        try:
+                            parsed = json.loads(line[9:])
+                            if isinstance(parsed, dict):
+                                result_payload = parsed
+                        except Exception:
+                            pass
+                        continue
+                    if line.startswith("[ERROR] "):
+                        error_line = line[8:].strip()
+                        if error_line:
+                            bridge_errors.append(error_line)
+                        continue
+            proc.wait()
+        finally:
+            try:
+                Path(payload_file).unlink(missing_ok=True)
+            except Exception:
+                pass
+
+        if proc.returncode != 0:
+            if bridge_errors:
+                raise RuntimeError(bridge_errors[-1])
+            raise RuntimeError(f"Pipeline bridge exited with code {proc.returncode}.")
+
+        if not isinstance(result_payload, dict):
+            raise RuntimeError("Thumbnail generation did not return a valid result payload.")
+
+        image_path = str(result_payload.get("imagePath", "")).strip()
+        image_mime_type = str(result_payload.get("imageMimeType", "")).strip()
+        if not image_path:
+            raise RuntimeError("Thumbnail generation did not return imagePath.")
+
+        return {
+            "runDir": str(result_payload.get("runDir", "")).strip(),
+            "imagePath": image_path,
+            "imageMimeType": image_mime_type or "image/png",
+        }
+
+    @classmethod
+    def _update_progress(cls, job: ReelRenderJob, phase: str, label: str) -> None:
+        result = job.result or {}
+        result["progress"] = {
+            "phase": phase,
+            "label": label,
+            "percent": int(cls._PHASE_PERCENT.get(phase, 0)),
+        }
+        job.result = result
+        job.save(update_fields=["result"])
+
+    @classmethod
+    def _start_pipeline_process(cls, job: ReelRenderJob, *, command: str, run_dir: Path) -> subprocess.Popen:
+        if not cls._cli_path.exists():
+            raise RuntimeError(f"Workflow CLI not found at: {cls._cli_path}")
+
+        payload = job.payload or {}
+        cmd = [
+            "node",
+            str(cls._cli_path),
+            command,
+            "--url",
+            str(payload.get("url", "")).strip(),
+            "--out",
+            str(run_dir),
+        ]
+
+        max_clips = payload.get("maxClips")
+        if isinstance(max_clips, int) and max_clips > 0:
+            cmd += ["--max-clips", str(max_clips)]
+
+        if bool(payload.get("compose")):
+            cmd.append("--compose")
+        if bool(payload.get("headful")):
+            cmd.append("--headful")
+
+        return subprocess.Popen(
+            cmd,
+            cwd=str(cls._workflow_root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+    @classmethod
+    def _stream_process_output(cls, job: ReelRenderJob, proc: subprocess.Popen) -> None:
+        stream = proc.stdout
+        if stream is None:
+            proc.wait()
+            return
+
+        for raw_line in stream:
+            line = str(raw_line).strip()
+            if not line:
+                continue
+            cls._append_log(job, line)
+            cls._infer_progress_from_log(job, line)
+        proc.wait()
+
+    @classmethod
+    def _infer_progress_from_log(cls, job: ReelRenderJob, line: str) -> None:
+        lower = line.lower()
+        if "downloading album videos" in lower or "downloaded " in lower:
+            cls._update_progress(job, "download", "Downloading clips...")
+            return
+        if "extracting" in lower and "frame" in lower:
+            cls._update_progress(job, "frames", "Extracting frames...")
+            return
+        if "sending them to gemini" in lower or "classified " in lower:
+            cls._update_progress(job, "analyze", "Analyzing and planning...")
+            return
+        if "composing the selected local clips" in lower or "composed reel:" in lower:
+            cls._update_progress(job, "compose", "Composing reel + end scene...")
+            return
+        if "voice-over" in lower or "script options" in lower:
+            cls._update_progress(job, "voiceover", "Voice-over scripts...")
+
+    @classmethod
+    def _build_run_report_from_outputs(cls, run_dir: Path, command: str) -> dict:
+        downloads_manifest = cls._read_json(run_dir / "downloads-manifest.json") or {}
+        frames_manifest = cls._read_json(run_dir / "frames-manifest.json") or {}
+        analysis_manifest = cls._read_json(run_dir / "analysis.json") or {}
+        reel_plan = cls._read_json(run_dir / "reel-plan.json") or {}
+
+        downloaded_videos = downloads_manifest.get("videos", []) if isinstance(downloads_manifest, dict) else []
+        framed_videos = frames_manifest.get("videos", []) if isinstance(frames_manifest, dict) else []
+        analyzed_clips = analysis_manifest.get("clips", []) if isinstance(analysis_manifest, dict) else []
+        planned_segments = (
+            ((reel_plan.get("composition") or {}).get("segments") or [])
+            if isinstance(reel_plan, dict)
+            else []
+        )
+
+        final_reel_webm = run_dir / "final-reel.webm"
+        final_reel_mp4 = run_dir / "final-reel.mp4"
+
+        return {
+            "pipeline": {
+                "download": {"done": len(downloaded_videos) > 0},
+                "frames": {"done": len(framed_videos) > 0},
+                "prepare": {"done": len(framed_videos) > 0},
+                "analyze": {"done": len(analyzed_clips) > 0},
+                "render": {"done": final_reel_webm.exists() or final_reel_mp4.exists()},
+            },
+            "stats": {
+                "downloads": len(downloaded_videos),
+                "frames": sum(len(v.get("framePaths", []) or []) for v in framed_videos if isinstance(v, dict)),
+                "analyzed": len(analyzed_clips),
+                "planned": len(planned_segments),
+            },
+            "downloadsManifest": downloads_manifest,
+            "framesManifest": frames_manifest,
+            "analysis": analysis_manifest,
+            "plan": reel_plan,
+            "runDir": str(run_dir),
+            "command": command,
+            "voiceoverDraft": {"variants": []},
+            "voiceoverStatus": "",
+            "hasVoiceover": False,
+            "finalReelUrl": str(final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")),
+            "finalReelWebmUrl": str(final_reel_webm) if final_reel_webm.exists() else "",
+            "videos": analyzed_clips if analyzed_clips else framed_videos,
+        }
+
+    @staticmethod
+    def _read_json(path: Path) -> dict | list | None:
+        if not path.exists():
+            return None
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+
+    @staticmethod
+    def jobs_payload() -> dict:
+        try:
+            ReelRenderService._recover_stale_jobs()
+            jobs = list(ReelRenderJob.objects.all()[:50])
+        except (OperationalError, ProgrammingError):
+            return {"activeJobId": None, "activeJobIds": [], "maxParallelJobs": ReelRenderService._max_parallel_jobs, "jobs": []}
+        active_jobs = [j for j in jobs if j.status in {"queued", "running"}]
+        active = active_jobs[0] if active_jobs else None
+        return {
+            "activeJobId": active.job_id if active else None,
+            "activeJobIds": [j.job_id for j in active_jobs],
+            "maxParallelJobs": ReelRenderService._max_parallel_jobs,
+            "jobs": [ReelRenderService._job_to_public(j) for j in jobs],
+        }
+
+    @classmethod
+    def control_job(cls, job_id: str, action: str) -> dict:
+        normalized_job_id = str(job_id or "").strip()
+        normalized_action = str(action or "").strip().lower()
+        if not normalized_job_id:
+            raise RuntimeError("Missing job id.")
+        if normalized_action not in {"pause", "resume", "stop", "remove"}:
+            raise RuntimeError("Unsupported action.")
+
+        job = ReelRenderJob.objects.filter(job_id=normalized_job_id).first()
+        if not job:
+            raise RuntimeError("Job not found.")
+
+        run_id = str((job.payload or {}).get("runId", "")).strip()
+
+        if normalized_action == "pause":
+            if job.status != "queued":
+                raise RuntimeError("Only queued jobs can be paused.")
+            job.status = "paused"
+            job.save(update_fields=["status"])
+            cls._update_progress(job, "queued", "Paused.")
+            if run_id:
+                ReelRun.objects.filter(run_id=run_id).update(status="paused")
+            return cls._job_to_public(job)
+
+        if normalized_action == "resume":
+            if job.status != "paused":
+                raise RuntimeError("Only paused jobs can be resumed.")
+            job.status = "queued"
+            job.save(update_fields=["status"])
+            cls._update_progress(job, "queued", "Waiting in queue...")
+            if run_id:
+                ReelRun.objects.filter(run_id=run_id).update(status="queued")
+            threading.Thread(target=cls._run_job, args=(job.id,), daemon=True).start()
+            job.refresh_from_db()
+            return cls._job_to_public(job)
+
+        if normalized_action == "stop":
+            if job.status in {"completed", "failed", "cancelled"}:
+                return cls._job_to_public(job)
+            with cls._process_lock:
+                proc = cls._active_processes.get(normalized_job_id)
+            if proc and proc.poll() is None:
+                try:
+                    proc.terminate()
+                except Exception:
+                    pass
+            job.status = "cancelled"
+            job.error = "Stopped by user."
+            job.finished_at = timezone.now()
+            job.save(update_fields=["status", "error", "finished_at"])
+            cls._update_progress(job, "error", "Stopped.")
+            if run_id:
+                ReelRun.objects.filter(run_id=run_id).update(status="failed")
+            return cls._job_to_public(job)
+
+        if job.status == "running":
+            raise RuntimeError("Stop the running job before removing it.")
+
+        job_public = cls._job_to_public(job)
+        job.delete()
+        if run_id:
+            ReelRun.objects.filter(run_id=run_id, status__in=["queued", "paused", "failed"]).delete()
+        return job_public
+
+    @staticmethod
+    def runs_payload() -> dict:
+        try:
+            runs = ReelRun.objects.all()[:100]
+        except (OperationalError, ProgrammingError):
+            return {"runs": []}
+        return {
+            "runs": [
+                {
+                    "runId": r.run_id,
+                    "createdAt": r.created_at.isoformat(),
+                    "updatedAt": r.updated_at.isoformat(),
+                    "listingTitle": r.listing_title,
+                    "stockId": r.stock_id,
+                    "listingPrice": r.listing_price,
+                    "status": r.status,
+                    "pipeline": (r.report or {}).get("pipeline", {}),
+                    "stats": {
+                        "downloads": int((r.report or {}).get("stats", {}).get("downloads", 0)),
+                        "frames": int((r.report or {}).get("stats", {}).get("frames", 0)),
+                        "analyzed": int((r.report or {}).get("stats", {}).get("analyzed", 0)),
+                        "planned": int((r.report or {}).get("stats", {}).get("planned", 0)),
+                    },
+                    "voiceoverDraft": (r.report or {}).get("voiceoverDraft", {"variants": []}),
+                    "voiceoverStatus": (r.report or {}).get("voiceoverStatus", ""),
+                    "hasVoiceover": bool((r.report or {}).get("hasVoiceover", False)),
+                }
+                for r in runs
+            ]
+        }
+
+    @staticmethod
+    def delete_run(run_id: str) -> bool:
+        try:
+            deleted, _ = ReelRun.objects.filter(run_id=run_id).delete()
+            return deleted > 0
+        except (OperationalError, ProgrammingError):
+            return False
+
+    @staticmethod
+    def _job_to_public(j: ReelRenderJob) -> dict:
+        payload = j.payload or {}
+        result = j.result or {}
+        return {
+            "id": j.job_id,
+            "runId": payload.get("runId") or result.get("runId"),
+            "command": j.command,
+            "urls": [payload["url"]] if payload.get("url") else payload.get("urls", []),
+            "listingTitle": payload.get("listingTitle", ""),
+            "stockId": payload.get("stockId", ""),
+            "carDescription": payload.get("carDescription", ""),
+            "listingPrice": payload.get("listingPrice", ""),
+            "priceIncludes": payload.get("priceIncludes", None),
+            "maxClips": payload.get("maxClips", None),
+            "compose": bool(payload.get("compose", False)),
+            "headless": not bool(payload.get("headful", False)),
+            "status": j.status,
+            "createdAt": j.created_at.isoformat(),
+            "startedAt": j.started_at.isoformat() if j.started_at else None,
+            "finishedAt": j.finished_at.isoformat() if j.finished_at else None,
+            "logs": list(result.get("logs", [])),
+            "result": result,
+            "error": j.error or None,
+            "resumeRunId": payload.get("resumeRunId"),
+            "sourcePayload": payload,
+            "progress": result.get("progress"),
+            "voiceoverScriptApproval": bool(payload.get("voiceoverScriptApproval", True)),
+        }
+
+
+class VehicleInventoryService:
+    _cache_path = Path(__file__).resolve().parent / "workflow_engine" / ".ui-cache" / "all_stock.json"
+    _api_url = "https://www.cbs.s1.carbarn.com.au/carbarnau/api/v1/vehicles"
+
+    @classmethod
+    def _load_payload(cls) -> dict:
+        if not cls._cache_path.exists():
+            return {}
+        try:
+            payload = json.loads(cls._cache_path.read_text(encoding="utf-8"))
+            if isinstance(payload, dict):
+                return payload
+        except Exception:
+            return {}
+        return {}
+
+    @classmethod
+    def _load(cls) -> list[dict]:
+        payload = cls._load_payload()
+        if isinstance(payload.get("vehicles"), list):
+            return payload["vehicles"]
+        if isinstance(payload, list):
+            return payload
+        return []
+
+    @classmethod
+    def status(cls) -> dict:
+        payload = cls._load_payload()
+        vehicles = cls._load()
+        return {
+            "cachePath": str(cls._cache_path),
+            "cachedAt": payload.get("cachedAt"),
+            "count": len(vehicles),
+            "refreshing": False,
+            "lastError": "",
+        }
+
+    @classmethod
+    def search(cls, query: str, limit: int = 20) -> dict:
+        q = (query or "").strip().lower()
+        vehicles = cls._load()
+        if not q:
+            return {"query": query, "count": len(vehicles), "matches": []}
+        out = []
+        for v in vehicles:
+            title = str(v.get("title", "")).lower()
+            stock = str(v.get("stockNo", "")).lower()
+            if q in title or q in stock:
+                out.append(v)
+            if len(out) >= limit:
+                break
+        return {"query": query, "count": len(vehicles), "matches": out}
+
+    @classmethod
+    def refresh(cls) -> dict:
+        vehicles = []
+        page = 0
+        total_pages = None
+
+        while True:
+            query = urlencode(
+                {
+                    "page": page,
+                    "size": 500,
+                    "sort": "id,asc",
+                    "soldStatus": "UnSold",
+                }
+            )
+            url = f"{cls._api_url}?{query}"
+            req = Request(url, headers={"accept": "application/json"})
+            with urlopen(req, timeout=30) as resp:  # noqa: S310
+                payload = json.loads(resp.read().decode("utf-8"))
+
+            content = payload.get("content") or []
+            if not content:
+                break
+            vehicles.extend(content)
+
+            if total_pages is None:
+                try:
+                    total_pages = int(((payload.get("page") or {}).get("totalPages")) or 0)
+                except Exception:
+                    total_pages = 0
+
+            page += 1
+            if total_pages and page >= total_pages:
+                break
+
+            if page > 3000:
+                break
+
+        cls._cache_path.parent.mkdir(parents=True, exist_ok=True)
+        data = {"cachedAt": datetime.utcnow().isoformat(), "vehicles": vehicles}
+        cls._cache_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return {"ok": True, "count": len(vehicles), "cachedAt": data["cachedAt"]}
