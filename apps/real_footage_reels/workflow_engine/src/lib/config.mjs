@@ -3,9 +3,9 @@ import path from "node:path";
 import process from "node:process";
 import { getLockedTargetSequence } from "./reel-rules.mjs";
 
-const DEFAULT_PYTHON_PATH = "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
-const DEFAULT_FFMPEG_PATH =
-  "C:\\Users\\user\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1-full_build\\bin\\ffmpeg.exe";
+const IS_WINDOWS = process.platform === "win32";
+const DEFAULT_PYTHON_PATH = IS_WINDOWS ? "python" : "python3";
+const DEFAULT_FFMPEG_PATH = IS_WINDOWS ? "ffmpeg.exe" : "ffmpeg";
 const DEFAULT_COMPOSE_WIDTH = 1080;
 const DEFAULT_COMPOSE_HEIGHT = 1920;
 const DEFAULT_COMPOSE_MAIN_DURATION_SECONDS = 14;
