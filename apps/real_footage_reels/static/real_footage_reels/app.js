@@ -46,15 +46,29 @@
 
     const r = await fetch(url, req);
     const raw = await r.text();
+    const contentType = String(r.headers.get('content-type') || '').toLowerCase();
     let data;
     try {
       data = raw ? JSON.parse(raw) : {};
     } catch (_err) {
-      if (!r.ok) throw new Error(`Request failed (${r.status}).`);
+      if (!r.ok) {
+        const cleaned = String(raw || '')
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 400);
+        throw new Error(cleaned || `Request failed (${r.status}).`);
+      }
       throw new Error('Server returned non-JSON response.');
     }
 
-    if (!r.ok) throw new Error(data.error || `Request failed (${r.status}).`);
+    if (!r.ok) {
+      const apiError = data && typeof data.error === 'string' ? data.error.trim() : '';
+      const fallback = !contentType.includes('application/json')
+        ? String(raw || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 400)
+        : '';
+      throw new Error(apiError || fallback || `Request failed (${r.status}).`);
+    }
     return data;
   }
 
