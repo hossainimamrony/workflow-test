@@ -362,6 +362,15 @@ video {
   flex-wrap: wrap;
   font-size: 0.84rem;
 }
+.run-row__error {
+  padding: 8px 10px;
+  border: 1px solid #f3c3c6;
+  border-radius: 10px;
+  background: #fff4f5;
+  color: #8f1f2f;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
 .run-row__actions {
   display: flex;
   gap: 8px;

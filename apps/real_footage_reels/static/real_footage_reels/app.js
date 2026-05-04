@@ -835,6 +835,7 @@
   function runRow(run) {
     const s = run.stats || {};
     const runStatus = String(run.status || '').toLowerCase();
+    const failureReason = String(run.error || '').trim();
     const state = (runStatus === 'failed' || runStatus === 'cancelled')
       ? 'failed'
       : run.pipeline && run.pipeline.render && run.pipeline.render.done
@@ -852,6 +853,7 @@
         </div>
         <div class="pipeline-dots"><span class="pipeline-dot ${(run.pipeline&&run.pipeline.download&&run.pipeline.download.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&((run.pipeline.frames&&run.pipeline.frames.done)||(run.pipeline.prepare&&run.pipeline.prepare.done)))?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.analyze&&run.pipeline.analyze.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.render&&run.pipeline.render.done)?'pipeline-dot--on':''}"></span></div>
         <div class="run-row__stats"><span>${state}</span><span>${s.downloads||0} clips</span><span>${s.frames||0} frames</span><span>${s.analyzed||0} AI</span><span>${s.planned||0} cut</span></div>
+        ${(runStatus === 'failed' || runStatus === 'cancelled') && failureReason ? `<div class="run-row__error"><strong>Failure reason:</strong> ${esc(failureReason)}</div>` : ''}
       </div>
       <div class="run-row__actions">
         <button class="button button--secondary" type="button" data-view="${esc(run.runId)}">View</button>
