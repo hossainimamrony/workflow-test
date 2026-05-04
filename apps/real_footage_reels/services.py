@@ -2,6 +2,7 @@ import threading
 import time
 import uuid
 import os
+import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 import json
@@ -176,7 +177,24 @@ class ReelRenderService:
                 job.save(update_fields=["status", "error", "finished_at"])
                 run_id = str(job.payload.get("runId", "")).strip()
                 if run_id:
-                    ReelRun.objects.filter(run_id=run_id).update(status="failed")
+                    existing = ReelRun.objects.filter(run_id=run_id).first()
+                    report = dict((existing.report if existing else None) or {})
+                    report["error"] = str(exc)
+                    report["errorType"] = exc.__class__.__name__
+                    report["failedAt"] = timezone.now().isoformat()
+                    report["traceback"] = traceback.format_exc()
+                    report["lastLogs"] = list((job.result or {}).get("logs", []))[-30:]
+                    ReelRun.objects.update_or_create(
+                        run_id=run_id,
+                        defaults={
+                            "listing_title": str(job.payload.get("listingTitle", "")).strip(),
+                            "stock_id": str(job.payload.get("stockId", "")).strip(),
+                            "car_description": str(job.payload.get("carDescription", "")).strip(),
+                            "listing_price": str(job.payload.get("listingPrice", "")).strip(),
+                            "status": "failed",
+                            "report": report,
+                        },
+                    )
         finally:
             cls._job_slots.release()
 
