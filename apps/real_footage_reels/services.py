@@ -229,6 +229,7 @@ class ReelRenderService:
             cls._active_processes[job.job_id] = proc
         result_payload = None
         bridge_errors: list[str] = []
+        raw_output_tail: list[str] = []
         try:
             stream = proc.stdout
             if stream is not None:
@@ -236,6 +237,9 @@ class ReelRenderService:
                     line = str(raw_line).rstrip("\r\n")
                     if not line:
                         continue
+                    raw_output_tail.append(line)
+                    if len(raw_output_tail) > 60:
+                        raw_output_tail = raw_output_tail[-60:]
                     if line.startswith("[LOG] "):
                         cls._append_log(job, line[6:])
                         cls._infer_progress_from_log(job, line[6:])
@@ -279,6 +283,10 @@ class ReelRenderService:
         if proc.returncode != 0:
             if bridge_errors:
                 raise RuntimeError(bridge_errors[-1])
+            # Bubble up the most useful recent bridge output so we don't lose root-cause details.
+            tail_preview = " | ".join(raw_output_tail[-8:]).strip()
+            if tail_preview:
+                raise RuntimeError(f"Pipeline bridge exited with code {proc.returncode}. Details: {tail_preview}")
             raise RuntimeError(f"Pipeline bridge exited with code {proc.returncode}.")
         return result_payload or {}
 
