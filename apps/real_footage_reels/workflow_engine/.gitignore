@@ -1,0 +1,7 @@
+node_modules/
+.env
+.canva-oauth.json
+.browser-profile/
+.ui-cache/
+runs/
+*.log

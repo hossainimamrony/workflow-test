@@ -1,0 +1,21 @@
+{
+  "name": "au-real-footage-reels",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/cli.mjs",
+    "build:ui": "node scripts/build-ui.mjs",
+    "ui": "npm run build:ui && node src/server.mjs",
+    "tunnel": "cloudflared tunnel --url http://127.0.0.1:4173",
+    "check": "node --check src/cli.mjs && node --check src/server.mjs && node --check src/lib/browser.mjs && node --check src/lib/composer.mjs && node --check src/lib/config.mjs && node --check src/lib/end-scene.mjs && node --check src/lib/final-reel-output.mjs && node --check src/lib/fs-utils.mjs && node --check src/lib/gemini.mjs && node --check src/lib/google-photos-downloads.mjs && node --check src/lib/google-photos.mjs && node --check src/lib/planner.mjs && node --check src/lib/python-frames.mjs && node --check src/lib/reel-rules.mjs && node --check src/lib/run-report.mjs && node --check src/lib/voiceover.mjs && node --check src/lib/workflow.mjs && node src/lib/planner.test.mjs && node scripts/build-ui.mjs"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.1.1",
+    "antd": "^6.3.6",
+    "esbuild": "^0.28.0",
+    "playwright-core": "^1.49.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  }
+}
