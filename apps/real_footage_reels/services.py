@@ -8,6 +8,7 @@ from pathlib import Path
 import json
 import subprocess
 import tempfile
+import contextlib
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
 
@@ -51,6 +52,13 @@ class ReelRenderService:
         "ELEVENLAB_VOICE_ID",
         "ELEVEN_LABS_VOICE_ID",
     )
+    _COMMAND_TIMEOUT_SECONDS = {
+        "script-draft": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_SCRIPT_DRAFT_SEC", "420") or "420"),
+        "voiceover-draft": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_SCRIPT_DRAFT_SEC", "420") or "420"),
+        "prepare": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_PREPARE_SEC", "900") or "900"),
+        "compose": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_COMPOSE_SEC", "1800") or "1800"),
+        "run": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_RUN_SEC", "2400") or "2400"),
+    }
 
     @staticmethod
     def _is_pythonanywhere() -> bool:
@@ -281,6 +289,30 @@ class ReelRenderService:
             encoding="utf-8",
             errors="replace",
         )
+        timeout_seconds = int(cls._COMMAND_TIMEOUT_SECONDS.get(command, int(os.environ.get("REAL_FOOTAGE_TIMEOUT_DEFAULT_SEC", "1200") or "1200")))
+        timed_out = {"value": False}
+        timed_out_reason = {
+            "message": (
+                f"Workflow timed out after {timeout_seconds}s during '{command}'. "
+                "Likely causes: Chromium/Playwright blocked, ffmpeg unavailable, low server CPU/RAM, or album access challenge."
+            )
+        }
+
+        def _kill_if_timeout() -> None:
+            if proc.poll() is not None:
+                return
+            timed_out["value"] = True
+            cls._append_log(job, timed_out_reason["message"])
+            with contextlib.suppress(Exception):
+                proc.terminate()
+            time.sleep(3)
+            if proc.poll() is None:
+                with contextlib.suppress(Exception):
+                    proc.kill()
+
+        watchdog = threading.Timer(timeout_seconds, _kill_if_timeout)
+        watchdog.daemon = True
+        watchdog.start()
         with cls._process_lock:
             cls._active_processes[job.job_id] = proc
         result_payload = None
@@ -329,6 +361,8 @@ class ReelRenderService:
                     cls._append_log(job, line)
             proc.wait()
         finally:
+            with contextlib.suppress(Exception):
+                watchdog.cancel()
             with cls._process_lock:
                 cls._active_processes.pop(job.job_id, None)
             try:
@@ -337,6 +371,8 @@ class ReelRenderService:
                 pass
 
         if proc.returncode != 0:
+            if timed_out["value"]:
+                raise RuntimeError(timed_out_reason["message"])
             if bridge_errors:
                 raise RuntimeError(bridge_errors[-1])
             # Bubble up the most useful recent bridge output so we don't lose root-cause details.
