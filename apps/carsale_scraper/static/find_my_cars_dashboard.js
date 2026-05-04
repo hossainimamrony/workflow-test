@@ -387,7 +387,8 @@ async function quickAddUrl() {
 }
 
 async function loadStatus() {
-  const s = await api("/api/status");
+  const outDir = encodeURIComponent(getOutDir() || "");
+  const s = await api(`/api/status?out_dir=${outDir}`);
   state.status = s;
   els.runBtn.disabled = !!s.running;
   els.stopBtn.disabled = !s.running;
@@ -410,7 +411,10 @@ async function loadStatus() {
       els.runStatus.textContent = "Stopped by user";
       setStatusBadge("Stopped");
     } else {
-      els.runStatus.textContent = `Error (code ${s.return_code}) ${s.last_error || ""}`;
+      const primaryError = String(s.display_error || s.last_error || "").trim();
+      const errorHint = String(s.error_hint || "").trim();
+      const composed = errorHint ? `${primaryError} ${errorHint}`.trim() : primaryError;
+      els.runStatus.textContent = `Error (code ${s.return_code}) ${composed}`;
       setStatusBadge("Error");
     }
     closeProgressStream();

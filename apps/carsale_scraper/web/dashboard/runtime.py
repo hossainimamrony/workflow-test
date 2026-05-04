@@ -49,6 +49,7 @@ CARSALES_URLS_FILENAME = "carsales_urls.json"
 CARSALES_URL_REGISTRY_FILENAME = "carsales_url_registry.json"
 MANUAL_MATCHES_FILENAME = "manual_matches.json"
 MANUAL_PROGRESS_FILENAME = "manual_match_progress.json"
+RUNTIME_STATUS_FILENAME = "runtime_status.json"
 UI_BUILD = "20260430-1"
 
 
@@ -127,6 +128,85 @@ def _current_dir(out_dir: str | Path) -> Path:
 def _sessions_dir(out_dir: str | Path) -> Path:
     p = Path(out_dir).resolve()
     return _ensure_output_layout(p)["sessions"]
+
+
+def _runtime_status_file(out_dir: str | Path) -> Path:
+    return _current_dir(out_dir) / RUNTIME_STATUS_FILENAME
+
+
+def _normalize_runtime_error_message(raw_error: str) -> tuple[str, str]:
+    msg = str(raw_error or "").strip()
+    if not msg:
+        return "", ""
+    low = msg.lower()
+    if "tunnel connection failed: 403 forbidden" in low:
+        return (
+            "Network blocked by host (403 tunnel).",
+            "PythonAnywhere is blocking this outbound site/API. Use a paid plan or allowlisted domain, then retry.",
+        )
+    if "playwright_import_failed" in low:
+        return (
+            "Playwright module is missing.",
+            "Install dependencies in the active virtualenv and reload the web app.",
+        )
+    if "antibot_browser_start_failed" in low and "/usr/bin/chromium" in low:
+        return (
+            "Chromium launch failed on server.",
+            "Check PLAYWRIGHT_CHROMIUM_EXECUTABLE path and keep headless mode enabled on PythonAnywhere.",
+        )
+    if "winerror 5" in low and "access is denied" in low and "playwright" in low:
+        return (
+            "Playwright browser launch blocked (WinError 5).",
+            "Run the app with Python 3.11/3.12 + installed Playwright browsers, or disable browser-verification-only for fallback HTTP parsing.",
+        )
+    if "browser_verification_required" in low:
+        return (
+            "Browser verification required for this URL.",
+            "This URL needs anti-bot verification. Re-run with session reuse ON and retry unresolved URLs.",
+        )
+    if "browser_verification_failed" in low:
+        return (
+            "Browser verification failed.",
+            "Carsales anti-bot challenge was not solved in time. Retry in Not Found mode.",
+        )
+    if "playwright_fetch_failed" in low:
+        return (
+            "Playwright fetch failed.",
+            "Headless browser could not load the page. Retry and check PythonAnywhere error logs for blocked outbound access.",
+        )
+    return msg, ""
+
+
+def _save_runtime_status_snapshot(snapshot: dict[str, Any], out_dir: str | Path) -> None:
+    try:
+        path = _runtime_status_file(out_dir)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "running": bool(snapshot.get("running", False)),
+            "return_code": snapshot.get("return_code"),
+            "started_at": snapshot.get("started_at"),
+            "finished_at": snapshot.get("finished_at"),
+            "last_error": str(snapshot.get("last_error") or ""),
+            "progress": snapshot.get("progress") or {},
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+        }
+        display_error, error_hint = _normalize_runtime_error_message(payload["last_error"])
+        payload["display_error"] = display_error
+        payload["error_hint"] = error_hint
+        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _load_runtime_status_snapshot(out_dir: str | Path) -> dict[str, Any]:
+    path = _runtime_status_file(out_dir)
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
 
 
 class JobState:
@@ -343,6 +423,7 @@ def run_job(cmd: list[str], out_dir: Path):
         STATE.progress = {"stage": "init", "event": "run_started", "progress_percent": 0.0}
         STATE.event_seq += 1
         STATE.progress_updated_at = time.time()
+    _save_runtime_status_snapshot(STATE.snapshot(), out_dir)
 
     def _fallback_commands(primary: list[str]) -> list[list[str]]:
         if len(primary) < 2:
@@ -472,6 +553,7 @@ def run_job(cmd: list[str], out_dir: Path):
         )
         STATE.progress = final_progress
         STATE.progress_updated_at = time.time()
+    _save_runtime_status_snapshot(STATE.snapshot(), out_dir)
     STATE.append_log(f"Process finished with exit code {code}")
 
 
@@ -2729,6 +2811,7 @@ def run_manual_url_job(payload: dict[str, Any]) -> None:
         STATE.progress = {"stage": "init", "event": "run_started", "progress_percent": 0.0}
         STATE.event_seq += 1
         STATE.progress_updated_at = time.time()
+    _save_runtime_status_snapshot(STATE.snapshot(), out_dir)
 
     try:
         if not urls:
@@ -2847,10 +2930,77 @@ def run_manual_url_job(payload: dict[str, Any]) -> None:
                 if stocks & requested_stock_keys:
                     filtered_urls.append(u)
             if not filtered_urls:
-                STATE.append_log(
-                    "Stock filter fallback: no URL-to-stock mapping found in manual_matches.json. "
-                    "Continuing with all saved URLs for this run."
-                )
+                # No direct URL-stock mapping yet.
+                # Fallback 1 (preferred): choose from existing saved detail URLs by year/make/model similarity.
+                candidate_detail_urls: list[str] = []
+                for r in inventory_rows:
+                    stock_key = str(r.get("stock_no", "")).strip().lower()
+                    if stock_key not in requested_stock_keys:
+                        continue
+                    y = _slugify_carsales(r.get("year", ""))
+                    mk = _slugify_carsales(r.get("make", ""))
+                    model_tokens = [
+                        t for t in re.split(r"[^a-z0-9]+", _slugify_carsales(r.get("model", ""))) if t
+                    ]
+                    loose_candidates: list[str] = []
+                    for u in urls:
+                        ul = str(u or "").strip().lower()
+                        if "/cars/details/" not in ul:
+                            continue
+                        if y and f"/{y}-" not in ul and f"/{y}/" not in ul:
+                            continue
+                        if mk and f"-{mk}-" not in ul and f"/{mk}-" not in ul:
+                            continue
+                        if model_tokens:
+                            has_model_hit = any(
+                                f"-{tok}-" in ul or f"/{tok}-" in ul or ul.endswith(f"-{tok}/")
+                                for tok in model_tokens
+                            )
+                            if has_model_hit:
+                                candidate_detail_urls.append(u)
+                            else:
+                                # Keep a loose year+make match as backup when model wording differs.
+                                loose_candidates.append(u)
+                        else:
+                            loose_candidates.append(u)
+                    if not candidate_detail_urls and loose_candidates:
+                        candidate_detail_urls.extend(loose_candidates)
+                candidate_detail_urls = _dedupe_keep_order(candidate_detail_urls)
+
+                if candidate_detail_urls:
+                    urls = candidate_detail_urls
+                    STATE.append_log(
+                        "Stock filter had no direct URL mapping. "
+                        f"Using {len(urls)} matching saved detail URL(s) by year/make/model for stock IDs: "
+                        + ", ".join(requested_stock_ids)
+                    )
+                else:
+                    # Fallback 2: generate dealer lookup URLs from selected stocks.
+                    generated_urls: list[str] = []
+                    for r in inventory_rows:
+                        stock_key = str(r.get("stock_no", "")).strip().lower()
+                        if stock_key not in requested_stock_keys:
+                            continue
+                        for lookup in _build_carsales_lookup_urls(
+                            r.get("year", ""),
+                            r.get("make", ""),
+                            r.get("model", ""),
+                        ):
+                            lu = str(lookup.get("url", "")).strip()
+                            if lu:
+                                generated_urls.append(lu)
+                    generated_urls = _dedupe_keep_order(generated_urls)
+                    if not generated_urls:
+                        raise RuntimeError(
+                            "Selected Stock IDs mode could not map or generate any URLs for requested stock IDs: "
+                            + ", ".join(requested_stock_ids)
+                        )
+                    urls = generated_urls
+                    STATE.append_log(
+                        "Stock filter had no direct URL mapping or detail URL candidate. "
+                        f"Generated {len(urls)} Carsales lookup URL(s) from selected stock IDs: "
+                        + ", ".join(requested_stock_ids)
+                    )
             else:
                 urls = filtered_urls
                 STATE.append_log(
@@ -2994,7 +3144,11 @@ def run_manual_url_job(payload: dict[str, Any]) -> None:
                             cs["error"] = (cs.get("error", "") + f"; {anti_wait_err}").strip("; ")
             else:
                 if browser_verification_only:
-                    reason = "antibot_browser_not_opened" if open_urls_in_browser else "open_urls_in_browser_disabled"
+                    reason = (
+                        f"antibot_browser_not_opened: {open_err}"
+                        if open_urls_in_browser
+                        else "open_urls_in_browser_disabled"
+                    )
                     cs = _parse_carsales_listing_from_html(url, "")
                     cs["error"] = f"browser_verification_required: {reason}"
                 else:
@@ -3155,6 +3309,7 @@ def run_manual_url_job(payload: dict[str, Any]) -> None:
             )
             STATE.progress = final_progress
             STATE.progress_updated_at = time.time()
+        _save_runtime_status_snapshot(STATE.snapshot(), out_dir)
 
 
 def refresh_single_manual_url(
@@ -3188,8 +3343,9 @@ def refresh_single_manual_url(
         return {"ok": False, "error": "No published vehicles found in Carbarn API inventory."}
 
     opened_in_antibot = False
+    open_err = ""
     if open_urls_in_browser:
-        opened, _ = _open_url_in_antibot_browser(url)
+        opened, open_err = _open_url_in_antibot_browser(url)
         opened_in_antibot = bool(opened)
 
     if opened_in_antibot:
@@ -3210,7 +3366,11 @@ def refresh_single_manual_url(
                     cs["error"] = (cs.get("error", "") + f"; {anti_wait_err}").strip("; ")
     else:
         if browser_verification_only:
-            reason = "antibot_browser_not_opened" if open_urls_in_browser else "open_urls_in_browser_disabled"
+            reason = (
+                f"antibot_browser_not_opened: {open_err}"
+                if open_urls_in_browser
+                else "open_urls_in_browser_disabled"
+            )
             cs = _parse_carsales_listing_from_html(url, "")
             cs["error"] = f"browser_verification_required: {reason}"
         else:
@@ -3301,7 +3461,22 @@ def api_config():
 
 
 def api_status():
-    return jsonify(STATE.snapshot())
+    out_dir_raw = str(request.args.get("out_dir") or "").strip()
+    snap = STATE.snapshot()
+    target_out_dir = out_dir_raw or str(snap.get("last_outdir") or DEFAULT_OUTDIR)
+    if (not bool(snap.get("running"))) and snap.get("return_code") is None:
+        persisted = _load_runtime_status_snapshot(target_out_dir)
+        if persisted:
+            snap["return_code"] = persisted.get("return_code")
+            snap["started_at"] = persisted.get("started_at")
+            snap["finished_at"] = persisted.get("finished_at")
+            snap["last_error"] = persisted.get("last_error", "")
+            if not snap.get("progress"):
+                snap["progress"] = persisted.get("progress") or {}
+    display_error, error_hint = _normalize_runtime_error_message(str(snap.get("last_error") or ""))
+    snap["display_error"] = display_error
+    snap["error_hint"] = error_hint
+    return jsonify(snap)
 
 
 def api_version():
