@@ -9,3 +9,13 @@ staticfiles/
 .DS_Store
 .vscode/
 .idea/
+node_modules/
+runs/
+.ui-cache/
+.browser-profile/
+ui/dist/
+*.log
+*.png
+*.jpg
+*.webm
+*.mp4
