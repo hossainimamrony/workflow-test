@@ -531,7 +531,7 @@ async function analyzeAndMaybeCompose(input, browserContext) {
     progress({ phase: "compose", percent: 100, label: "Done" });
   } else if (config.command === "run" && config.voiceoverScriptApproval) {
     progress({ phase: "voiceover", percent: 88, label: "Scripts" });
-    await draftVoiceoverScripts(runDir, config, log);
+    await draftVoiceoverScripts(runDir, config, log, { strict: true });
     progress({ phase: "voiceover", percent: 100, label: "Done" });
   }
 

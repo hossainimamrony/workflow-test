@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen, Request
 
 from django.db import OperationalError, ProgrammingError
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import ReelRenderJob, ReelRun
@@ -51,14 +52,36 @@ class ReelRenderService:
         "ELEVEN_LABS_VOICE_ID",
     )
 
+    @staticmethod
+    def _is_pythonanywhere() -> bool:
+        keys = ("PYTHONANYWHERE_SITE", "PYTHONANYWHERE_DOMAIN", "PYTHONANYWHERE_HOME")
+        return any(str(os.environ.get(key, "") or "").strip() for key in keys)
+
     @classmethod
     def _recover_stale_jobs(cls) -> None:
-        cutoff = timezone.now() - timedelta(minutes=30)
-        stale_qs = ReelRenderJob.objects.filter(status__in=["queued", "running"]).filter(created_at__lt=cutoff)
+        now = timezone.now()
+        running_cutoff = now - timedelta(minutes=30)
+        queued_cutoff = now - timedelta(minutes=10)
+        stale_qs = ReelRenderJob.objects.filter(
+            Q(status="running", created_at__lt=running_cutoff)
+            | Q(status="queued", created_at__lt=queued_cutoff)
+        )
         for stale in stale_qs:
+            command = str((stale.payload or {}).get("command", "")).strip().lower()
+            if stale.status == "queued":
+                if cls._is_pythonanywhere():
+                    stale.error = stale.error or (
+                        "Job stayed queued and never started. PythonAnywhere web workers do not run background threads "
+                        "reliably for this workflow. Use an Always-on task / queue worker, then retry."
+                    )
+                else:
+                    stale.error = stale.error or "Job stayed queued too long and was marked failed."
+            else:
+                stale.error = stale.error or "Job marked stale after server restart/timeout."
+            if command in {"script-draft", "voiceover-draft"} and not stale.error:
+                stale.error = "Script draft timed out before completion."
             stale.status = "failed"
-            stale.error = stale.error or "Job marked stale after server restart/timeout."
-            stale.finished_at = timezone.now()
+            stale.finished_at = now
             stale.save(update_fields=["status", "error", "finished_at"])
             run_id = str((stale.payload or {}).get("runId", "")).strip()
             if run_id:
@@ -551,6 +574,10 @@ class ReelRenderService:
 
         active_jobs = ReelRenderJob.objects.filter(status__in=["queued", "running"]).count()
         return {
+            "host": {
+                "pythonAnywhere": cls._is_pythonanywhere(),
+                "pid": os.getpid(),
+            },
             "node": {
                 "bin": cls._node_bin,
                 "ok": node_ok,
@@ -614,6 +641,9 @@ class ReelRenderService:
         frames_manifest = cls._read_json(run_dir / "frames-manifest.json") or {}
         analysis_manifest = cls._read_json(run_dir / "analysis.json") or {}
         reel_plan = cls._read_json(run_dir / "reel-plan.json") or {}
+        voiceover_draft_manifest = cls._read_json(run_dir / "voiceover-script-draft.json") or {}
+        voiceover_status_manifest = cls._read_json(run_dir / "voiceover-status.json") or {}
+        voiceover_manifest = cls._read_json(run_dir / "voiceover-manifest.json") or {}
 
         downloaded_videos = downloads_manifest.get("videos", []) if isinstance(downloads_manifest, dict) else []
         framed_videos = frames_manifest.get("videos", []) if isinstance(frames_manifest, dict) else []
@@ -626,6 +656,17 @@ class ReelRenderService:
 
         final_reel_webm = run_dir / "final-reel.webm"
         final_reel_mp4 = run_dir / "final-reel.mp4"
+        draft_variants = (
+            voiceover_draft_manifest.get("variants", [])
+            if isinstance(voiceover_draft_manifest, dict)
+            else []
+        )
+        has_voiceover = isinstance(voiceover_manifest, dict) and bool(voiceover_manifest)
+        voiceover_status = (
+            "applied"
+            if has_voiceover
+            else str((voiceover_status_manifest or {}).get("status", "")).strip()
+        )
 
         return {
             "pipeline": {
@@ -647,9 +688,19 @@ class ReelRenderService:
             "plan": reel_plan,
             "runDir": str(run_dir),
             "command": command,
-            "voiceoverDraft": {"variants": []},
-            "voiceoverStatus": "",
-            "hasVoiceover": False,
+            "voiceoverDraft": (
+                {
+                    "status": str(voiceover_draft_manifest.get("status", "pending")).strip() or "pending",
+                    "createdAt": voiceover_draft_manifest.get("createdAt"),
+                    "appliedAt": voiceover_draft_manifest.get("appliedAt"),
+                    "variants": draft_variants if isinstance(draft_variants, list) else [],
+                }
+                if isinstance(voiceover_draft_manifest, dict) and voiceover_draft_manifest
+                else {"variants": []}
+            ),
+            "voiceoverStatus": voiceover_status,
+            "voiceoverLastError": str((voiceover_status_manifest or {}).get("lastError", "")).strip(),
+            "hasVoiceover": has_voiceover,
             "finalReelUrl": str(final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")),
             "finalReelWebmUrl": str(final_reel_webm) if final_reel_webm.exists() else "",
             "videos": analyzed_clips if analyzed_clips else framed_videos,
@@ -746,10 +797,125 @@ class ReelRenderService:
         return job_public
 
     @staticmethod
-    def runs_payload() -> dict:
+    def _duration_label(total_seconds: float) -> str:
+        seconds = max(0, int(total_seconds))
+        if seconds < 60:
+            return f"{seconds}s"
+        minutes, rem = divmod(seconds, 60)
+        if minutes < 60:
+            return f"{minutes}m {rem}s"
+        hours, mins = divmod(minutes, 60)
+        return f"{hours}h {mins}m"
+
+    @classmethod
+    def _latest_jobs_by_run_id(cls, limit: int = 500) -> dict[str, ReelRenderJob]:
+        latest: dict[str, ReelRenderJob] = {}
+        for job in ReelRenderJob.objects.all()[:limit]:
+            payload = job.payload or {}
+            result = job.result or {}
+            run_id = str(payload.get("runId") or result.get("runId") or "").strip()
+            if not run_id or run_id in latest:
+                continue
+            latest[run_id] = job
+        return latest
+
+    @classmethod
+    def _derive_debug_reason(
+        cls,
+        *,
+        run: ReelRun,
+        run_error: str,
+        latest_job: ReelRenderJob | None,
+    ) -> str:
+        report = run.report or {}
+        pipeline = report.get("pipeline", {}) if isinstance(report, dict) else {}
+        has_render = bool((pipeline.get("render") or {}).get("done"))
+        has_scripts = bool(((report.get("voiceoverDraft") or {}).get("variants") or []))
+        has_any_pipeline_step = any(
+            bool((pipeline.get(step) or {}).get("done"))
+            for step in ("download", "frames", "analyze", "render")
+        )
+        run_status = str(run.status or "").strip().lower()
+        if run_status in {"failed", "cancelled"}:
+            return run_error
+
+        if latest_job is None:
+            if run_status in {"queued", "running"}:
+                age_seconds = (timezone.now() - run.updated_at).total_seconds()
+                if age_seconds > 90:
+                    base = f"Run is {run_status} but has no active job record for {cls._duration_label(age_seconds)}."
+                    if cls._is_pythonanywhere():
+                        return (
+                            f"{base} PythonAnywhere web workers do not support this thread-based background runner; "
+                            "move processing to an Always-on task/queue worker."
+                        )
+                    return f"{base} Check worker process logs."
+            return ""
+
+        job_status = str(latest_job.status or "").strip().lower()
+        progress = (latest_job.result or {}).get("progress", {}) if isinstance(latest_job.result, dict) else {}
+        phase = str(progress.get("phase", "")).strip().lower()
+        label = str(progress.get("label", "")).strip()
+        command = str(latest_job.command or (latest_job.payload or {}).get("command", "") or "").strip().lower()
+        job_error = str(latest_job.error or "").strip()
+
+        if job_status in {"failed", "cancelled"}:
+            return job_error or run_error or label or "Job failed."
+
+        if job_status == "completed" and command in {"script-draft", "voiceover-draft"}:
+            if not has_scripts:
+                if not has_any_pipeline_step and not has_render:
+                    return (
+                        "Script-draft job completed but produced zero script variants. "
+                        "Most common causes: missing/placeholder GEMINI_API_KEY or empty car description."
+                    )
+                return "Script-draft completed without script variants. Check job logs for Gemini/validation issues."
+            return ""
+
+        if job_status == "queued" and latest_job.started_at is None:
+            age_seconds = (timezone.now() - latest_job.created_at).total_seconds()
+            if age_seconds > 90:
+                base = f"Job has been queued for {cls._duration_label(age_seconds)} and has not started."
+                if cls._is_pythonanywhere():
+                    return (
+                        f"{base} PythonAnywhere WSGI web apps do not support this background thread pattern. "
+                        "Use an Always-on task or queue worker."
+                    )
+                return f"{base} Check worker capacity or background thread startup."
+
+        if job_status == "running":
+            started_at = latest_job.started_at or latest_job.created_at
+            age_seconds = (timezone.now() - started_at).total_seconds()
+            if age_seconds > 300 and phase in {"voiceover", "download", "frames", "analyze", "compose"}:
+                return f"Job has been running for {cls._duration_label(age_seconds)} at phase '{phase or 'unknown'}'. Last update: {label or '-'}."
+
+        return ""
+
+    @staticmethod
+    def _job_summary(job: ReelRenderJob | None) -> dict | None:
+        if job is None:
+            return None
+        result = job.result or {}
+        progress = result.get("progress", {}) if isinstance(result, dict) else {}
+        payload = job.payload or {}
+        return {
+            "id": job.job_id,
+            "runId": payload.get("runId") or result.get("runId"),
+            "command": job.command,
+            "status": job.status,
+            "createdAt": job.created_at.isoformat(),
+            "startedAt": job.started_at.isoformat() if job.started_at else None,
+            "finishedAt": job.finished_at.isoformat() if job.finished_at else None,
+            "error": job.error or None,
+            "progress": progress if isinstance(progress, dict) else {},
+        }
+
+    @classmethod
+    def runs_payload(cls) -> dict:
         try:
-            ReelRenderService._recover_stale_jobs()
+            cls._recover_stale_jobs()
             runs = ReelRun.objects.all()[:100]
+            latest_jobs_by_run_id = cls._latest_jobs_by_run_id(limit=500)
         except (OperationalError, ProgrammingError):
             return {"runs": []}
         return {
@@ -779,6 +945,16 @@ class ReelRenderService:
                     "voiceoverDraft": (r.report or {}).get("voiceoverDraft", {"variants": []}),
                     "voiceoverStatus": (r.report or {}).get("voiceoverStatus", ""),
                     "hasVoiceover": bool((r.report or {}).get("hasVoiceover", False)),
+                    "lastJob": cls._job_summary(latest_jobs_by_run_id.get(r.run_id)),
+                    "debugReason": cls._derive_debug_reason(
+                        run=r,
+                        run_error=(
+                            str(getattr(r, "error", "") or "").strip()
+                            or str((r.report or {}).get("error", "")).strip()
+                            or str((r.report or {}).get("lastError", "")).strip()
+                        ),
+                        latest_job=latest_jobs_by_run_id.get(r.run_id),
+                    ),
                 }
                 for r in runs
             ]

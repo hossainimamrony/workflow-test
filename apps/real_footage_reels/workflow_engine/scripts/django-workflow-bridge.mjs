@@ -154,7 +154,12 @@ async function main() {
     );
 
     onProgress({ phase: "voiceover", percent: 20, label: "Script drafts" });
-    await draftVoiceoverScripts(runDir, config, log);
+    const draft = await draftVoiceoverScripts(runDir, config, log, { strict: true });
+    if (!draft?.variants?.length) {
+      throw new Error(
+        "Script draft failed: no script variants were generated. Check GEMINI_API_KEY and run logs for details.",
+      );
+    }
     result = { runDir };
   } else if (command === "voiceover-draft" || command === "voiceover-apply") {
     if (!runDir) {
@@ -180,7 +185,12 @@ async function main() {
 
     if (command === "voiceover-draft") {
       onProgress({ phase: "voiceover", percent: 20, label: "Script drafts" });
-      await draftVoiceoverScripts(runDir, config, log);
+      const draft = await draftVoiceoverScripts(runDir, config, log, { strict: true });
+      if (!draft?.variants?.length) {
+        throw new Error(
+          "Script draft failed: no script variants were generated. Check GEMINI_API_KEY and run logs for details.",
+        );
+      }
     } else {
       const script = String(payload.approvedScript || "").trim();
       if (!script) {

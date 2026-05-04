@@ -13,9 +13,15 @@ const ELEVENLABS_RETRY_DELAYS_MS = [500, 1500, 3500];
 /**
  * Generate several script options for Studio approval before TTS/render handoff.
  */
-export async function draftVoiceoverScripts(runDir, config, log = () => {}) {
+export async function draftVoiceoverScripts(runDir, config, log = () => {}, options = {}) {
+  const strict = Boolean(options.strict);
   const ctx = await resolveVoiceoverContext(runDir, config, log, { requireVideo: false });
   if (!ctx) {
+    if (strict) {
+      throw new Error(
+        "Script draft failed: car description is missing. Add a description in Studio and run script generation again.",
+      );
+    }
     return null;
   }
   const { normalizedDir, manifest, carDescription, mainSeconds, endSeconds, totalSeconds } = ctx;
@@ -23,6 +29,11 @@ export async function draftVoiceoverScripts(runDir, config, log = () => {}) {
 
   if (!config.geminiApiKey) {
     log("Voice-over drafts skipped: GEMINI_API_KEY required.");
+    if (strict) {
+      throw new Error(
+        "Script draft failed: GEMINI_API_KEY is missing or placeholder. Add a real Gemini key in environment/.env and restart the web app.",
+      );
+    }
     return null;
   }
 

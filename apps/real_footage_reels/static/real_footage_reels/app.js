@@ -859,12 +859,14 @@
 
   function runRow(run, activeJob) {
     const s = run.stats || {};
+    const latestJob = activeJob || (run && run.lastJob ? run.lastJob : null);
     const runStatus = String(run.status || '').toLowerCase();
-    const jobStatus = String(activeJob && activeJob.status ? activeJob.status : '').toLowerCase();
-    const progress = activeJob && activeJob.progress && typeof activeJob.progress === 'object' ? activeJob.progress : {};
+    const jobStatus = String(latestJob && latestJob.status ? latestJob.status : '').toLowerCase();
+    const progress = latestJob && latestJob.progress && typeof latestJob.progress === 'object' ? latestJob.progress : {};
     const phase = String(progress.phase || '').toLowerCase();
     const phaseLabel = String(progress.label || '').trim();
-    const jobError = String(activeJob && activeJob.error ? activeJob.error : '').trim();
+    const jobError = String(latestJob && latestJob.error ? latestJob.error : '').trim();
+    const debugReason = String(run && run.debugReason ? run.debugReason : '').trim();
     const failureReason = String(run.error || jobError).trim();
     let state = 'processing';
     if (runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') {
@@ -885,7 +887,7 @@
         error: 'failed',
       }[phase] || 'running';
     } else if (jobStatus === 'completed' && !run.pipeline?.render?.done && !(run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length)) {
-      state = 'script generation completed';
+      state = debugReason ? 'script generation failed' : 'script generation completed';
     } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
       state = 'video ready';
     } else if (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length) {
@@ -902,6 +904,7 @@
         <div class="pipeline-dots"><span class="pipeline-dot ${(run.pipeline&&run.pipeline.download&&run.pipeline.download.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&((run.pipeline.frames&&run.pipeline.frames.done)||(run.pipeline.prepare&&run.pipeline.prepare.done)))?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.analyze&&run.pipeline.analyze.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.render&&run.pipeline.render.done)?'pipeline-dot--on':''}"></span></div>
         <div class="run-row__stats"><span>${state}</span><span>${s.downloads||0} clips</span><span>${s.frames||0} frames</span><span>${s.analyzed||0} AI</span><span>${s.planned||0} cut</span></div>
         ${((runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') && failureReason) ? `<div class="run-row__error"><strong>Failure reason:</strong> ${esc(failureReason)}</div>` : ''}
+        ${(debugReason && !failureReason) ? `<div class="run-row__error"><strong>Reason:</strong> ${esc(debugReason)}</div>` : ''}
       </div>
       <div class="run-row__actions">
         <button class="button button--secondary" type="button" data-view="${esc(run.runId)}">View</button>
