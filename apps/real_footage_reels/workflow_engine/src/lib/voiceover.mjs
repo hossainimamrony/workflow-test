@@ -149,7 +149,6 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
 
   log("Muxing final reel with voice-over audio...");
 
-  const mutePath = path.join(normalizedDir, "final-reel-mute.webm");
   const cleanVideoPath = await resolveCleanVideoSource({
     config,
     ffmpegPath: config.ffmpegPath,
@@ -158,12 +157,11 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
     totalSeconds,
     log,
   });
-  await fs.copyFile(cleanVideoPath, mutePath);
 
   const outPath = path.join(normalizedDir, "final-reel.webm");
   await muxVideoWithAudio({
     ffmpegPath: config.ffmpegPath,
-    videoPath: mutePath,
+    videoPath: cleanVideoPath,
     audioPath: voicePath,
     outPath,
   });
@@ -219,7 +217,6 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
     Number(voiceoverManifest.mainMontageDurationSeconds) ||
     resolveReelDurations(config).composeMainDurationSeconds;
 
-  const mutePath = path.join(normalizedDir, "final-reel-mute.webm");
   const cleanVideoPath = await resolveCleanVideoSource({
     config,
     ffmpegPath: config.ffmpegPath,
@@ -228,11 +225,10 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
     totalSeconds,
     log,
   });
-  await fs.copyFile(cleanVideoPath, mutePath);
 
   await muxVideoWithAudio({
     ffmpegPath: config.ffmpegPath,
-    videoPath: mutePath,
+    videoPath: cleanVideoPath,
     audioPath: voicePath,
     outPath: videoPath,
   });
@@ -245,6 +241,28 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
 
 async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds, totalSeconds, log }) {
   const cleanPath = path.join(runDir, "final-reel-clean.webm");
+  const finalPath = path.join(runDir, "final-reel.webm");
+  const minimumDurationSeconds = Math.max(0.1, Number(totalSeconds) - 0.35);
+
+  if (await fileExists(finalPath)) {
+    const finalDuration = await probeMediaDuration(ffmpegPath, finalPath);
+    if (!finalDuration || finalDuration >= minimumDurationSeconds) {
+      const copied = await stripAudioFromVideoCopy({
+        ffmpegPath,
+        inputPath: finalPath,
+        outPath: cleanPath,
+      });
+      if (copied) {
+        log("Prepared voice-over base from existing final reel (stream copy, no re-encode).");
+        return cleanPath;
+      }
+    } else {
+      log(
+        `Existing final reel is ${finalDuration.toFixed(1)}s but expected ~${Number(totalSeconds).toFixed(1)}s. Rebuilding clean base from segments...`,
+      );
+    }
+  }
+
   const mainPath = path.join(runDir, "main-reel.webm");
   const endPath = path.join(runDir, "end-scene.webm");
   if (!(await fileExists(mainPath)) || !(await fileExists(endPath))) {
@@ -264,6 +282,27 @@ async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds
   });
   log("Rebuilt clean base reel from main + end scene for voice-over rebuild.");
   return cleanPath;
+}
+
+async function stripAudioFromVideoCopy({ ffmpegPath, inputPath, outPath }) {
+  const runDir = path.dirname(path.resolve(inputPath));
+  const rel = (abs) => path.relative(runDir, path.resolve(abs)).split(path.sep).join("/");
+  try {
+    await runFfmpeg(ffmpegPath, [
+      "-y",
+      "-i",
+      rel(inputPath),
+      "-map",
+      "0:v:0",
+      "-an",
+      "-c:v",
+      "copy",
+      rel(outPath),
+    ], { cwd: runDir });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function mergeDraftStatusApplied(runDir, appliedScript) {
@@ -710,13 +749,20 @@ async function prepareVoiceoverAudioForTarget({
 }
 
 async function resolveFfprobePath(ffmpegPath) {
-  const probePath = path.join(path.dirname(ffmpegPath), "ffprobe.exe");
-  try {
-    await fs.access(probePath);
-    return probePath;
-  } catch {
-    return null;
+  const candidates = [
+    path.join(path.dirname(ffmpegPath), "ffprobe.exe"),
+    path.join(path.dirname(ffmpegPath), "ffprobe"),
+    "ffprobe",
+  ];
+  for (const probePath of candidates) {
+    try {
+      await runProcess(probePath, ["-version"], { allowFailure: false });
+      return probePath;
+    } catch {
+      continue;
+    }
   }
+  return null;
 }
 
 async function muxVideoWithAudio({ ffmpegPath, videoPath, audioPath, outPath }) {

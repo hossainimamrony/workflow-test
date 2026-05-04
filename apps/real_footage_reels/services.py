@@ -700,11 +700,23 @@ class ReelRenderService:
         if "concatenating main reel + end scene" in lower:
             cls._update_progress(job, "compose", "Finalizing reel...")
             return
-        if "composing the selected local clips" in lower or "composed reel:" in lower:
+        if "composing the selected local clips" in lower:
             cls._update_progress(job, "compose", "Composing reel + end scene...")
             return
-        if "voice-over" in lower or "script options" in lower:
+        if "synthesizing speech with elevenlabs" in lower:
+            cls._update_progress(job, "voiceover", "Generating voice-over audio...")
+            return
+        if "muxing final reel with voice-over audio" in lower:
+            cls._update_progress(job, "voiceover", "Stitching voice-over into reel...")
+            return
+        if "voice-over complete" in lower:
+            cls._update_progress(job, "voiceover", "Voice-over complete.")
+            return
+        if "voice-over scripts" in lower or "script options" in lower:
             cls._update_progress(job, "voiceover", "Voice-over scripts...")
+            return
+        if "composed reel:" in lower:
+            cls._update_progress(job, "compose", "Finalizing reel...")
 
     @classmethod
     def _build_run_report_from_outputs(cls, run_dir: Path, command: str) -> dict:

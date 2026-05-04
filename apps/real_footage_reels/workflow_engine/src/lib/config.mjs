@@ -95,6 +95,12 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(input.webmThreads, env.WEBM_THREADS, process.env.WEBM_THREADS),
     fastRender ? 2 : null,
   );
+  const rawWebmCodec = firstEnv(input.webmCodec, env.WEBM_CODEC, process.env.WEBM_CODEC);
+  const rawEndSceneSupersample = firstEnv(
+    input.endSceneSupersample,
+    env.END_SCENE_SUPERSAMPLE,
+    process.env.END_SCENE_SUPERSAMPLE,
+  );
   const reelDurations = resolveReelDurations(input);
   let composeWidth = numberValue(
     firstEnv(input.composeWidth, env.COMPOSE_WIDTH, process.env.COMPOSE_WIDTH),
@@ -109,7 +115,7 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     defaultComposeFps,
   );
   let endSceneSupersample = numberValue(
-    firstEnv(input.endSceneSupersample, env.END_SCENE_SUPERSAMPLE, process.env.END_SCENE_SUPERSAMPLE),
+    rawEndSceneSupersample,
     fastRender ? 1 : 2,
   );
   let webmCodecFinal = webmCodec;
@@ -122,17 +128,24 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);
     composeHeight = Math.max(1920, Number(composeHeight) || 1920);
     composeFps = Math.max(30, Number(composeFps) || 30);
-    endSceneSupersample = Math.max(2, Number(endSceneSupersample) || 2);
-    webmCodecFinal = "libvpx-vp9";
-    webmDeadlineFinal = webmDeadlineFinal || "good";
-    webmCrfFinal = Math.min(webmCrfFinal, 20);
-    if (Number.isFinite(webmCpuUsedFinal)) {
-      webmCpuUsedFinal = Math.min(webmCpuUsedFinal, 2);
+    endSceneSupersample = Math.max(1, Math.min(2, Number(endSceneSupersample) || 1));
+    if (!rawWebmCodec && isPythonAnywhereRuntime(env)) {
+      webmCodecFinal = "libvpx";
     } else {
-      webmCpuUsedFinal = 2;
+      webmCodecFinal = webmCodecFinal || (fastRender ? "libvpx" : "libvpx-vp9");
+    }
+    webmDeadlineFinal = webmDeadlineFinal || "good";
+    webmCrfFinal = Math.min(webmCrfFinal, 22);
+    if (Number.isFinite(webmCpuUsedFinal)) {
+      webmCpuUsedFinal = Math.min(webmCpuUsedFinal, 4);
+    } else {
+      webmCpuUsedFinal = 3;
     }
     if (!Number.isFinite(webmThreadsFinal) || webmThreadsFinal <= 0) {
       webmThreadsFinal = 2;
+    }
+    if (!rawEndSceneSupersample) {
+      endSceneSupersample = 1;
     }
   }
 

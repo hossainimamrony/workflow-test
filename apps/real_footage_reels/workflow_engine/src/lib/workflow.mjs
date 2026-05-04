@@ -372,7 +372,7 @@ export async function composeSavedRun(runDir, config, hooks = {}) {
 
   const outputPath = path.join(normalizedRunDir, "final-reel.webm");
 
-  progress({ phase: "compose", percent: 92, label: "Voice" });
+  progress({ phase: "voiceover", percent: 92, label: "Stitching voice-over" });
   if (approvedScript) {
     await applyVoiceoverToReel(normalizedRunDir, config, log, {
       approvedScript,
@@ -517,7 +517,7 @@ async function analyzeAndMaybeCompose(input, browserContext) {
 
     outputPath = path.join(runDir, "final-reel.webm");
 
-    progress({ phase: "compose", percent: 92, label: "Voice" });
+    progress({ phase: "voiceover", percent: 92, label: "Stitching voice-over" });
     if (approvedScript) {
       await applyVoiceoverToReel(runDir, config, log, {
         approvedScript,
