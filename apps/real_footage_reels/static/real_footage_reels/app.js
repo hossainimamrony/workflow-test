@@ -888,10 +888,10 @@
       }[phase] || 'running';
     } else if (jobStatus === 'completed' && !run.pipeline?.render?.done && !(run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length)) {
       state = debugReason ? 'script generation failed' : 'script generation completed';
-    } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
-      state = 'video ready';
     } else if (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length) {
       state = 'scripts ready';
+    } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
+      state = 'video ready';
     } else if (run.pipeline && run.pipeline.analyze && run.pipeline.analyze.done) {
       state = 'generating scripts';
     }
