@@ -41,6 +41,15 @@ class ReelRenderService:
         "done": 100,
         "error": 100,
     }
+    _FORWARDED_ENV_KEYS = (
+        "GEMINI_API_KEY",
+        "GEMINI_MODEL",
+        "GEMINI_IMAGE_MODEL",
+        "THUMBNAIL_GEMINI_MODEL",
+        "ELEVEN_LABS_API_KEY",
+        "ELEVENLAB_VOICE_ID",
+        "ELEVEN_LABS_VOICE_ID",
+    )
 
     @classmethod
     def _recover_stale_jobs(cls) -> None:
@@ -242,6 +251,7 @@ class ReelRenderService:
         proc = subprocess.Popen(
             cmd,
             cwd=str(cls._workflow_root),
+            env=cls._workflow_subprocess_env(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -359,6 +369,7 @@ class ReelRenderService:
         proc = subprocess.Popen(
             cmd,
             cwd=str(cls._workflow_root),
+            env=cls._workflow_subprocess_env(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -454,12 +465,22 @@ class ReelRenderService:
         return subprocess.Popen(
             cmd,
             cwd=str(cls._workflow_root),
+            env=cls._workflow_subprocess_env(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             encoding="utf-8",
             errors="replace",
         )
+
+    @classmethod
+    def _workflow_subprocess_env(cls) -> dict:
+        env = dict(os.environ)
+        for key in cls._FORWARDED_ENV_KEYS:
+            value = str(os.environ.get(key, "") or "").strip()
+            if value:
+                env[key] = value
+        return env
 
     @classmethod
     def _ensure_node_runtime_ready(cls) -> None:
