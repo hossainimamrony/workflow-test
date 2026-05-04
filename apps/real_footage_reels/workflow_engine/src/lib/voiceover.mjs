@@ -164,6 +164,7 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
     videoPath: cleanVideoPath,
     audioPath: voicePath,
     outPath,
+    targetSeconds: totalSeconds,
   });
 
   await writeJson(path.join(normalizedDir, "voiceover-manifest.json"), {
@@ -231,6 +232,7 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
     videoPath: cleanVideoPath,
     audioPath: voicePath,
     outPath: videoPath,
+    targetSeconds: totalSeconds,
   });
 
   await clearVoiceoverFailureStatus(normalizedDir);
@@ -253,6 +255,14 @@ async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds
         outPath: cleanPath,
       });
       if (copied) {
+        await normalizeVideoDurationForTarget({
+          config,
+          ffmpegPath,
+          runDir,
+          inputPath: cleanPath,
+          targetSeconds: totalSeconds,
+          log,
+        });
         log("Prepared voice-over base from existing final reel (stream copy, no re-encode).");
         return cleanPath;
       }
@@ -279,6 +289,14 @@ async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds
     mainDurationSeconds: mainSeconds,
     outPath: cleanPath,
     durationSeconds: totalSeconds,
+  });
+  await normalizeVideoDurationForTarget({
+    config,
+    ffmpegPath,
+    runDir,
+    inputPath: cleanPath,
+    targetSeconds: totalSeconds,
+    log,
   });
   log("Rebuilt clean base reel from main + end scene for voice-over rebuild.");
   return cleanPath;
@@ -727,23 +745,37 @@ async function prepareVoiceoverAudioForTarget({
     throw new Error("Could not measure audio duration.");
   }
 
-  // Keep ElevenLabs audio exactly as generated unless it exceeds the reel cap.
-  if (rawDuration <= targetSeconds + 0.02) {
+  if (Math.abs(rawDuration - targetSeconds) <= 0.02) {
     await fs.copyFile(rawAudioPath, outAudioPath);
     return;
   }
 
-  const requiredTempo = rawDuration / targetSeconds;
-  const appliedTempo = Number(requiredTempo.toFixed(4));
+  if (rawDuration > targetSeconds + 0.02) {
+    const requiredTempo = rawDuration / targetSeconds;
+    const appliedTempo = Number(requiredTempo.toFixed(4));
+    log(
+      `Voice-over exceeds target (${rawDuration.toFixed(2)}s > ${targetSeconds.toFixed(1)}s). Applying slight speed-up x${appliedTempo.toFixed(3)} to fit.`,
+    );
+    await runFfmpeg(ffmpegPath, [
+      "-y",
+      "-i",
+      rawAudioPath,
+      "-af",
+      `atempo=${appliedTempo},atrim=0:${targetSeconds.toFixed(3)},apad=pad_dur=${targetSeconds.toFixed(3)}`,
+      outAudioPath,
+    ]);
+    return;
+  }
+
   log(
-    `Voice-over exceeds target (${rawDuration.toFixed(2)}s > ${targetSeconds.toFixed(1)}s). Applying slight speed-up x${appliedTempo.toFixed(3)} to fit.`,
+    `Voice-over shorter than target (${rawDuration.toFixed(2)}s < ${targetSeconds.toFixed(1)}s). Padding silence to reach full reel length.`,
   );
   await runFfmpeg(ffmpegPath, [
     "-y",
     "-i",
     rawAudioPath,
     "-af",
-    `atempo=${appliedTempo}`,
+    `apad=pad_dur=${targetSeconds.toFixed(3)},atrim=0:${targetSeconds.toFixed(3)}`,
     outAudioPath,
   ]);
 }
@@ -765,7 +797,7 @@ async function resolveFfprobePath(ffmpegPath) {
   return null;
 }
 
-async function muxVideoWithAudio({ ffmpegPath, videoPath, audioPath, outPath }) {
+async function muxVideoWithAudio({ ffmpegPath, videoPath, audioPath, outPath, targetSeconds = 0 }) {
   const runDir = path.dirname(path.resolve(videoPath));
   const rel = (abs) => path.relative(runDir, path.resolve(abs)).split(path.sep).join("/");
   const vIn = rel(videoPath);
@@ -782,7 +814,8 @@ async function muxVideoWithAudio({ ffmpegPath, videoPath, audioPath, outPath }) 
     "0:v:0",
     "-map",
     "1:a:0",
-    "-shortest",
+    "-t",
+    String(Number(targetSeconds) > 0 ? Number(targetSeconds).toFixed(3) : 0),
     "-c:v",
     "copy",
     "-c:a",
@@ -854,6 +887,80 @@ async function concatMainAndEndForVoiceover({
     rel(outPath),
   );
   await runFfmpeg(ffmpegPath, args, { cwd: runDir });
+}
+
+async function normalizeVideoDurationForTarget({ config, ffmpegPath, runDir, inputPath, targetSeconds, log }) {
+  const currentDuration = await probeMediaDuration(ffmpegPath, inputPath);
+  if (!currentDuration || !Number.isFinite(currentDuration) || currentDuration <= 0) {
+    return;
+  }
+
+  const delta = Number(targetSeconds) - currentDuration;
+  if (Math.abs(delta) <= 0.03) {
+    return;
+  }
+
+  if (delta < 0) {
+    const inRel = path.relative(runDir, path.resolve(inputPath)).split(path.sep).join("/");
+    const tempPath = path.join(runDir, "final-reel-clean-trimmed.webm");
+    const outRel = path.relative(runDir, path.resolve(tempPath)).split(path.sep).join("/");
+    await runFfmpeg(ffmpegPath, [
+      "-y",
+      "-i",
+      inRel,
+      "-t",
+      String(Number(targetSeconds).toFixed(3)),
+      "-c:v",
+      "copy",
+      outRel,
+    ], { cwd: runDir });
+    await fs.rename(tempPath, inputPath);
+    log(`Trimmed video to ${Number(targetSeconds).toFixed(1)}s for exact voice-over alignment.`);
+    return;
+  }
+
+  const codec = String(config?.webmCodec || "libvpx-vp9").trim() || "libvpx-vp9";
+  const deadline = String(config?.webmDeadline || "").trim();
+  const cpuUsed = Number(config?.webmCpuUsed);
+  const threads = Number(config?.webmThreads);
+  const crf = Number(config?.webmCrf);
+  const tempPath = path.join(runDir, "final-reel-clean-padded.webm");
+  const inRel = path.relative(runDir, path.resolve(inputPath)).split(path.sep).join("/");
+  const outRel = path.relative(runDir, path.resolve(tempPath)).split(path.sep).join("/");
+  const args = [
+    "-y",
+    "-i",
+    inRel,
+    "-vf",
+    `tpad=stop_mode=clone:stop_duration=${delta.toFixed(3)}`,
+    "-an",
+    "-c:v",
+    codec,
+  ];
+  if (codec.includes("vp9")) {
+    args.push("-row-mt", "1");
+  }
+  if (deadline) {
+    args.push("-deadline", deadline);
+  }
+  if (Number.isFinite(cpuUsed)) {
+    args.push("-cpu-used", String(cpuUsed));
+  }
+  if (Number.isFinite(threads) && threads > 0) {
+    args.push("-threads", String(threads));
+  }
+  args.push(
+    "-pix_fmt",
+    "yuv420p",
+    "-crf",
+    String(Number.isFinite(crf) ? crf : 22),
+    "-b:v",
+    "0",
+    outRel,
+  );
+  await runFfmpeg(ffmpegPath, args, { cwd: runDir });
+  await fs.rename(tempPath, inputPath);
+  log(`Extended video by ${delta.toFixed(2)}s to keep full ${Number(targetSeconds).toFixed(1)}s reel.`);
 }
 
 async function fileExists(filePath) {
