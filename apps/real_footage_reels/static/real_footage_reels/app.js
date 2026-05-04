@@ -485,19 +485,14 @@
     ]);
     const runs = runsData.runs || [];
     const jobs = Array.isArray(jobsData.jobs) ? jobsData.jobs : [];
-    const activeJobsByRunId = new Map();
+    const latestJobsByRunId = new Map();
     jobs.forEach((job) => {
       if (!job) return;
-      const status = String(job.status || '').toLowerCase();
-      if (!['queued', 'running', 'paused'].includes(status)) return;
       const runId = String(job.runId || '').trim();
       if (!runId) return;
-      const existing = activeJobsByRunId.get(runId);
-      if (!existing || (existing.status !== 'running' && status === 'running')) {
-        activeJobsByRunId.set(runId, job);
-      }
+      if (!latestJobsByRunId.has(runId)) latestJobsByRunId.set(runId, job);
     });
-    runsList.innerHTML = runs.length ? runs.map((run) => runRow(run, activeJobsByRunId.get(String(run.runId || '')))).join('') : '<div class="empty-block"><strong>No runs</strong></div>';
+    runsList.innerHTML = runs.length ? runs.map((run) => runRow(run, latestJobsByRunId.get(String(run.runId || '')))).join('') : '<div class="empty-block"><strong>No runs</strong></div>';
     runsList.querySelectorAll('[data-view]').forEach((b) => b.onclick = () => {
       const runId = b.dataset.view;
       if (!runId) return;
@@ -869,9 +864,10 @@
     const progress = activeJob && activeJob.progress && typeof activeJob.progress === 'object' ? activeJob.progress : {};
     const phase = String(progress.phase || '').toLowerCase();
     const phaseLabel = String(progress.label || '').trim();
-    const failureReason = String(run.error || '').trim();
+    const jobError = String(activeJob && activeJob.error ? activeJob.error : '').trim();
+    const failureReason = String(run.error || jobError).trim();
     let state = 'processing';
-    if (runStatus === 'failed' || runStatus === 'cancelled') {
+    if (runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') {
       state = 'failed';
     } else if (jobStatus === 'queued') {
       state = 'queued';
@@ -888,6 +884,8 @@
         done: 'completed',
         error: 'failed',
       }[phase] || 'running';
+    } else if (jobStatus === 'completed' && !run.pipeline?.render?.done && !(run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length)) {
+      state = 'script generation completed';
     } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
       state = 'video ready';
     } else if (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length) {
@@ -903,7 +901,7 @@
         </div>
         <div class="pipeline-dots"><span class="pipeline-dot ${(run.pipeline&&run.pipeline.download&&run.pipeline.download.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&((run.pipeline.frames&&run.pipeline.frames.done)||(run.pipeline.prepare&&run.pipeline.prepare.done)))?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.analyze&&run.pipeline.analyze.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.render&&run.pipeline.render.done)?'pipeline-dot--on':''}"></span></div>
         <div class="run-row__stats"><span>${state}</span><span>${s.downloads||0} clips</span><span>${s.frames||0} frames</span><span>${s.analyzed||0} AI</span><span>${s.planned||0} cut</span></div>
-        ${(runStatus === 'failed' || runStatus === 'cancelled') && failureReason ? `<div class="run-row__error"><strong>Failure reason:</strong> ${esc(failureReason)}</div>` : ''}
+        ${((runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') && failureReason) ? `<div class="run-row__error"><strong>Failure reason:</strong> ${esc(failureReason)}</div>` : ''}
       </div>
       <div class="run-row__actions">
         <button class="button button--secondary" type="button" data-view="${esc(run.runId)}">View</button>
