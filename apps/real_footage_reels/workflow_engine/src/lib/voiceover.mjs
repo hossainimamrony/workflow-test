@@ -92,11 +92,19 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
     log(
       `Voice-over skipped: missing ${missing}. Add to the project .env file (save the file) and/or set in the system environment, then restart the server.`,
     );
+    if (failOnTtsError) {
+      throw new Error(
+        `Voice-over failed: missing ${missing}. Add it in workflow_engine/.env and reload the app.`,
+      );
+    }
     return null;
   }
 
   if (!approvedScript) {
     log("Voice-over TTS skipped: approve a script from Runs before stitching audio.");
+    if (failOnTtsError) {
+      throw new Error("Voice-over failed: approved script is required.");
+    }
     return null;
   }
 

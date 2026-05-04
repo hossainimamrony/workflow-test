@@ -221,6 +221,11 @@ class JobsApiView(APIView):
             if path_text.endswith("/identify"):
                 payload["command"] = "script-draft"
                 payload["compose"] = False
+            elif path_text.endswith("/prepare-analysis"):
+                payload["command"] = "run"
+                payload["compose"] = False
+                payload["voiceoverScriptApproval"] = False
+                payload["prepareAnalysis"] = True
             elif path_text.endswith("/compose"):
                 payload["command"] = "compose"
                 payload["compose"] = True
@@ -236,7 +241,7 @@ class JobsApiView(APIView):
         command = str(payload.get("command", "")).strip().lower()
         # Backward-compatibility guard:
         # if older UI sends "run" for the first step, force script-first behavior.
-        if command == "run" and not bool(payload.get("compose", False)):
+        if command == "run" and not bool(payload.get("compose", False)) and not bool(payload.get("prepareAnalysis", False)):
             command = "script-draft"
             payload["command"] = "script-draft"
             payload["compose"] = False
@@ -344,6 +349,7 @@ class RunDetailApiView(APIView):
         )
         final_reel_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelUrl"))
         final_reel_webm_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelWebmUrl"))
+        main_reel_path = _resolve_report_asset_path(run_dir_value, report.get("mainReelUrl"))
         return Response(
             {
                 "runId": run.run_id,
@@ -360,6 +366,7 @@ class RunDetailApiView(APIView):
                 "voiceoverDraft": report.get("voiceoverDraft", {"variants": []}),
                 "voiceoverStatus": report.get("voiceoverStatus", ""),
                 "hasVoiceover": bool(report.get("hasVoiceover", False)),
+                "mainReelUrl": _asset_url(run_id, main_reel_path) if main_reel_path else "",
                 "finalReelUrl": _asset_url(run_id, final_reel_path) if final_reel_path else "",
                 "finalReelWebmUrl": _asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
                 "videos": decorated_videos,

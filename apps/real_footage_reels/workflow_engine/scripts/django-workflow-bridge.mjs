@@ -228,17 +228,16 @@ async function main() {
         throw new Error("Approve/select a script first, then generate full video.");
       }
       const report = await buildRunReport(runDir, rootDir);
-      result = report?.pipeline?.analyze?.done
-        ? await composeSavedRun(runDir, config, {
-            log,
-            onProgress,
-            approvedScript,
-          })
-        : await continueWorkflow(runDir, config, {
-            log,
-            onProgress,
-            approvedScript,
-          });
+      if (!report?.pipeline?.analyze?.done) {
+        throw new Error(
+          "Analysis/plan is not ready yet. Run 'Prepare Footage + Plan' first, then compose.",
+        );
+      }
+      result = await composeSavedRun(runDir, config, {
+        log,
+        onProgress,
+        approvedScript,
+      });
     } else if (command === "end-scene-rerender") {
       if (!runDir) throw new Error("Missing resumeRunId for end-scene-rerender.");
       result = await rerenderRunEndScene(runDir, config, { log, onProgress });

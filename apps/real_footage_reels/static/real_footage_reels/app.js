@@ -521,8 +521,9 @@
     const sequenceItems = Array.isArray(run?.plan?.composition?.segments) && run.plan.composition.segments.length
       ? run.plan.composition.segments
       : (Array.isArray(run?.plan?.sequence) ? run.plan.sequence : []);
-    const heroVideoUrl = run.finalReelUrl || (previewClips[0] ? previewClips[0].videoUrl : '');
+    const heroVideoUrl = run.finalReelUrl || run.mainReelUrl || (previewClips[0] ? previewClips[0].videoUrl : '');
     const scriptVariants = Array.isArray(run?.voiceoverDraft?.variants) ? run.voiceoverDraft.variants : [];
+    const analysisReady = Boolean(run?.pipeline?.analyze?.done);
     const priceIncludes = String(run.priceIncludes || (run.report && run.report.priceIncludes) || '').trim();
     const autoPrice = String(run.listingPrice || '').trim() || 'AU ';
 
@@ -542,7 +543,7 @@
 
         <section class="panel detail-overview">
           <div class="detail-overview__media">
-            <p class="detail-overview__label">${heroVideoUrl ? (run.finalReelUrl ? 'Final Reel' : 'Preview') : 'Preview'}</p>
+            <p class="detail-overview__label">${heroVideoUrl ? (run.finalReelUrl ? 'Final Reel' : (run.mainReelUrl ? 'Main Reel (building final)' : 'Preview')) : 'Preview'}</p>
             ${heroVideoUrl ? `<div class="preview-frame preview-frame--hero">${renderVideoPlayer(heroVideoUrl, run.listingTitle || run.runId || 'Video', { compact: false })}</div>` : '<div class="empty-block"><strong>No preview</strong></div>'}
           </div>
 
@@ -621,8 +622,9 @@
           ` : '<div class="empty-block"><strong>No script options yet</strong></div>'}
           <div class="voiceover-script-panel__row">
             <button id="btn-regenerate-scripts" class="button button--secondary" type="button">Regenerate options</button>
-            <button id="btn-generate-full" class="button button--primary" type="button">Generate Full Video</button>
+            <button id="btn-generate-full" class="button button--primary" type="button">${analysisReady ? 'Compose Final Video' : 'Prepare Footage + Plan'}</button>
           </div>
+          <p class="field__hint">${analysisReady ? 'Step 3: compose and stitch voice-over.' : 'Step 2: download footage, extract frames, analyze, and build sequence. Then compose in a separate click.'}</p>
         </section>
 
         <section class="panel">
@@ -843,6 +845,19 @@
       fullBtn.disabled = true;
       try {
         const script = scriptBox ? String(scriptBox.value || '').trim() : '';
+        if (!script) {
+          throw new Error('Pick or enter a script first.');
+        }
+        if (!analysisReady) {
+          await api(base + '/runs/' + encodeURIComponent(runId) + '/prepare-analysis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ script }),
+          });
+          alert('Preparation started (download + frames + AI + sequence). When it finishes, click Compose Final Video.');
+          window.location.href = `${appBase}/workflow`;
+          return;
+        }
         await api(base + '/runs/' + encodeURIComponent(runId) + '/compose', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

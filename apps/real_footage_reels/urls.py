@@ -33,6 +33,7 @@ urlpatterns = [
     path("api/runs/<str:run_id>/thumbnail", RunThumbnailApiView.as_view(), name="api-run-thumbnail"),
     path("api/runs/<str:run_id>/asset", RunAssetApiView.as_view(), name="api-run-asset"),
     path("api/runs/<str:run_id>/prepare", JobsApiView.as_view(), name="api-run-prepare"),
+    path("api/runs/<str:run_id>/prepare-analysis", JobsApiView.as_view(), name="api-run-prepare-analysis"),
     path("api/runs/<str:run_id>/identify", JobsApiView.as_view(), name="api-run-identify"),
     path("api/runs/<str:run_id>/compose", JobsApiView.as_view(), name="api-run-compose"),
     path("api/runs/<str:run_id>/end-scene", JobsApiView.as_view(), name="api-run-end-scene"),

@@ -727,6 +727,7 @@ class ReelRenderService:
 
         final_reel_webm = run_dir / "final-reel.webm"
         final_reel_mp4 = run_dir / "final-reel.mp4"
+        main_reel_webm = run_dir / "main-reel.webm"
         draft_variants = (
             voiceover_draft_manifest.get("variants", [])
             if isinstance(voiceover_draft_manifest, dict)
@@ -772,6 +773,7 @@ class ReelRenderService:
             "voiceoverStatus": voiceover_status,
             "voiceoverLastError": str((voiceover_status_manifest or {}).get("lastError", "")).strip(),
             "hasVoiceover": has_voiceover,
+            "mainReelUrl": str(main_reel_webm) if main_reel_webm.exists() else "",
             "finalReelUrl": str(final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")),
             "finalReelWebmUrl": str(final_reel_webm) if final_reel_webm.exists() else "",
             "videos": analyzed_clips if analyzed_clips else framed_videos,
