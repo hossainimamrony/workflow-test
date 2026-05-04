@@ -479,9 +479,25 @@
   }
 
   async function loadRuns() {
-    const data = await api(base + '/runs');
-    const runs = data.runs || [];
-    runsList.innerHTML = runs.length ? runs.map(runRow).join('') : '<div class="empty-block"><strong>No runs</strong></div>';
+    const [runsData, jobsData] = await Promise.all([
+      api(base + '/runs'),
+      api(base + '/jobs').catch(() => ({ jobs: [] })),
+    ]);
+    const runs = runsData.runs || [];
+    const jobs = Array.isArray(jobsData.jobs) ? jobsData.jobs : [];
+    const activeJobsByRunId = new Map();
+    jobs.forEach((job) => {
+      if (!job) return;
+      const status = String(job.status || '').toLowerCase();
+      if (!['queued', 'running', 'paused'].includes(status)) return;
+      const runId = String(job.runId || '').trim();
+      if (!runId) return;
+      const existing = activeJobsByRunId.get(runId);
+      if (!existing || (existing.status !== 'running' && status === 'running')) {
+        activeJobsByRunId.set(runId, job);
+      }
+    });
+    runsList.innerHTML = runs.length ? runs.map((run) => runRow(run, activeJobsByRunId.get(String(run.runId || '')))).join('') : '<div class="empty-block"><strong>No runs</strong></div>';
     runsList.querySelectorAll('[data-view]').forEach((b) => b.onclick = () => {
       const runId = b.dataset.view;
       if (!runId) return;
@@ -846,19 +862,39 @@
     };
   }
 
-  function runRow(run) {
+  function runRow(run, activeJob) {
     const s = run.stats || {};
     const runStatus = String(run.status || '').toLowerCase();
+    const jobStatus = String(activeJob && activeJob.status ? activeJob.status : '').toLowerCase();
+    const progress = activeJob && activeJob.progress && typeof activeJob.progress === 'object' ? activeJob.progress : {};
+    const phase = String(progress.phase || '').toLowerCase();
+    const phaseLabel = String(progress.label || '').trim();
     const failureReason = String(run.error || '').trim();
-    const state = (runStatus === 'failed' || runStatus === 'cancelled')
-      ? 'failed'
-      : run.pipeline && run.pipeline.render && run.pipeline.render.done
-      ? 'video ready'
-      : (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length)
-        ? 'scripts ready'
-        : (run.pipeline && run.pipeline.analyze && run.pipeline.analyze.done)
-          ? 'generating scripts'
-          : 'processing';
+    let state = 'processing';
+    if (runStatus === 'failed' || runStatus === 'cancelled') {
+      state = 'failed';
+    } else if (jobStatus === 'queued') {
+      state = 'queued';
+    } else if (jobStatus === 'paused') {
+      state = 'paused';
+    } else if (jobStatus === 'running') {
+      state = phaseLabel || {
+        queued: 'queued',
+        download: 'downloading clips',
+        frames: 'extracting frames',
+        analyze: 'analyzing clips',
+        compose: 'composing reel',
+        voiceover: 'generating scripts',
+        done: 'completed',
+        error: 'failed',
+      }[phase] || 'running';
+    } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
+      state = 'video ready';
+    } else if (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length) {
+      state = 'scripts ready';
+    } else if (run.pipeline && run.pipeline.analyze && run.pipeline.analyze.done) {
+      state = 'generating scripts';
+    }
     return `<article class="run-row">
       <div class="run-row__main">
         <div class="run-row__header">
