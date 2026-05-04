@@ -151,6 +151,7 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
 
   const mutePath = path.join(normalizedDir, "final-reel-mute.webm");
   const cleanVideoPath = await resolveCleanVideoSource({
+    config,
     ffmpegPath: config.ffmpegPath,
     runDir: normalizedDir,
     mainSeconds,
@@ -220,6 +221,7 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
 
   const mutePath = path.join(normalizedDir, "final-reel-mute.webm");
   const cleanVideoPath = await resolveCleanVideoSource({
+    config,
     ffmpegPath: config.ffmpegPath,
     runDir: normalizedDir,
     mainSeconds,
@@ -241,7 +243,7 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
   return true;
 }
 
-async function resolveCleanVideoSource({ ffmpegPath, runDir, mainSeconds, totalSeconds, log }) {
+async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds, totalSeconds, log }) {
   const cleanPath = path.join(runDir, "final-reel-clean.webm");
   const mainPath = path.join(runDir, "main-reel.webm");
   const endPath = path.join(runDir, "end-scene.webm");
@@ -251,6 +253,7 @@ async function resolveCleanVideoSource({ ffmpegPath, runDir, mainSeconds, totalS
     );
   }
   await concatMainAndEndForVoiceover({
+    config,
     ffmpegPath,
     runDir,
     mainPath,
@@ -751,6 +754,7 @@ function runFfmpeg(ffmpegPath, args, options = {}) {
 }
 
 async function concatMainAndEndForVoiceover({
+  config,
   ffmpegPath,
   runDir,
   mainPath,
@@ -760,6 +764,11 @@ async function concatMainAndEndForVoiceover({
   durationSeconds,
 }) {
   const rel = (abs) => path.relative(runDir, path.resolve(abs)).split(path.sep).join("/");
+  const codec = String(config?.webmCodec || "libvpx-vp9").trim() || "libvpx-vp9";
+  const deadline = String(config?.webmDeadline || "").trim();
+  const cpuUsed = Number(config?.webmCpuUsed);
+  const threads = Number(config?.webmThreads);
+  const crf = Number(config?.webmCrf);
   const args = [
     "-y",
     "-t",
@@ -775,17 +784,29 @@ async function concatMainAndEndForVoiceover({
     "-t",
     String(durationSeconds),
     "-c:v",
-    "libvpx-vp9",
-    "-row-mt",
-    "1",
+    codec,
+  ];
+  if (codec.includes("vp9")) {
+    args.push("-row-mt", "1");
+  }
+  if (deadline) {
+    args.push("-deadline", deadline);
+  }
+  if (Number.isFinite(cpuUsed)) {
+    args.push("-cpu-used", String(cpuUsed));
+  }
+  if (Number.isFinite(threads) && threads > 0) {
+    args.push("-threads", String(threads));
+  }
+  args.push(
     "-pix_fmt",
     "yuv420p",
     "-crf",
-    "30",
+    String(Number.isFinite(crf) ? crf : 20),
     "-b:v",
     "0",
     rel(outPath),
-  ];
+  );
   await runFfmpeg(ffmpegPath, args, { cwd: runDir });
 }
 

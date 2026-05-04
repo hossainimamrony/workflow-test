@@ -163,9 +163,12 @@ async function renderEndScene({ runDir, config, meta, durationSeconds, log, brow
 async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, log, browserContext }) {
   const width = config.composeWidth;
   const height = config.composeHeight;
-  const supersample = Math.max(1, Math.min(2, Number(config.endSceneSupersample ?? END_SCENE_SUPERSAMPLE) || END_SCENE_SUPERSAMPLE));
-  const renderWidth = width * supersample;
-  const renderHeight = height * supersample;
+  const supersample = Math.max(
+    1,
+    Math.min(4, Number(config.endSceneSupersample ?? END_SCENE_SUPERSAMPLE) || END_SCENE_SUPERSAMPLE),
+  );
+  const renderWidth = Math.round(width * supersample);
+  const renderHeight = Math.round(height * supersample);
   const fps = config.composeFps ?? DEFAULT_END_FPS;
   const frameCount = Math.max(1, Math.round(durationSeconds * fps));
   const htmlPath = path.join(runDir, "end-scene.browser.html");
@@ -191,7 +194,9 @@ async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, l
   try {
     await page.setViewportSize({ width: renderWidth, height: renderHeight });
     await page.setContent(html, { waitUntil: "load" });
-    const patchApplied = await applySampleTemplatePatchInPage(page, meta, durationSeconds);
+    const patchApplied = await applySampleTemplatePatchInPage(page, meta, durationSeconds, {
+      designScale: renderWidth / 1080,
+    });
     if (!patchApplied.ok) {
       throw new Error(`Sample end-scene template selector missing: ${patchApplied.missing.join(", ")}`);
     }
@@ -261,7 +266,7 @@ async function buildAnimatedEndSceneHtmlFromSampleTemplate(options) {
   return { html, debug };
 }
 
-async function applySampleTemplatePatchInPage(page, meta, durationSeconds) {
+async function applySampleTemplatePatchInPage(page, meta, durationSeconds, options = {}) {
   const durationMs = Math.max(1000, Math.round(durationSeconds * 1000));
   const headline = createHeadlineLayout(meta.listingTitle);
   const includes = meta.priceIncludes.slice(0, 3);
@@ -280,6 +285,8 @@ async function applySampleTemplatePatchInPage(page, meta, durationSeconds) {
     }
     root.style.setProperty("--scene-duration", `${payload.durationMs}ms`);
     appliedTokens.push("scene duration");
+    root.style.setProperty("--scale", String(payload.designScale));
+    appliedTokens.push("design scale");
 
     const headlineNode = document.querySelector(".headline");
     if (!headlineNode) {
@@ -322,6 +329,7 @@ async function applySampleTemplatePatchInPage(page, meta, durationSeconds) {
   }, {
     payload: {
       durationMs,
+      designScale: Math.max(0.5, Number(options.designScale) || 1),
       headlineLines: headline.lines,
       headlineScale: headline.scale.toFixed(3),
       priceLine: meta.priceLine,

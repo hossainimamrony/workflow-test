@@ -59,6 +59,10 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
   const resolvedGeminiApiKey = normalizeGeminiApiKey(
     input.geminiApiKey ?? env.GEMINI_API_KEY ?? process.env.GEMINI_API_KEY ?? "",
   );
+  const strictEndScene = parseBooleanLike(
+    firstEnv(input.endSceneStrict, env.END_SCENE_STRICT, process.env.END_SCENE_STRICT),
+    true,
+  );
   const fastRender = resolveFastRenderMode(input, env);
   const defaultComposeWidth = fastRender ? FAST_COMPOSE_WIDTH : DEFAULT_COMPOSE_WIDTH;
   const defaultComposeHeight = fastRender ? FAST_COMPOSE_HEIGHT : DEFAULT_COMPOSE_HEIGHT;
@@ -91,12 +95,46 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(input.webmThreads, env.WEBM_THREADS, process.env.WEBM_THREADS),
     fastRender ? 2 : null,
   );
-  const endSceneSupersample = numberValue(
+  const reelDurations = resolveReelDurations(input);
+  let composeWidth = numberValue(
+    firstEnv(input.composeWidth, env.COMPOSE_WIDTH, process.env.COMPOSE_WIDTH),
+    defaultComposeWidth,
+  );
+  let composeHeight = numberValue(
+    firstEnv(input.composeHeight, env.COMPOSE_HEIGHT, process.env.COMPOSE_HEIGHT),
+    defaultComposeHeight,
+  );
+  let composeFps = numberValue(
+    firstEnv(input.composeFps, env.COMPOSE_FPS, process.env.COMPOSE_FPS),
+    defaultComposeFps,
+  );
+  let endSceneSupersample = numberValue(
     firstEnv(input.endSceneSupersample, env.END_SCENE_SUPERSAMPLE, process.env.END_SCENE_SUPERSAMPLE),
     fastRender ? 1 : 2,
   );
+  let webmCodecFinal = webmCodec;
+  let webmCrfFinal = Number.isFinite(Number(webmCrf)) ? Number(webmCrf) : (fastRender ? 34 : 30);
+  let webmCpuUsedFinal = Number.isFinite(Number(webmCpuUsed)) ? Number(webmCpuUsed) : (fastRender ? 5 : null);
+  let webmDeadlineFinal = webmDeadline;
+  let webmThreadsFinal = Number.isFinite(Number(webmThreads)) ? Number(webmThreads) : null;
 
-  const reelDurations = resolveReelDurations(input);
+  if (strictEndScene) {
+    composeWidth = Math.max(1080, Number(composeWidth) || 1080);
+    composeHeight = Math.max(1920, Number(composeHeight) || 1920);
+    composeFps = Math.max(30, Number(composeFps) || 30);
+    endSceneSupersample = Math.max(2, Number(endSceneSupersample) || 2);
+    webmCodecFinal = "libvpx-vp9";
+    webmDeadlineFinal = webmDeadlineFinal || "good";
+    webmCrfFinal = Math.min(webmCrfFinal, 20);
+    if (Number.isFinite(webmCpuUsedFinal)) {
+      webmCpuUsedFinal = Math.min(webmCpuUsedFinal, 2);
+    } else {
+      webmCpuUsedFinal = 2;
+    }
+    if (!Number.isFinite(webmThreadsFinal) || webmThreadsFinal <= 0) {
+      webmThreadsFinal = 2;
+    }
+  }
 
   return {
     command: input.command ?? "help",
@@ -139,24 +177,16 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     geminiApiKey: resolvedGeminiApiKey,
     geminiModel: input.geminiModel || env.GEMINI_MODEL || "gemini-2.5-pro",
     targetSequence: getLockedTargetSequence(),
-    composeWidth: numberValue(
-      firstEnv(input.composeWidth, env.COMPOSE_WIDTH, process.env.COMPOSE_WIDTH),
-      defaultComposeWidth,
-    ),
-    composeHeight: numberValue(
-      firstEnv(input.composeHeight, env.COMPOSE_HEIGHT, process.env.COMPOSE_HEIGHT),
-      defaultComposeHeight,
-    ),
-    composeFps: numberValue(
-      firstEnv(input.composeFps, env.COMPOSE_FPS, process.env.COMPOSE_FPS),
-      defaultComposeFps,
-    ),
+    composeWidth,
+    composeHeight,
+    composeFps,
     fastRender,
-    webmCodec,
-    webmDeadline,
-    webmCpuUsed,
-    webmCrf,
-    webmThreads,
+    strictEndScene,
+    webmCodec: webmCodecFinal,
+    webmDeadline: webmDeadlineFinal,
+    webmCpuUsed: webmCpuUsedFinal,
+    webmCrf: webmCrfFinal,
+    webmThreads: webmThreadsFinal,
     endSceneSupersample,
     /** Skip this many seconds at the start of each source clip before sampling/composing. */
     clipStartSkipSeconds: clampClipStartSkipSeconds(
