@@ -491,22 +491,24 @@ async function analyzeAndMaybeCompose(input, browserContext) {
 
   let outputPath = null;
   if (config.compose) {
-    progress({ phase: "compose", percent: 85, label: "Render" });
+    progress({ phase: "compose", percent: 85, label: "Main reel" });
     logReservedEndSceneTiming(config, log);
     log("Composing the selected local clips...");
 
     const mainReelPath = path.join(runDir, "main-reel.webm");
     if (browserContext) {
-      await composeSelections(browserContext, reelPlan, mainReelPath, config);
+      await composeSelections(browserContext, reelPlan, mainReelPath, config, { log });
     } else {
       const browserSession = await launchWorkflowBrowser(config);
       try {
-        await composeSelections(browserSession.context, reelPlan, mainReelPath, config);
+        await composeSelections(browserSession.context, reelPlan, mainReelPath, config, { log });
       } finally {
         await browserSession.close();
       }
     }
 
+    progress({ phase: "compose", percent: 89, label: "End scene" });
+    log("Main reel rendered. Building branded end scene...");
     const manifestForEnd = await readDownloadsManifest(runDir);
     await appendEndSceneToReel(runDir, config, manifestForEnd, log, {
       browserContext,
@@ -557,7 +559,7 @@ async function maybeApplyVoiceover(runDir, config, log) {
   }
 }
 
-async function composeSelections(browserContext, reelPlan, outputPath, config) {
+async function composeSelections(browserContext, reelPlan, outputPath, config, hooks = {}) {
   const mainSeconds = config.composeMainDurationSeconds ?? config.composeDurationSeconds ?? 14;
   await composeSelectedClips(
     browserContext,
@@ -575,6 +577,12 @@ async function composeSelections(browserContext, reelPlan, outputPath, config) {
       durationSeconds: mainSeconds,
       ffmpegPath: config.ffmpegPath,
       clipStartSkipSeconds: config.clipStartSkipSeconds,
+      webmCodec: config.webmCodec,
+      webmDeadline: config.webmDeadline,
+      webmCpuUsed: config.webmCpuUsed,
+      webmCrf: config.webmCrf,
+      webmThreads: config.webmThreads,
+      log: hooks.log,
     },
   );
 }

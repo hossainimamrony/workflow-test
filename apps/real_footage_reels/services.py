@@ -665,6 +665,15 @@ class ReelRenderService:
         if "sending them to gemini" in lower or "classified " in lower:
             cls._update_progress(job, "analyze", "Analyzing and planning...")
             return
+        if "main reel encoding heartbeat" in lower:
+            cls._update_progress(job, "compose", "Composing main reel...")
+            return
+        if "rendering end scene" in lower or "end scene frames" in lower or "building branded end scene" in lower:
+            cls._update_progress(job, "compose", "Rendering end scene...")
+            return
+        if "concatenating main reel + end scene" in lower:
+            cls._update_progress(job, "compose", "Finalizing reel...")
+            return
         if "composing the selected local clips" in lower or "composed reel:" in lower:
             cls._update_progress(job, "compose", "Composing reel + end scene...")
             return
@@ -922,7 +931,10 @@ class ReelRenderService:
         if job_status == "running":
             started_at = latest_job.started_at or latest_job.created_at
             age_seconds = (timezone.now() - started_at).total_seconds()
-            if age_seconds > 300 and phase in {"voiceover", "download", "frames", "analyze", "compose"}:
+            warn_seconds = int(os.environ.get("REAL_FOOTAGE_RUNNING_WARN_SEC", "900") or "900")
+            if phase == "compose":
+                warn_seconds = max(warn_seconds, int(os.environ.get("REAL_FOOTAGE_COMPOSE_WARN_SEC", "1200") or "1200"))
+            if age_seconds > warn_seconds and phase in {"voiceover", "download", "frames", "analyze", "compose"}:
                 return f"Job has been running for {cls._duration_label(age_seconds)} at phase '{phase or 'unknown'}'. Last update: {label or '-'}."
 
         return ""

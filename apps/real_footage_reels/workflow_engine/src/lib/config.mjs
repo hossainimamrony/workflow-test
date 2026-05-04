@@ -8,6 +8,10 @@ const DEFAULT_PYTHON_PATH = IS_WINDOWS ? "python" : "python3";
 const DEFAULT_FFMPEG_PATH = IS_WINDOWS ? "ffmpeg.exe" : "ffmpeg";
 const DEFAULT_COMPOSE_WIDTH = 1080;
 const DEFAULT_COMPOSE_HEIGHT = 1920;
+const FAST_COMPOSE_WIDTH = 720;
+const FAST_COMPOSE_HEIGHT = 1280;
+const DEFAULT_COMPOSE_FPS = 30;
+const FAST_COMPOSE_FPS = 24;
 const DEFAULT_COMPOSE_MAIN_DURATION_SECONDS = 14;
 const DEFAULT_END_SCENE_DURATION_SECONDS = 3.5;
 const DEFAULT_MAX_TOTAL_REEL_DURATION_SECONDS = 17;
@@ -55,6 +59,42 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
   const resolvedGeminiApiKey = normalizeGeminiApiKey(
     input.geminiApiKey ?? env.GEMINI_API_KEY ?? process.env.GEMINI_API_KEY ?? "",
   );
+  const fastRender = resolveFastRenderMode(input, env);
+  const defaultComposeWidth = fastRender ? FAST_COMPOSE_WIDTH : DEFAULT_COMPOSE_WIDTH;
+  const defaultComposeHeight = fastRender ? FAST_COMPOSE_HEIGHT : DEFAULT_COMPOSE_HEIGHT;
+  const defaultComposeFps = fastRender ? FAST_COMPOSE_FPS : DEFAULT_COMPOSE_FPS;
+  const webmCodec = String(
+    firstEnv(
+      input.webmCodec,
+      env.WEBM_CODEC,
+      process.env.WEBM_CODEC,
+      fastRender ? "libvpx" : "libvpx-vp9",
+    ),
+  ).trim();
+  const webmDeadline = String(
+    firstEnv(
+      input.webmDeadline,
+      env.WEBM_DEADLINE,
+      process.env.WEBM_DEADLINE,
+      fastRender ? "good" : "",
+    ),
+  ).trim();
+  const webmCpuUsed = numberValue(
+    firstEnv(input.webmCpuUsed, env.WEBM_CPU_USED, process.env.WEBM_CPU_USED),
+    fastRender ? 5 : null,
+  );
+  const webmCrf = numberValue(
+    firstEnv(input.webmCrf, env.WEBM_CRF, process.env.WEBM_CRF),
+    fastRender ? 34 : 30,
+  );
+  const webmThreads = numberValue(
+    firstEnv(input.webmThreads, env.WEBM_THREADS, process.env.WEBM_THREADS),
+    fastRender ? 2 : null,
+  );
+  const endSceneSupersample = numberValue(
+    firstEnv(input.endSceneSupersample, env.END_SCENE_SUPERSAMPLE, process.env.END_SCENE_SUPERSAMPLE),
+    fastRender ? 1 : 2,
+  );
 
   const reelDurations = resolveReelDurations(input);
 
@@ -99,9 +139,25 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     geminiApiKey: resolvedGeminiApiKey,
     geminiModel: input.geminiModel || env.GEMINI_MODEL || "gemini-2.5-pro",
     targetSequence: getLockedTargetSequence(),
-    composeWidth: input.composeWidth ?? DEFAULT_COMPOSE_WIDTH,
-    composeHeight: input.composeHeight ?? DEFAULT_COMPOSE_HEIGHT,
-    composeFps: input.composeFps ?? 30,
+    composeWidth: numberValue(
+      firstEnv(input.composeWidth, env.COMPOSE_WIDTH, process.env.COMPOSE_WIDTH),
+      defaultComposeWidth,
+    ),
+    composeHeight: numberValue(
+      firstEnv(input.composeHeight, env.COMPOSE_HEIGHT, process.env.COMPOSE_HEIGHT),
+      defaultComposeHeight,
+    ),
+    composeFps: numberValue(
+      firstEnv(input.composeFps, env.COMPOSE_FPS, process.env.COMPOSE_FPS),
+      defaultComposeFps,
+    ),
+    fastRender,
+    webmCodec,
+    webmDeadline,
+    webmCpuUsed,
+    webmCrf,
+    webmThreads,
+    endSceneSupersample,
     /** Skip this many seconds at the start of each source clip before sampling/composing. */
     clipStartSkipSeconds: clampClipStartSkipSeconds(
       input.clipStartSkipSeconds ?? DEFAULT_CLIP_START_SKIP_SECONDS,
@@ -203,6 +259,39 @@ export function hasVoiceoverEnv(env = loadEnvConfig(process.cwd())) {
 function normalizePlainSecret(value) {
   const normalized = String(value ?? "").trim();
   return normalized;
+}
+
+function resolveFastRenderMode(input, env) {
+  if (typeof input.fastRender === "boolean") {
+    return input.fastRender;
+  }
+  const onPythonAnywhere = isPythonAnywhereRuntime(env);
+  const raw = firstEnv(input.fastRender, env.REAL_FOOTAGE_FAST_RENDER, process.env.REAL_FOOTAGE_FAST_RENDER);
+  if (!raw) {
+    return onPythonAnywhere;
+  }
+  return parseBooleanLike(raw, onPythonAnywhere);
+}
+
+function isPythonAnywhereRuntime(env = {}) {
+  return Boolean(
+    firstEnv(
+      env.PYTHONANYWHERE_SITE,
+      env.PYTHONANYWHERE_DOMAIN,
+      env.PYTHONANYWHERE_HOME,
+      process.env.PYTHONANYWHERE_SITE,
+      process.env.PYTHONANYWHERE_DOMAIN,
+      process.env.PYTHONANYWHERE_HOME,
+    ),
+  );
+}
+
+function parseBooleanLike(value, fallback = false) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) return fallback;
+  if (["1", "true", "yes", "y", "on"].includes(normalized)) return true;
+  if (["0", "false", "no", "n", "off"].includes(normalized)) return false;
+  return fallback;
 }
 
 function firstEnv(...values) {

@@ -34,11 +34,18 @@ export async function composeSelectedClips(_context, selectedClips, outputPath, 
 
   await runProcess(options.ffmpegPath, args, {
     cwd: path.dirname(outputPath),
+    log: options.log,
+    heartbeatLabel: "Main reel encoding",
   });
 }
 
 function buildFfmpegCommand(segments, outputPath, options) {
   const args = ["-y"];
+  const codec = String(options.webmCodec || "libvpx-vp9").trim();
+  const deadline = String(options.webmDeadline || "").trim();
+  const cpuUsed = Number(options.webmCpuUsed);
+  const crf = Number(options.webmCrf);
+  const threads = Number(options.webmThreads);
 
   for (const segment of segments) {
     args.push(
@@ -65,13 +72,25 @@ function buildFfmpegCommand(segments, outputPath, options) {
     "[outv]",
     "-an",
     "-c:v",
-    "libvpx-vp9",
-    "-row-mt",
-    "1",
+    codec,
+  );
+  if (codec.includes("vp9")) {
+    args.push("-row-mt", "1");
+  }
+  if (deadline) {
+    args.push("-deadline", deadline);
+  }
+  if (Number.isFinite(cpuUsed)) {
+    args.push("-cpu-used", String(cpuUsed));
+  }
+  if (Number.isFinite(threads) && threads > 0) {
+    args.push("-threads", String(threads));
+  }
+  args.push(
     "-pix_fmt",
     "yuv420p",
     "-crf",
-    "30",
+    String(Number.isFinite(crf) ? crf : 30),
     "-b:v",
     "0",
     outputPath,
@@ -85,6 +104,10 @@ function buildFfmpegCommand(segments, outputPath, options) {
       width: options.width,
       height: options.height,
       fps: options.fps,
+      codec,
+      deadline: deadline || null,
+      cpuUsed: Number.isFinite(cpuUsed) ? cpuUsed : null,
+      threads: Number.isFinite(threads) ? threads : null,
       clipStartSkipSeconds: options.clipStartSkipSeconds ?? 0,
       durationSeconds: options.durationSeconds,
       segments: segments.map((segment) => ({
@@ -131,13 +154,20 @@ async function probeVideoDuration(ffmpegPath, filePath) {
 }
 
 async function resolveFfprobePath(ffmpegPath) {
-  const probePath = path.join(path.dirname(ffmpegPath), "ffprobe.exe");
-  try {
-    await fs.access(probePath);
-    return probePath;
-  } catch {
-    return null;
+  const candidates = [
+    path.join(path.dirname(ffmpegPath), "ffprobe.exe"),
+    path.join(path.dirname(ffmpegPath), "ffprobe"),
+    "ffprobe",
+  ];
+  for (const probePath of candidates) {
+    try {
+      await runProcess(probePath, ["-version"], { allowFailure: false, maxCaptureBytes: 1024 * 8 });
+      return probePath;
+    } catch {
+      continue;
+    }
   }
+  return null;
 }
 
 function resolveSegmentStart(inputDuration, startRatio, segmentDuration, minStartSeconds = 0) {
@@ -160,13 +190,40 @@ function runProcess(command, args, options = {}) {
 
     let stdout = "";
     let stderr = "";
+    let lastHeartbeatAt = 0;
+    let stderrBuffer = "";
 
     child.stdout.on("data", (chunk) => {
       stdout += chunk.toString();
     });
 
     child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
+      const text = chunk.toString();
+      stderr += text;
+      stderrBuffer += text;
+
+      const lines = stderrBuffer.split(/\r?\n/u);
+      stderrBuffer = lines.pop() ?? "";
+      for (const lineRaw of lines) {
+        const line = String(lineRaw || "").trim();
+        if (!line) continue;
+        if (typeof options.log === "function" && line.startsWith("frame=")) {
+          const now = Date.now();
+          if (now - lastHeartbeatAt > 7000) {
+            lastHeartbeatAt = now;
+            const timeMatch = /time=\s*([0-9:.]+)/u.exec(line);
+            const fpsMatch = /fps=\s*([0-9.]+)/u.exec(line);
+            const speedMatch = /speed=\s*([0-9.]+x)/u.exec(line);
+            const parts = [];
+            if (timeMatch?.[1]) parts.push(`time ${timeMatch[1]}`);
+            if (fpsMatch?.[1]) parts.push(`fps ${fpsMatch[1]}`);
+            if (speedMatch?.[1]) parts.push(`speed ${speedMatch[1]}`);
+            options.log(
+              `${options.heartbeatLabel || "ffmpeg"} heartbeat${parts.length ? ` (${parts.join(", ")})` : ""}`,
+            );
+          }
+        }
+      }
     });
 
     child.on("error", (error) => {

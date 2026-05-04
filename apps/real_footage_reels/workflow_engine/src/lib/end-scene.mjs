@@ -52,6 +52,7 @@ export async function appendEndSceneToReel(runDir, config, manifest, log = () =>
 
   log("Concatenating main reel + end scene...");
   await concatVideosVertical({
+    config,
     ffmpegPath: config.ffmpegPath,
     cwd: runDir,
     mainRelativePath: "main-reel.webm",
@@ -154,15 +155,17 @@ async function renderEndScene({ runDir, config, meta, durationSeconds, log, brow
     config,
     meta,
     durationSeconds,
+    log,
     browserContext,
   });
 }
 
-async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, browserContext }) {
+async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, log, browserContext }) {
   const width = config.composeWidth;
   const height = config.composeHeight;
-  const renderWidth = width * END_SCENE_SUPERSAMPLE;
-  const renderHeight = height * END_SCENE_SUPERSAMPLE;
+  const supersample = Math.max(1, Math.min(2, Number(config.endSceneSupersample ?? END_SCENE_SUPERSAMPLE) || END_SCENE_SUPERSAMPLE));
+  const renderWidth = width * supersample;
+  const renderHeight = height * supersample;
   const fps = config.composeFps ?? DEFAULT_END_FPS;
   const frameCount = Math.max(1, Math.round(durationSeconds * fps));
   const htmlPath = path.join(runDir, "end-scene.browser.html");
@@ -205,6 +208,12 @@ async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, b
         path: path.join(framesDir, `frame-${String(frameIndex).padStart(4, "0")}.png`),
         type: "png",
       });
+      if (typeof log === "function") {
+        const every = Math.max(1, Math.floor(frameCount / 5));
+        if ((frameIndex + 1) % every === 0 || frameIndex === frameCount - 1) {
+          log(`End scene frames ${frameIndex + 1}/${frameCount}`);
+        }
+      }
     }
   } finally {
     await page.close().catch(() => {});
@@ -214,6 +223,7 @@ async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, b
   }
 
   await encodeFramesToWebm({
+    config,
     ffmpegPath: config.ffmpegPath,
     cwd: runDir,
     fps,
@@ -1232,22 +1242,15 @@ async function renderEndSceneWebm({ ffmpegPath, cwd, assRelativePath, outRelativ
     vf,
     "-t",
     String(durationSeconds),
-    "-c:v",
-    "libvpx-vp9",
-    "-row-mt",
-    "1",
     "-pix_fmt",
     "yuv420p",
-    "-crf",
-    String(END_SCENE_VP9_CRF),
-    "-b:v",
-    "0",
-    outRelativePath,
   ];
+  appendWebmEncodingArgs(args, { codec: "libvpx-vp9", crf: END_SCENE_VP9_CRF });
+  args.push(outRelativePath);
   await runProcess(ffmpegPath, args, { cwd });
 }
 
-async function encodeFramesToWebm({ ffmpegPath, cwd, fps, durationSeconds, framesRelativePattern, outRelativePath, width, height }) {
+async function encodeFramesToWebm({ config, ffmpegPath, cwd, fps, durationSeconds, framesRelativePattern, outRelativePath, width, height }) {
   const args = [
     "-y",
     "-framerate",
@@ -1261,20 +1264,20 @@ async function encodeFramesToWebm({ ffmpegPath, cwd, fps, durationSeconds, frame
     "-an",
     "-vf",
     `scale=${width}:${height}:flags=lanczos,format=yuv420p`,
-    "-c:v",
-    "libvpx-vp9",
-    "-row-mt",
-    "1",
-    "-crf",
-    String(END_SCENE_VP9_CRF),
-    "-b:v",
-    "0",
-    outRelativePath,
   ];
+  appendWebmEncodingArgs(args, {
+    codec: String(config?.webmCodec || "libvpx-vp9"),
+    deadline: String(config?.webmDeadline || "").trim(),
+    cpuUsed: config?.webmCpuUsed,
+    threads: config?.webmThreads,
+    crf: Number.isFinite(Number(config?.webmCrf)) ? Number(config.webmCrf) : END_SCENE_VP9_CRF,
+  });
+  args.push(outRelativePath);
   await runProcess(ffmpegPath, args, { cwd });
 }
 
 async function concatVideosVertical({
+  config,
   ffmpegPath,
   cwd,
   mainRelativePath,
@@ -1297,19 +1300,46 @@ async function concatVideosVertical({
     "[0:v][1:v]concat=n=2:v=1:a=0[outv]",
     "-map",
     "[outv]",
-    "-c:v",
-    "libvpx-vp9",
-    "-row-mt",
-    "1",
     "-pix_fmt",
     "yuv420p",
+  ];
+  appendWebmEncodingArgs(args, {
+    codec: String(config?.webmCodec || "libvpx-vp9"),
+    deadline: String(config?.webmDeadline || "").trim(),
+    cpuUsed: config?.webmCpuUsed,
+    threads: config?.webmThreads,
+    crf: Number.isFinite(Number(config?.webmCrf)) ? Number(config.webmCrf) : END_SCENE_VP9_CRF,
+  });
+  args.push(outRelativePath);
+  await runProcess(ffmpegPath, args, { cwd });
+}
+
+function appendWebmEncodingArgs(args, profile = {}) {
+  const codec = String(profile.codec || "libvpx-vp9").trim() || "libvpx-vp9";
+  const deadline = String(profile.deadline || "").trim();
+  const cpuUsed = Number(profile.cpuUsed);
+  const threads = Number(profile.threads);
+  const crf = Number(profile.crf);
+
+  args.push("-c:v", codec);
+  if (codec.includes("vp9")) {
+    args.push("-row-mt", "1");
+  }
+  if (deadline) {
+    args.push("-deadline", deadline);
+  }
+  if (Number.isFinite(cpuUsed)) {
+    args.push("-cpu-used", String(cpuUsed));
+  }
+  if (Number.isFinite(threads) && threads > 0) {
+    args.push("-threads", String(threads));
+  }
+  args.push(
     "-crf",
-    String(END_SCENE_VP9_CRF),
+    String(Number.isFinite(crf) ? crf : END_SCENE_VP9_CRF),
     "-b:v",
     "0",
-    outRelativePath,
-  ];
-  await runProcess(ffmpegPath, args, { cwd });
+  );
 }
 
 function runProcess(command, args, options = {}) {
