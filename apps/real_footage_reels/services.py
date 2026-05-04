@@ -27,6 +27,9 @@ class ReelRenderService:
     _cli_path = _workflow_root / "src" / "cli.mjs"
     _bridge_path = _workflow_root / "scripts" / "django-workflow-bridge.mjs"
     _runs_root = _workflow_root / "runs"
+    _workflow_package_json = _workflow_root / "package.json"
+    _workflow_node_modules = _workflow_root / "node_modules"
+    _node_bin = os.environ.get("NODE_BIN", "node")
     _PHASE_PERCENT = {
         "queued": 2,
         "download": 18,
@@ -211,6 +214,7 @@ class ReelRenderService:
     def _run_bridge_workflow(cls, job: ReelRenderJob, *, command: str, run_dir: Path, run_id: str) -> dict:
         if not cls._bridge_path.exists():
             raise RuntimeError(f"Workflow bridge not found at: {cls._bridge_path}")
+        cls._ensure_node_runtime_ready()
 
         payload = dict(job.payload or {})
         payload["command"] = command
@@ -229,7 +233,7 @@ class ReelRenderService:
             payload_file = tmp.name
 
         cmd = [
-            "node",
+            cls._node_bin,
             str(cls._bridge_path),
             "--payload",
             payload_file,
@@ -320,6 +324,7 @@ class ReelRenderService:
     ) -> dict:
         if not cls._bridge_path.exists():
             raise RuntimeError(f"Workflow bridge not found at: {cls._bridge_path}")
+        cls._ensure_node_runtime_ready()
 
         payload = {
             "command": "thumbnail",
@@ -345,7 +350,7 @@ class ReelRenderService:
             payload_file = tmp.name
 
         cmd = [
-            "node",
+            cls._node_bin,
             str(cls._bridge_path),
             "--payload",
             payload_file,
@@ -423,10 +428,11 @@ class ReelRenderService:
     def _start_pipeline_process(cls, job: ReelRenderJob, *, command: str, run_dir: Path) -> subprocess.Popen:
         if not cls._cli_path.exists():
             raise RuntimeError(f"Workflow CLI not found at: {cls._cli_path}")
+        cls._ensure_node_runtime_ready()
 
         payload = job.payload or {}
         cmd = [
-            "node",
+            cls._node_bin,
             str(cls._cli_path),
             command,
             "--url",
@@ -453,6 +459,16 @@ class ReelRenderService:
             encoding="utf-8",
             errors="replace",
         )
+
+    @classmethod
+    def _ensure_node_runtime_ready(cls) -> None:
+        if not cls._workflow_package_json.exists():
+            raise RuntimeError(f"workflow_engine package.json not found: {cls._workflow_package_json}")
+        if not cls._workflow_node_modules.exists():
+            raise RuntimeError(
+                "workflow_engine/node_modules is missing. "
+                "Run: `cd apps/real_footage_reels/workflow_engine && npm ci` on the server."
+            )
 
     @classmethod
     def _stream_process_output(cls, job: ReelRenderJob, proc: subprocess.Popen) -> None:
