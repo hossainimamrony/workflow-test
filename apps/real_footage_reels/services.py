@@ -622,7 +622,13 @@ class ReelRenderService:
                     "stockId": r.stock_id,
                     "listingPrice": r.listing_price,
                     "status": r.status,
-                    "error": r.error or "",
+                    # ReelRun has no DB-level `error` field in older/live schemas.
+                    # Keep API backward-compatible by deriving error text safely.
+                    "error": (
+                        str(getattr(r, "error", "") or "").strip()
+                        or str((r.report or {}).get("error", "")).strip()
+                        or str((r.report or {}).get("lastError", "")).strip()
+                    ),
                     "pipeline": (r.report or {}).get("pipeline", {}),
                     "stats": {
                         "downloads": int((r.report or {}).get("stats", {}).get("downloads", 0)),

@@ -1,10 +1,12 @@
 import mimetypes
 import re
+import traceback
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from django.http import FileResponse, Http404, HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
+from django.conf import settings
 from django.views import View
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -248,6 +250,12 @@ class JobsApiView(APIView):
             job = ReelRenderService.start_job(payload)
         except RuntimeError as exc:
             return Response({"error": str(exc)}, status=409)
+        except Exception as exc:  # pragma: no cover - defensive error surface for UI debugging
+            message = f"{exc.__class__.__name__}: {exc}"
+            body = {"error": message}
+            if bool(getattr(settings, "DEBUG", False)):
+                body["traceback"] = traceback.format_exc()
+            return Response(body, status=500)
 
         return Response(ReelRenderService._job_to_public(job), status=202)
 
