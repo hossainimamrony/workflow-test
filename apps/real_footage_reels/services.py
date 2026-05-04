@@ -28,6 +28,7 @@ class ReelRenderService:
     _bridge_path = _workflow_root / "scripts" / "django-workflow-bridge.mjs"
     _runs_root = _workflow_root / "runs"
     _workflow_package_json = _workflow_root / "package.json"
+    _workflow_env_file = _workflow_root / ".env"
     _workflow_node_modules = _workflow_root / "node_modules"
     _node_bin = os.environ.get("NODE_BIN", "node")
     _PHASE_PERCENT = {
@@ -470,6 +471,89 @@ class ReelRenderService:
                 "Run: `cd apps/real_footage_reels/workflow_engine && npm ci` on the server."
             )
 
+    @staticmethod
+    def _is_placeholder_secret(value: str) -> bool:
+        normalized = str(value or "").strip().lower()
+        placeholders = {
+            "",
+            "your_gemini_api_key_here",
+            "your_api_key_here",
+            "paste_your_gemini_api_key_here",
+            "replace_with_your_gemini_api_key",
+            "replace_me",
+            "changeme",
+        }
+        return normalized in placeholders
+
+    @classmethod
+    def workflow_debug_status(cls) -> dict:
+        env_key = str(os.environ.get("GEMINI_API_KEY", "") or "").strip()
+        env_has_gemini = not cls._is_placeholder_secret(env_key)
+        file_has_gemini = False
+        env_file_exists = cls._workflow_env_file.exists()
+        env_file_error = ""
+        if env_file_exists:
+            try:
+                for raw_line in cls._workflow_env_file.read_text(encoding="utf-8").splitlines():
+                    line = raw_line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, value = line.split("=", 1)
+                    if key.strip() == "GEMINI_API_KEY":
+                        cleaned = value.strip().strip('"').strip("'")
+                        file_has_gemini = not cls._is_placeholder_secret(cleaned)
+                        break
+            except Exception as exc:  # noqa: BLE001
+                env_file_error = str(exc)
+
+        node_ok = False
+        node_version = ""
+        node_error = ""
+        try:
+            proc = subprocess.run(
+                [cls._node_bin, "--version"],
+                cwd=str(cls._workflow_root),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=8,
+                check=False,
+            )
+            if proc.returncode == 0:
+                node_ok = True
+                node_version = str(proc.stdout or "").strip() or str(proc.stderr or "").strip()
+            else:
+                node_error = str(proc.stderr or proc.stdout or "").strip() or f"node exited with {proc.returncode}"
+        except Exception as exc:  # noqa: BLE001
+            node_error = str(exc)
+
+        active_jobs = ReelRenderJob.objects.filter(status__in=["queued", "running"]).count()
+        return {
+            "node": {
+                "bin": cls._node_bin,
+                "ok": node_ok,
+                "version": node_version,
+                "error": node_error,
+            },
+            "workflow": {
+                "root": str(cls._workflow_root),
+                "bridgeExists": cls._bridge_path.exists(),
+                "packageJsonExists": cls._workflow_package_json.exists(),
+                "nodeModulesExists": cls._workflow_node_modules.exists(),
+            },
+            "keys": {
+                "geminiInProcessEnv": env_has_gemini,
+                "geminiInDotEnv": file_has_gemini,
+                "envFileExists": env_file_exists,
+                "envFileError": env_file_error,
+            },
+            "jobs": {
+                "activeCount": active_jobs,
+                "maxParallelJobs": cls._max_parallel_jobs,
+            },
+        }
+
     @classmethod
     def _stream_process_output(cls, job: ReelRenderJob, proc: subprocess.Popen) -> None:
         stream = proc.stdout
@@ -643,6 +727,7 @@ class ReelRenderService:
     @staticmethod
     def runs_payload() -> dict:
         try:
+            ReelRenderService._recover_stale_jobs()
             runs = ReelRun.objects.all()[:100]
         except (OperationalError, ProgrammingError):
             return {"runs": []}

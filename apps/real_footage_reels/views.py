@@ -282,6 +282,14 @@ class RunsApiView(APIView):
         return Response(ReelRenderService.runs_payload())
 
 
+class WorkflowDebugApiView(APIView):
+    def get(self, request):
+        try:
+            return Response(ReelRenderService.workflow_debug_status())
+        except Exception as exc:  # pragma: no cover - defensive diagnostics endpoint
+            return Response({"error": f"{exc.__class__.__name__}: {exc}"}, status=500)
+
+
 class RunDeleteApiView(APIView):
     def delete(self, request, run_id):
         deleted = ReelRenderService.delete_run(run_id)
