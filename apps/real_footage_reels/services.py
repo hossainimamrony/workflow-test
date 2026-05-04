@@ -60,6 +60,25 @@ class ReelRenderService:
         "run": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_RUN_SEC", "2400") or "2400"),
     }
 
+    @classmethod
+    def _initial_run_report(cls, *, command: str, run_id: str) -> dict:
+        return {
+            "pipeline": {
+                "download": {"done": False},
+                "frames": {"done": False},
+                "prepare": {"done": False},
+                "analyze": {"done": False},
+                "render": {"done": False},
+            },
+            "stats": {"downloads": 0, "frames": 0, "analyzed": 0, "planned": 0},
+            "runDir": str((cls._runs_root / run_id)),
+            "command": command,
+            "voiceoverDraft": {"variants": []},
+            "voiceoverStatus": "",
+            "hasVoiceover": False,
+            "videos": [],
+        }
+
     @staticmethod
     def _is_pythonanywhere() -> bool:
         keys = ("PYTHONANYWHERE_SITE", "PYTHONANYWHERE_DOMAIN", "PYTHONANYWHERE_HOME")
@@ -105,30 +124,37 @@ class ReelRenderService:
                 resume_run_id = str(normalized_payload.get("resumeRunId", "")).strip()
                 run_id = resume_run_id or f"{datetime.utcnow().strftime('%Y-%m-%dT%H-%M-%S')}-{uuid.uuid4().hex[:4]}"
                 normalized_payload["runId"] = run_id
+                existing_run = ReelRun.objects.filter(run_id=run_id).first()
+                existing_report = (
+                    dict(existing_run.report)
+                    if existing_run and isinstance(existing_run.report, dict)
+                    else {}
+                )
+                if existing_report:
+                    existing_report.setdefault("runDir", str((cls._runs_root / run_id)))
+                    existing_report["command"] = command or str(existing_report.get("command", "")).strip()
+                run_report = existing_report or cls._initial_run_report(command=command, run_id=run_id)
+                listing_title = str(normalized_payload.get("listingTitle", "")).strip() or (
+                    existing_run.listing_title if existing_run else ""
+                )
+                stock_id = str(normalized_payload.get("stockId", "")).strip() or (
+                    existing_run.stock_id if existing_run else ""
+                )
+                car_description = str(normalized_payload.get("carDescription", "")).strip() or (
+                    existing_run.car_description if existing_run else ""
+                )
+                listing_price = str(normalized_payload.get("listingPrice", "")).strip() or (
+                    existing_run.listing_price if existing_run else ""
+                )
                 ReelRun.objects.update_or_create(
                     run_id=run_id,
                     defaults={
-                        "listing_title": str(normalized_payload.get("listingTitle", "")).strip(),
-                        "stock_id": str(normalized_payload.get("stockId", "")).strip(),
-                        "car_description": str(normalized_payload.get("carDescription", "")).strip(),
-                        "listing_price": str(normalized_payload.get("listingPrice", "")).strip(),
+                        "listing_title": listing_title,
+                        "stock_id": stock_id,
+                        "car_description": car_description,
+                        "listing_price": listing_price,
                         "status": "queued",
-                        "report": {
-                            "pipeline": {
-                                "download": {"done": False},
-                                "frames": {"done": False},
-                                "prepare": {"done": False},
-                                "analyze": {"done": False},
-                                "render": {"done": False},
-                            },
-                            "stats": {"downloads": 0, "frames": 0, "analyzed": 0, "planned": 0},
-                            "runDir": str((cls._runs_root / run_id)),
-                            "command": command,
-                            "voiceoverDraft": {"variants": []},
-                            "voiceoverStatus": "",
-                            "hasVoiceover": False,
-                            "videos": [],
-                        },
+                        "report": run_report,
                     },
                 )
                 job = ReelRenderJob.objects.create(
