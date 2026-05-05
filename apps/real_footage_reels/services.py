@@ -779,6 +779,7 @@ class ReelRenderService:
         voiceover_draft_manifest = cls._read_json(run_dir / "voiceover-script-draft.json") or {}
         voiceover_status_manifest = cls._read_json(run_dir / "voiceover-status.json") or {}
         voiceover_manifest = cls._read_json(run_dir / "voiceover-manifest.json") or {}
+        publish_manifest = cls._read_json(run_dir / "final-reel-publish.json") or {}
 
         downloaded_videos = downloads_manifest.get("videos", []) if isinstance(downloads_manifest, dict) else []
         framed_videos = frames_manifest.get("videos", []) if isinstance(frames_manifest, dict) else []
@@ -800,6 +801,13 @@ class ReelRenderService:
             else []
         )
         has_voiceover = isinstance(voiceover_manifest, dict) and bool(voiceover_manifest)
+        remote_final_url = (
+            str((publish_manifest or {}).get("cdnUrl", "")).strip()
+            if isinstance(publish_manifest, dict)
+            else ""
+        )
+        if not remote_final_url.lower().startswith(("http://", "https://")):
+            remote_final_url = ""
         voiceover_status = (
             "applied"
             if has_voiceover
@@ -840,7 +848,10 @@ class ReelRenderService:
             "voiceoverLastError": str((voiceover_status_manifest or {}).get("lastError", "")).strip(),
             "hasVoiceover": has_voiceover,
             "mainReelUrl": str(main_reel_mp4 if main_reel_mp4.exists() else (main_reel_webm if main_reel_webm.exists() else "")),
-            "finalReelUrl": str(final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")),
+            "finalReelUrl": remote_final_url or str(
+                final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")
+            ),
+            "finalReelRemoteUrl": remote_final_url,
             "finalReelPreviewUrl": str(final_reel_preview_mp4) if final_reel_preview_mp4.exists() else "",
             "finalReelWebmUrl": str(final_reel_webm) if final_reel_webm.exists() else "",
             "videos": analyzed_clips if analyzed_clips else framed_videos,

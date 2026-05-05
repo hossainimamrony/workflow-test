@@ -196,6 +196,46 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(input.publishWebm, env.FINAL_REEL_PUBLISH_WEBM, process.env.FINAL_REEL_PUBLISH_WEBM),
     false,
   );
+  const finalReelRemoteUploadEnabled = parseBooleanLike(
+    firstEnv(
+      input.finalReelRemoteUploadEnabled,
+      env.FINAL_REEL_REMOTE_UPLOAD_ENABLED,
+      process.env.FINAL_REEL_REMOTE_UPLOAD_ENABLED,
+    ),
+    false,
+  );
+  const finalReelUploadEndpoint = String(
+    firstEnv(
+      input.finalReelUploadEndpoint,
+      env.FINAL_REEL_UPLOAD_ENDPOINT,
+      process.env.FINAL_REEL_UPLOAD_ENDPOINT,
+      "https://www.cbs.s1.carbarn.com.au/carbarnau/s3/uploadfiles",
+    ),
+  ).trim();
+  const finalReelUploadDirectory = String(
+    firstEnv(
+      input.finalReelUploadDirectory,
+      env.FINAL_REEL_UPLOAD_DIRECTORY,
+      process.env.FINAL_REEL_UPLOAD_DIRECTORY,
+      "social-media-content/reels",
+    ),
+  ).trim();
+  const finalReelCdnBase = String(
+    firstEnv(
+      input.finalReelCdnBase,
+      env.FINAL_REEL_CDN_BASE,
+      process.env.FINAL_REEL_CDN_BASE,
+      "https://www.storage.importautos.com.au/social-media-content/reels",
+    ),
+  ).trim();
+  const finalReelUploadTimeoutMs = numberValue(
+    firstEnv(
+      input.finalReelUploadTimeoutMs,
+      env.FINAL_REEL_UPLOAD_TIMEOUT_MS,
+      process.env.FINAL_REEL_UPLOAD_TIMEOUT_MS,
+    ),
+    180000,
+  );
 
   if (strictEndScene) {
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);
@@ -291,6 +331,11 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     previewPreset,
     previewAudioBitrate,
     publishWebm,
+    finalReelRemoteUploadEnabled,
+    finalReelUploadEndpoint,
+    finalReelUploadDirectory,
+    finalReelCdnBase,
+    finalReelUploadTimeoutMs,
     endSceneSupersample,
     /** Skip this many seconds at the start of each source clip before sampling/composing. */
     clipStartSkipSeconds: clampClipStartSkipSeconds(

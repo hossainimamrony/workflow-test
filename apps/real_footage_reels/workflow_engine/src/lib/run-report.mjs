@@ -32,6 +32,7 @@ export async function buildRunReport(runDir, rootDir) {
   const voiceoverStatusManifest = await readJsonIfExists(path.join(runDir, "voiceover-status.json"));
   const voiceoverScriptDraft = await readJsonIfExists(path.join(runDir, "voiceover-script-draft.json"));
   const endSceneManifest = await readJsonIfExists(path.join(runDir, "end-scene-manifest.json"));
+  const finalReelPublishManifest = await readJsonIfExists(path.join(runDir, "final-reel-publish.json"));
 
   if (!downloadsManifest && !framesManifest && !analysisManifest && !reelPlan) {
     return null;
@@ -45,6 +46,7 @@ export async function buildRunReport(runDir, rootDir) {
   const finalReelWebmPath = await fileIfExists(path.join(runDir, "final-reel.webm"));
   const finalReelMp4Path = await fileIfExists(path.join(runDir, "final-reel.mp4"));
   const finalReelPreviewPath = await fileIfExists(path.join(runDir, "final-reel-preview.mp4"));
+  const finalReelRemoteUrl = normalizeRemoteUrl(finalReelPublishManifest?.cdnUrl);
   const finalReelPath = finalReelMp4Path ?? finalReelWebmPath;
   const finalReelVersion = finalReelPath ? await fileVersionIfExists(finalReelPath) : null;
   const finalReelWebmVersion = finalReelWebmPath ? await fileVersionIfExists(finalReelWebmPath) : null;
@@ -117,8 +119,9 @@ export async function buildRunReport(runDir, rootDir) {
       null,
     hasAnalysis: Boolean(analysisManifest),
     hasPlan: Boolean(reelPlan),
-    finalReelUrl: finalReelPath ? toPublicFileUrl(finalReelPath, rootDir) : null,
+    finalReelUrl: finalReelRemoteUrl || (finalReelPath ? toPublicFileUrl(finalReelPath, rootDir) : null),
     finalReelVersion,
+    finalReelRemoteUrl,
     finalReelPreviewUrl: finalReelPreviewPath ? toPublicFileUrl(finalReelPreviewPath, rootDir) : null,
     finalReelPreviewVersion,
     finalReelWebmUrl: finalReelWebmPath ? toPublicFileUrl(finalReelWebmPath, rootDir) : null,
@@ -149,6 +152,13 @@ export async function buildRunReport(runDir, rootDir) {
         }
       : null,
   };
+}
+
+function normalizeRemoteUrl(value) {
+  const url = String(value ?? "").trim();
+  if (!url) return null;
+  if (!/^https?:\/\//iu.test(url)) return null;
+  return url;
 }
 
 function enrichPlanItem(item, context) {

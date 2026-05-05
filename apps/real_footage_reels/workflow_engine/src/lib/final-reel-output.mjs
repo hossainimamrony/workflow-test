@@ -4,6 +4,7 @@ import process from "node:process";
 import { spawn } from "node:child_process";
 
 const PREVIEW_FILE_NAME = "final-reel-preview.mp4";
+const FINAL_REEL_PUBLISH_MANIFEST = "final-reel-publish.json";
 
 export async function publishFinalReelMp4(runDir, ffmpegPath, log = () => {}, config = {}) {
   const normalizedDir = path.resolve(runDir);
@@ -93,6 +94,14 @@ export async function publishFinalReelMp4(runDir, ffmpegPath, log = () => {}, co
   );
   if (keepWebm) {
     await publishWebmFromMp4(normalizedDir, ffmpegPath, log, config);
+  }
+
+  const remoteUploadEnabled = parseBooleanLike(
+    config.finalReelRemoteUploadEnabled ?? process.env.FINAL_REEL_REMOTE_UPLOAD_ENABLED,
+    false,
+  );
+  if (remoteUploadEnabled) {
+    await publishFinalReelToRemote(normalizedDir, log, config);
   }
 
   return publishedPath;
@@ -214,12 +223,133 @@ async function publishWebmFromMp4(runDir, ffmpegPath, log = () => {}, config = {
   return outPath;
 }
 
+async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
+  const sourcePath = path.join(runDir, "final-reel.mp4");
+  const sourceStats = await statIfExists(sourcePath);
+  if (!sourceStats) {
+    return null;
+  }
+
+  const endpoint = String(
+    config.finalReelUploadEndpoint ??
+      process.env.FINAL_REEL_UPLOAD_ENDPOINT ??
+      "https://www.cbs.s1.carbarn.com.au/carbarnau/s3/uploadfiles",
+  ).trim();
+  const directory = String(
+    config.finalReelUploadDirectory ??
+      process.env.FINAL_REEL_UPLOAD_DIRECTORY ??
+      "social-media-content/reels",
+  ).trim().replace(/^\/+|\/+$/gu, "");
+  const cdnBase = String(
+    config.finalReelCdnBase ??
+      process.env.FINAL_REEL_CDN_BASE ??
+      "https://www.storage.importautos.com.au/social-media-content/reels",
+  ).trim().replace(/\/+$/gu, "");
+
+  if (!endpoint || !directory || !cdnBase) {
+    return null;
+  }
+
+  const sourceMtime = Math.trunc(sourceStats.mtimeMs);
+  const manifestPath = path.join(runDir, FINAL_REEL_PUBLISH_MANIFEST);
+  const existing = await readJsonIfExists(manifestPath);
+  if (
+    existing &&
+    Number(existing.sourceMtimeMs) === sourceMtime &&
+    String(existing.cdnUrl || "").startsWith("http")
+  ) {
+    return existing.cdnUrl;
+  }
+
+  const runId = path.basename(path.resolve(runDir));
+  const fileName = sanitizeRemoteFileName(`${runId}-final-reel.mp4`);
+  const cdnUrl = `${cdnBase}/${encodeURIComponent(fileName)}`;
+  const timeoutMs = Number(
+    config.finalReelUploadTimeoutMs ?? process.env.FINAL_REEL_UPLOAD_TIMEOUT_MS ?? 180000,
+  );
+
+  log(`Uploading final reel to remote storage (${directory}/${fileName})...`);
+  const bytes = await fs.readFile(sourcePath);
+  const form = new FormData();
+  form.set("directory", directory);
+  form.set("file", new Blob([bytes], { type: "video/mp4" }), fileName);
+
+  const url = new URL(endpoint);
+  url.searchParams.set("directory", directory);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Math.max(5000, timeoutMs || 180000));
+  let response;
+  let responseText = "";
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      body: form,
+      signal: controller.signal,
+    });
+    responseText = await response.text();
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!response?.ok) {
+    throw new Error(
+      `Remote upload failed (${response?.status || "no-status"}): ${String(responseText || "").slice(0, 500)}`,
+    );
+  }
+
+  await fs.writeFile(
+    manifestPath,
+    `${JSON.stringify({
+      createdAt: new Date().toISOString(),
+      sourcePath,
+      sourceMtimeMs: sourceMtime,
+      fileName,
+      directory,
+      endpoint,
+      cdnBase,
+      cdnUrl,
+      remoteResponse: tryParseJson(responseText) ?? responseText.slice(0, 2000),
+    }, null, 2)}\n`,
+    "utf8",
+  );
+  log(`Remote final reel ready: ${cdnUrl}`);
+  return cdnUrl;
+}
+
 function parseBooleanLike(value, fallback = false) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (!normalized) return fallback;
   if (["1", "true", "yes", "y", "on"].includes(normalized)) return true;
   if (["0", "false", "no", "n", "off"].includes(normalized)) return false;
   return fallback;
+}
+
+function sanitizeRemoteFileName(value) {
+  return String(value || "final-reel.mp4")
+    .trim()
+    .replace(/[^a-z0-9._-]+/giu, "-")
+    .replace(/-+/gu, "-")
+    .replace(/^-|-$/gu, "") || "final-reel.mp4";
+}
+
+function tryParseJson(value) {
+  const text = String(value || "").trim();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+async function readJsonIfExists(filePath) {
+  try {
+    const raw = await fs.readFile(filePath, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }
 
 async function statIfExists(filePath) {

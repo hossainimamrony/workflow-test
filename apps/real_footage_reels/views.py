@@ -100,6 +100,8 @@ def _resolve_report_asset_path(run_dir_value: str, raw_value: str) -> str:
         return ""
 
     parsed = urlparse(value)
+    if parsed.scheme in {"http", "https"}:
+        return value
     if parsed.path.endswith("/api/file"):
         encoded = parse_qs(parsed.query).get("path", [""])[0]
         value = unquote(str(encoded or "")).strip()
@@ -132,6 +134,11 @@ def _resolve_report_asset_path(run_dir_value: str, raw_value: str) -> str:
         return value
 
     return str((run_dir / normalized).resolve())
+
+
+def _is_remote_http_url(value: str) -> bool:
+    parsed = urlparse(str(value or "").strip())
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
 def _resolve_run_dir_path(run_dir_value: str) -> Path | None:
@@ -198,6 +205,13 @@ class WorkflowHomeView(View):
 
 class MetaApiView(APIView):
     def get(self, request):
+        final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
+        final_reel_url = ""
+        if _is_remote_http_url(final_reel_url_value):
+            final_reel_url = final_reel_url_value
+        elif final_reel_path:
+            final_reel_url = _asset_url(run_id, final_reel_path)
+
         return Response(
             {
                 "appName": "AU Real Footage Reels",
@@ -368,7 +382,8 @@ class RunDetailApiView(APIView):
                 "voiceoverStatus": report.get("voiceoverStatus", ""),
                 "hasVoiceover": bool(report.get("hasVoiceover", False)),
                 "mainReelUrl": _asset_url(run_id, main_reel_path) if main_reel_path else "",
-                "finalReelUrl": _asset_url(run_id, final_reel_path) if final_reel_path else "",
+                "finalReelUrl": final_reel_url,
+                "finalReelRemoteUrl": str(report.get("finalReelRemoteUrl") or "").strip(),
                 "finalReelPreviewUrl": _asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
                 "finalReelWebmUrl": _asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
                 "videos": decorated_videos,
