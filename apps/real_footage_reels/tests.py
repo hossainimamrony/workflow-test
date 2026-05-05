@@ -186,6 +186,41 @@ class RunDetailAssetResolutionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("listingTitle"), "Title From Report")
 
+    def test_run_detail_keeps_remote_preview_and_final_urls(self):
+        run_id = "test-run-remote-preview"
+        run_dir = Path(__file__).resolve().parent / "workflow_engine" / "runs" / run_id
+        report = {
+            "runDir": str(run_dir),
+            "pipeline": {"download": {"done": True}, "frames": {"done": True}, "analyze": {"done": True}, "render": {"done": True}},
+            "stats": {"downloads": 1, "frames": 1, "analyzed": 1, "planned": 1},
+            "finalReelUrl": "https://cdn.example.com/reels/test-run-remote-preview-final-reel.mp4",
+            "finalReelPreviewUrl": "https://cdn.example.com/reels/test-run-remote-preview-final-reel-preview.mp4",
+            "finalReelRemoteUploadOk": True,
+            "videos": [],
+            "plan": {"sequence": [], "composition": {"segments": []}},
+        }
+        ReelRun.objects.create(
+            run_id=run_id,
+            listing_title="Remote listing",
+            stock_id="1004",
+            car_description="Test",
+            listing_price="AU$1",
+            status="completed",
+            report=report,
+        )
+
+        response = self.client.get(f"/workflows/real-footage-reels/api/runs/{run_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(
+            data.get("finalReelUrl"),
+            "https://cdn.example.com/reels/test-run-remote-preview-final-reel.mp4",
+        )
+        self.assertEqual(
+            data.get("finalReelPreviewUrl"),
+            "https://cdn.example.com/reels/test-run-remote-preview-final-reel-preview.mp4",
+        )
+
     def test_run_detail_resolves_legacy_run_dir_to_workflow_engine(self):
         run_id = "test-run-legacy-path"
         app_dir = Path(__file__).resolve().parent

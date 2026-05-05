@@ -86,6 +86,15 @@ def _asset_url(run_id: str, abs_path: str) -> str:
     return f"/workflows/real-footage-reels/api/runs/{run_id}/asset?path={encoded}"
 
 
+def _as_public_asset_url(run_id: str, resolved_path_or_url: str) -> str:
+    value = str(resolved_path_or_url or "").strip()
+    if not value:
+        return ""
+    if _is_remote_http_url(value):
+        return value
+    return _asset_url(run_id, value)
+
+
 def _pick_path(item: dict, *keys: str) -> str:
     for key in keys:
         value = item.get(key)
@@ -141,6 +150,37 @@ def _is_remote_http_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
+def _is_empty_report_value(value) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return not value.strip()
+    if isinstance(value, (list, tuple, set, dict)):
+        return len(value) == 0
+    return False
+
+
+def _merge_report_prefer_non_empty(base_report: dict, live_report: dict) -> dict:
+    merged = {**base_report, **live_report}
+    preserve_if_live_empty = (
+        "mainReelUrl",
+        "finalReelUrl",
+        "finalReelRemoteUrl",
+        "finalReelPreviewUrl",
+        "finalReelWebmUrl",
+        "videos",
+        "plan",
+        "voiceoverDraft",
+    )
+    for key in preserve_if_live_empty:
+        live_value = live_report.get(key)
+        if _is_empty_report_value(live_value):
+            base_value = base_report.get(key)
+            if not _is_empty_report_value(base_value):
+                merged[key] = base_value
+    return merged
+
+
 def _resolve_run_dir_path(run_dir_value: str) -> Path | None:
     run_dir_text = str(run_dir_value or "").strip()
     if not run_dir_text:
@@ -184,8 +224,8 @@ def _decorate_media_item(run_id: str, run_dir_value: str, item: dict) -> dict:
         frame_path = _resolve_report_asset_path(run_dir_value, _pick_path(item, "frameUrl"))
     return {
         **item,
-        "videoUrl": _asset_url(run_id, video_path) if video_path else "",
-        "frameUrl": _asset_url(run_id, frame_path) if frame_path else "",
+        "videoUrl": _as_public_asset_url(run_id, video_path) if video_path else "",
+        "frameUrl": _as_public_asset_url(run_id, frame_path) if frame_path else "",
     }
 
 
@@ -321,7 +361,7 @@ class RunDetailApiView(APIView):
                 str(report.get("command", "run")).strip() or "run",
             )
             if isinstance(live_report, dict) and live_report:
-                report = {**report, **live_report}
+                report = _merge_report_prefer_non_empty(report, live_report)
         except Exception:
             # Keep API resilient while background processing is still writing files.
             pass
@@ -358,11 +398,13 @@ class RunDetailApiView(APIView):
         final_reel_webm_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelWebmUrl"))
         main_reel_path = _resolve_report_asset_path(run_dir_value, report.get("mainReelUrl"))
         final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
+        remote_upload_ok_value = report.get("finalReelRemoteUploadOk")
+        remote_upload_ok = None if remote_upload_ok_value is None else bool(remote_upload_ok_value)
         final_reel_url = ""
-        if _is_remote_http_url(final_reel_url_value):
+        if _is_remote_http_url(final_reel_url_value) and remote_upload_ok is not False:
             final_reel_url = final_reel_url_value
         elif final_reel_path:
-            final_reel_url = _asset_url(run_id, final_reel_path)
+            final_reel_url = _as_public_asset_url(run_id, final_reel_path)
         return Response(
             {
                 "runId": run.run_id,
@@ -379,11 +421,13 @@ class RunDetailApiView(APIView):
                 "voiceoverDraft": report.get("voiceoverDraft", {"variants": []}),
                 "voiceoverStatus": report.get("voiceoverStatus", ""),
                 "hasVoiceover": bool(report.get("hasVoiceover", False)),
-                "mainReelUrl": _asset_url(run_id, main_reel_path) if main_reel_path else "",
+                "mainReelUrl": _as_public_asset_url(run_id, main_reel_path) if main_reel_path else "",
                 "finalReelUrl": final_reel_url,
                 "finalReelRemoteUrl": str(report.get("finalReelRemoteUrl") or "").strip(),
-                "finalReelPreviewUrl": _asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
-                "finalReelWebmUrl": _asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
+                "finalReelRemoteUploadOk": bool(report.get("finalReelRemoteUploadOk", False)),
+                "finalReelRemoteError": str(report.get("finalReelRemoteError") or "").strip(),
+                "finalReelPreviewUrl": _as_public_asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
+                "finalReelWebmUrl": _as_public_asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
                 "videos": decorated_videos,
                 "plan": {
                     **plan,

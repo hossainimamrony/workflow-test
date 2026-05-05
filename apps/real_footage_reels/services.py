@@ -806,8 +806,25 @@ class ReelRenderService:
             if isinstance(publish_manifest, dict)
             else ""
         )
+        remote_preview_url = (
+            str((publish_manifest or {}).get("previewCdnUrl", "")).strip()
+            if isinstance(publish_manifest, dict)
+            else ""
+        )
         if not remote_final_url.lower().startswith(("http://", "https://")):
             remote_final_url = ""
+        if not remote_preview_url.lower().startswith(("http://", "https://")):
+            remote_preview_url = ""
+        remote_publish_ok = (
+            bool((publish_manifest or {}).get("ok"))
+            if isinstance(publish_manifest, dict)
+            else False
+        ) and bool(remote_final_url)
+        remote_publish_error = (
+            str((publish_manifest or {}).get("error", "")).strip()
+            if isinstance(publish_manifest, dict)
+            else ""
+        )
         voiceover_status = (
             "applied"
             if has_voiceover
@@ -852,7 +869,9 @@ class ReelRenderService:
                 final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")
             ),
             "finalReelRemoteUrl": remote_final_url,
-            "finalReelPreviewUrl": str(final_reel_preview_mp4) if final_reel_preview_mp4.exists() else "",
+            "finalReelRemoteUploadOk": remote_publish_ok,
+            "finalReelRemoteError": remote_publish_error,
+            "finalReelPreviewUrl": remote_preview_url or (str(final_reel_preview_mp4) if final_reel_preview_mp4.exists() else ""),
             "finalReelWebmUrl": str(final_reel_webm) if final_reel_webm.exists() else "",
             "videos": analyzed_clips if analyzed_clips else framed_videos,
         }

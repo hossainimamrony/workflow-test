@@ -530,6 +530,8 @@
     const analysisReady = Boolean(run?.pipeline?.analyze?.done);
     const priceIncludes = String(run.priceIncludes || (run.report && run.report.priceIncludes) || '').trim();
     const autoPrice = String(run.listingPrice || '').trim() || 'AU ';
+    const remotePublishError = String(run.finalReelRemoteError || '').trim();
+    const remotePublishFailed = run.finalReelRemoteUploadOk === false && Boolean(remotePublishError);
 
     if (!runDetailPanel) return;
     runDetailPanel.innerHTML = `
@@ -576,6 +578,7 @@
             ${run.carDescription ? `<details class="run-detail__description" open><summary>Description</summary><p class="run-detail__description-body">${esc(run.carDescription)}</p></details>` : ''}
             ${priceIncludes ? `<details class="run-detail__description" open><summary>Price Includes</summary><p class="run-detail__description-body">${esc(priceIncludes)}</p></details>` : ''}
             ${run.hasVoiceover && run.voiceoverScript ? `<details class="run-detail__voiceover" open><summary>Voice-over</summary><p class="run-detail__voiceover-body">${esc(run.voiceoverScript)}</p></details>` : ''}
+            ${remotePublishFailed ? `<div class="callout callout--warning"><div class="callout__copy"><strong>Remote download unavailable</strong><p>${esc(remotePublishError)}</p></div></div>` : ''}
           </div>
         </section>
 

@@ -204,6 +204,14 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     ),
     false,
   );
+  const finalReelRemoteUploadRequired = parseBooleanLike(
+    firstEnv(
+      input.finalReelRemoteUploadRequired,
+      env.FINAL_REEL_REMOTE_UPLOAD_REQUIRED,
+      process.env.FINAL_REEL_REMOTE_UPLOAD_REQUIRED,
+    ),
+    false,
+  );
   const finalReelUploadEndpoint = String(
     firstEnv(
       input.finalReelUploadEndpoint,
@@ -236,6 +244,103 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     ),
     180000,
   );
+  const finalReelRemoteProvider = String(
+    firstEnv(
+      input.finalReelRemoteProvider,
+      env.FINAL_REEL_REMOTE_PROVIDER,
+      process.env.FINAL_REEL_REMOTE_PROVIDER,
+      "",
+    ),
+  ).trim().toLowerCase();
+  const finalReelS3Bucket = String(
+    firstEnv(
+      input.finalReelS3Bucket,
+      env.FINAL_REEL_S3_BUCKET,
+      env.S3_BUCKET,
+      env["cloud.aws.s3.bucket"],
+      process.env.FINAL_REEL_S3_BUCKET,
+      process.env.S3_BUCKET,
+      process.env["cloud.aws.s3.bucket"],
+    ),
+  ).trim();
+  const finalReelS3Region = String(
+    firstEnv(
+      input.finalReelS3Region,
+      env.FINAL_REEL_S3_REGION,
+      env.AWS_REGION,
+      env.AWS_DEFAULT_REGION,
+      env["cloud.aws.region.static"],
+      process.env.FINAL_REEL_S3_REGION,
+      process.env.AWS_REGION,
+      process.env.AWS_DEFAULT_REGION,
+      process.env["cloud.aws.region.static"],
+      "ap-southeast-2",
+    ),
+  ).trim();
+  const finalReelS3AccessKeyId = String(
+    firstEnv(
+      input.finalReelS3AccessKeyId,
+      env.FINAL_REEL_S3_ACCESS_KEY_ID,
+      env.AWS_ACCESS_KEY_ID,
+      env["cloud.aws.credentials.accessKey"],
+      process.env.FINAL_REEL_S3_ACCESS_KEY_ID,
+      process.env.AWS_ACCESS_KEY_ID,
+      process.env["cloud.aws.credentials.accessKey"],
+    ),
+  ).trim();
+  const finalReelS3SecretAccessKey = String(
+    firstEnv(
+      input.finalReelS3SecretAccessKey,
+      env.FINAL_REEL_S3_SECRET_ACCESS_KEY,
+      env.AWS_SECRET_ACCESS_KEY,
+      env["cloud.aws.credentials.secretKey"],
+      process.env.FINAL_REEL_S3_SECRET_ACCESS_KEY,
+      process.env.AWS_SECRET_ACCESS_KEY,
+      process.env["cloud.aws.credentials.secretKey"],
+    ),
+  ).trim();
+  const finalReelS3SessionToken = String(
+    firstEnv(
+      input.finalReelS3SessionToken,
+      env.FINAL_REEL_S3_SESSION_TOKEN,
+      env.AWS_SESSION_TOKEN,
+      process.env.FINAL_REEL_S3_SESSION_TOKEN,
+      process.env.AWS_SESSION_TOKEN,
+    ),
+  ).trim();
+  const finalReelS3Prefix = String(
+    firstEnv(
+      input.finalReelS3Prefix,
+      env.FINAL_REEL_S3_PREFIX,
+      process.env.FINAL_REEL_S3_PREFIX,
+      finalReelUploadDirectory,
+    ),
+  ).trim();
+  const finalReelS3PublicBaseUrl = String(
+    firstEnv(
+      input.finalReelS3PublicBaseUrl,
+      env.FINAL_REEL_S3_PUBLIC_BASE_URL,
+      process.env.FINAL_REEL_S3_PUBLIC_BASE_URL,
+      "",
+    ),
+  ).trim();
+  const finalReelS3Acl = String(
+    firstEnv(
+      input.finalReelS3Acl,
+      env.FINAL_REEL_S3_ACL,
+      process.env.FINAL_REEL_S3_ACL,
+      "",
+    ),
+  ).trim();
+  const finalReelRemoteProviderFinal =
+    finalReelRemoteProvider ||
+    (
+      finalReelS3Bucket &&
+      finalReelS3AccessKeyId &&
+      finalReelS3SecretAccessKey
+        ? "s3"
+        : "multipart"
+    );
 
   if (strictEndScene) {
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);
@@ -332,10 +437,20 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     previewAudioBitrate,
     publishWebm,
     finalReelRemoteUploadEnabled,
+    finalReelRemoteUploadRequired,
+    finalReelRemoteProvider: finalReelRemoteProviderFinal,
     finalReelUploadEndpoint,
     finalReelUploadDirectory,
     finalReelCdnBase,
     finalReelUploadTimeoutMs,
+    finalReelS3Bucket,
+    finalReelS3Region,
+    finalReelS3AccessKeyId,
+    finalReelS3SecretAccessKey,
+    finalReelS3SessionToken,
+    finalReelS3Prefix,
+    finalReelS3PublicBaseUrl,
+    finalReelS3Acl,
     endSceneSupersample,
     /** Skip this many seconds at the start of each source clip before sampling/composing. */
     clipStartSkipSeconds: clampClipStartSkipSeconds(
