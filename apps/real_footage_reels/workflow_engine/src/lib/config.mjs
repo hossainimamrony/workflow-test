@@ -17,6 +17,9 @@ const DEFAULT_END_SCENE_DURATION_SECONDS = 3.5;
 const DEFAULT_MAX_TOTAL_REEL_DURATION_SECONDS = 17;
 const DEFAULT_CLIP_START_SKIP_SECONDS = 2;
 const MAX_CLIP_START_SKIP_SECONDS = 2;
+const DEFAULT_MP4_VIDEO_CODEC = "libx264";
+const DEFAULT_MP4_PRESET = "medium";
+const DEFAULT_MP4_CRF = 18;
 const GEMINI_KEY_PLACEHOLDERS = new Set([
   "",
   "your_gemini_api_key_here",
@@ -95,6 +98,37 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(input.webmThreads, env.WEBM_THREADS, process.env.WEBM_THREADS),
     fastRender ? 2 : null,
   );
+  const mp4VideoCodec = String(
+    firstEnv(
+      input.mp4VideoCodec,
+      env.MP4_VIDEO_CODEC,
+      process.env.MP4_VIDEO_CODEC,
+      DEFAULT_MP4_VIDEO_CODEC,
+    ),
+  ).trim() || DEFAULT_MP4_VIDEO_CODEC;
+  const mp4Preset = String(
+    firstEnv(
+      input.mp4Preset,
+      env.MP4_PRESET,
+      process.env.MP4_PRESET,
+      DEFAULT_MP4_PRESET,
+    ),
+  ).trim() || DEFAULT_MP4_PRESET;
+  const mp4Crf = numberValue(
+    firstEnv(input.mp4Crf, env.MP4_CRF, process.env.MP4_CRF),
+    fastRender ? 20 : DEFAULT_MP4_CRF,
+  );
+  const mp4Threads = numberValue(
+    firstEnv(
+      input.mp4Threads,
+      env.MP4_THREADS,
+      process.env.MP4_THREADS,
+      input.webmThreads,
+      env.WEBM_THREADS,
+      process.env.WEBM_THREADS,
+    ),
+    fastRender ? 2 : null,
+  );
   const rawWebmCodec = firstEnv(input.webmCodec, env.WEBM_CODEC, process.env.WEBM_CODEC);
   const rawEndSceneSupersample = firstEnv(
     input.endSceneSupersample,
@@ -123,6 +157,45 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
   let webmCpuUsedFinal = Number.isFinite(Number(webmCpuUsed)) ? Number(webmCpuUsed) : (fastRender ? 5 : null);
   let webmDeadlineFinal = webmDeadline;
   let webmThreadsFinal = Number.isFinite(Number(webmThreads)) ? Number(webmThreads) : null;
+  let mp4VideoCodecFinal = mp4VideoCodec || DEFAULT_MP4_VIDEO_CODEC;
+  let mp4PresetFinal = mp4Preset || DEFAULT_MP4_PRESET;
+  let mp4CrfFinal = Number.isFinite(Number(mp4Crf)) ? Number(mp4Crf) : DEFAULT_MP4_CRF;
+  let mp4ThreadsFinal = Number.isFinite(Number(mp4Threads)) ? Number(mp4Threads) : null;
+  const previewEnabled = parseBooleanLike(
+    firstEnv(input.previewEnabled, env.REAL_FOOTAGE_PREVIEW_ENABLED, process.env.REAL_FOOTAGE_PREVIEW_ENABLED),
+    true,
+  );
+  const previewMaxWidth = numberValue(
+    firstEnv(input.previewMaxWidth, env.REAL_FOOTAGE_PREVIEW_MAX_WIDTH, process.env.REAL_FOOTAGE_PREVIEW_MAX_WIDTH),
+    720,
+  );
+  const previewMaxHeight = numberValue(
+    firstEnv(input.previewMaxHeight, env.REAL_FOOTAGE_PREVIEW_MAX_HEIGHT, process.env.REAL_FOOTAGE_PREVIEW_MAX_HEIGHT),
+    1280,
+  );
+  const previewCrf = numberValue(
+    firstEnv(input.previewCrf, env.REAL_FOOTAGE_PREVIEW_CRF, process.env.REAL_FOOTAGE_PREVIEW_CRF),
+    30,
+  );
+  const previewFps = numberValue(
+    firstEnv(input.previewFps, env.REAL_FOOTAGE_PREVIEW_FPS, process.env.REAL_FOOTAGE_PREVIEW_FPS),
+    null,
+  );
+  const previewPreset = String(
+    firstEnv(input.previewPreset, env.REAL_FOOTAGE_PREVIEW_PRESET, process.env.REAL_FOOTAGE_PREVIEW_PRESET, "veryfast"),
+  ).trim() || "veryfast";
+  const previewAudioBitrate = String(
+    firstEnv(
+      input.previewAudioBitrate,
+      env.REAL_FOOTAGE_PREVIEW_AUDIO_BITRATE,
+      process.env.REAL_FOOTAGE_PREVIEW_AUDIO_BITRATE,
+      "96k",
+    ),
+  ).trim() || "96k";
+  const publishWebm = parseBooleanLike(
+    firstEnv(input.publishWebm, env.FINAL_REEL_PUBLISH_WEBM, process.env.FINAL_REEL_PUBLISH_WEBM),
+    false,
+  );
 
   if (strictEndScene) {
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);
@@ -144,6 +217,12 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     if (!Number.isFinite(webmThreadsFinal) || webmThreadsFinal <= 0) {
       webmThreadsFinal = 2;
     }
+    if (!Number.isFinite(mp4ThreadsFinal) || mp4ThreadsFinal <= 0) {
+      mp4ThreadsFinal = 2;
+    }
+    mp4VideoCodecFinal = mp4VideoCodecFinal || DEFAULT_MP4_VIDEO_CODEC;
+    mp4PresetFinal = mp4PresetFinal || DEFAULT_MP4_PRESET;
+    mp4CrfFinal = Math.min(mp4CrfFinal, DEFAULT_MP4_CRF);
     if (!rawEndSceneSupersample) {
       endSceneSupersample = 1;
     }
@@ -200,6 +279,18 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     webmCpuUsed: webmCpuUsedFinal,
     webmCrf: webmCrfFinal,
     webmThreads: webmThreadsFinal,
+    mp4VideoCodec: mp4VideoCodecFinal,
+    mp4Preset: mp4PresetFinal,
+    mp4Crf: mp4CrfFinal,
+    mp4Threads: mp4ThreadsFinal,
+    previewEnabled,
+    previewMaxWidth,
+    previewMaxHeight,
+    previewCrf,
+    previewFps,
+    previewPreset,
+    previewAudioBitrate,
+    publishWebm,
     endSceneSupersample,
     /** Skip this many seconds at the start of each source clip before sampling/composing. */
     clipStartSkipSeconds: clampClipStartSkipSeconds(

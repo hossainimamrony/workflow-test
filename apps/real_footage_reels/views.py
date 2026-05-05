@@ -348,6 +348,7 @@ class RunDetailApiView(APIView):
             or str(downloads_manifest.get("listingPrice") or "").strip()
         )
         final_reel_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelUrl"))
+        final_reel_preview_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelPreviewUrl"))
         final_reel_webm_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelWebmUrl"))
         main_reel_path = _resolve_report_asset_path(run_dir_value, report.get("mainReelUrl"))
         return Response(
@@ -368,6 +369,7 @@ class RunDetailApiView(APIView):
                 "hasVoiceover": bool(report.get("hasVoiceover", False)),
                 "mainReelUrl": _asset_url(run_id, main_reel_path) if main_reel_path else "",
                 "finalReelUrl": _asset_url(run_id, final_reel_path) if final_reel_path else "",
+                "finalReelPreviewUrl": _asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
                 "finalReelWebmUrl": _asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
                 "videos": decorated_videos,
                 "plan": {

@@ -41,11 +41,18 @@ export async function composeSelectedClips(_context, selectedClips, outputPath, 
 
 function buildFfmpegCommand(segments, outputPath, options) {
   const args = ["-y"];
-  const codec = String(options.webmCodec || "libvpx-vp9").trim();
+  const outputExt = String(path.extname(outputPath || "") || "").toLowerCase();
+  const isMp4Target = outputExt === ".mp4";
+  const codec = String(
+    isMp4Target
+      ? (options.mp4VideoCodec || "libx264")
+      : (options.webmCodec || "libvpx-vp9"),
+  ).trim();
   const deadline = String(options.webmDeadline || "").trim();
   const cpuUsed = Number(options.webmCpuUsed);
-  const crf = Number(options.webmCrf);
-  const threads = Number(options.webmThreads);
+  const crf = Number(isMp4Target ? options.mp4Crf : options.webmCrf);
+  const threads = Number(isMp4Target ? options.mp4Threads : options.webmThreads);
+  const mp4Preset = String(options.mp4Preset || "medium").trim() || "medium";
 
   for (const segment of segments) {
     args.push(
@@ -74,33 +81,50 @@ function buildFfmpegCommand(segments, outputPath, options) {
     "-c:v",
     codec,
   );
-  if (codec.includes("vp9")) {
-    args.push("-row-mt", "1");
+  if (isMp4Target) {
+    args.push(
+      "-preset",
+      mp4Preset,
+      "-pix_fmt",
+      "yuv420p",
+      "-crf",
+      String(Number.isFinite(crf) ? crf : 18),
+      "-movflags",
+      "+faststart",
+    );
+    if (Number.isFinite(threads) && threads > 0) {
+      args.push("-threads", String(threads));
+    }
+  } else {
+    if (codec.includes("vp9")) {
+      args.push("-row-mt", "1");
+    }
+    if (deadline) {
+      args.push("-deadline", deadline);
+    }
+    if (Number.isFinite(cpuUsed)) {
+      args.push("-cpu-used", String(cpuUsed));
+    }
+    if (Number.isFinite(threads) && threads > 0) {
+      args.push("-threads", String(threads));
+    }
+    args.push(
+      "-pix_fmt",
+      "yuv420p",
+      "-crf",
+      String(Number.isFinite(crf) ? crf : 30),
+      "-b:v",
+      "0",
+    );
   }
-  if (deadline) {
-    args.push("-deadline", deadline);
-  }
-  if (Number.isFinite(cpuUsed)) {
-    args.push("-cpu-used", String(cpuUsed));
-  }
-  if (Number.isFinite(threads) && threads > 0) {
-    args.push("-threads", String(threads));
-  }
-  args.push(
-    "-pix_fmt",
-    "yuv420p",
-    "-crf",
-    String(Number.isFinite(crf) ? crf : 30),
-    "-b:v",
-    "0",
-    outputPath,
-  );
+  args.push(outputPath);
 
   return {
     args,
     debugPayload: {
       createdAt: new Date().toISOString(),
       outputPath,
+      outputExt,
       width: options.width,
       height: options.height,
       fps: options.fps,

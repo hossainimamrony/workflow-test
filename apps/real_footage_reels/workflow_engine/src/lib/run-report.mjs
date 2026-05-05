@@ -44,9 +44,11 @@ export async function buildRunReport(runDir, rootDir) {
   const runId = path.basename(runDir);
   const finalReelWebmPath = await fileIfExists(path.join(runDir, "final-reel.webm"));
   const finalReelMp4Path = await fileIfExists(path.join(runDir, "final-reel.mp4"));
+  const finalReelPreviewPath = await fileIfExists(path.join(runDir, "final-reel-preview.mp4"));
   const finalReelPath = finalReelMp4Path ?? finalReelWebmPath;
   const finalReelVersion = finalReelPath ? await fileVersionIfExists(finalReelPath) : null;
   const finalReelWebmVersion = finalReelWebmPath ? await fileVersionIfExists(finalReelWebmPath) : null;
+  const finalReelPreviewVersion = finalReelPreviewPath ? await fileVersionIfExists(finalReelPreviewPath) : null;
   const hasVoiceover = Boolean(voiceoverManifest);
   const voiceoverStatus = hasVoiceover
     ? "applied"
@@ -117,6 +119,8 @@ export async function buildRunReport(runDir, rootDir) {
     hasPlan: Boolean(reelPlan),
     finalReelUrl: finalReelPath ? toPublicFileUrl(finalReelPath, rootDir) : null,
     finalReelVersion,
+    finalReelPreviewUrl: finalReelPreviewPath ? toPublicFileUrl(finalReelPreviewPath, rootDir) : null,
+    finalReelPreviewVersion,
     finalReelWebmUrl: finalReelWebmPath ? toPublicFileUrl(finalReelWebmPath, rootDir) : null,
     finalReelWebmVersion,
     stats: {

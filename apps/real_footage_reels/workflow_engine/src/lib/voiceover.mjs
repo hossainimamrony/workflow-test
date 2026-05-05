@@ -158,7 +158,7 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
     log,
   });
 
-  const outPath = path.join(normalizedDir, "final-reel.webm");
+  const outPath = path.join(normalizedDir, "final-reel.mp4");
   await muxVideoWithAudio({
     ffmpegPath: config.ffmpegPath,
     videoPath: cleanVideoPath,
@@ -181,7 +181,7 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
 
   await clearVoiceoverFailureStatus(normalizedDir);
   await mergeDraftStatusApplied(normalizedDir, script);
-  await publishFinalReelMp4(normalizedDir, config.ffmpegPath, log);
+  await publishFinalReelMp4(normalizedDir, config.ffmpegPath, log, config);
 
   log(`Voice-over complete: ${outPath}`);
   return { script, outputPath: outPath };
@@ -202,7 +202,7 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
     return false;
   }
 
-  const videoPath = path.join(normalizedDir, "final-reel.webm");
+  const videoPath = path.join(normalizedDir, "final-reel.mp4");
   const voicePath = path.join(normalizedDir, "voiceover.mp3");
   try {
     await Promise.all([fs.access(videoPath), fs.access(voicePath)]);
@@ -236,14 +236,14 @@ export async function reapplySavedVoiceoverToReel(runDir, config, log = () => {}
   });
 
   await clearVoiceoverFailureStatus(normalizedDir);
-  await publishFinalReelMp4(normalizedDir, config.ffmpegPath, log);
+  await publishFinalReelMp4(normalizedDir, config.ffmpegPath, log, config);
   log("Reapplied saved voice-over onto the refreshed reel.");
   return true;
 }
 
 async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds, totalSeconds, log }) {
-  const cleanPath = path.join(runDir, "final-reel-clean.webm");
-  const finalPath = path.join(runDir, "final-reel.webm");
+  const cleanPath = path.join(runDir, "final-reel-clean.mp4");
+  const finalPath = path.join(runDir, "final-reel.mp4");
   const minimumDurationSeconds = Math.max(0.1, Number(totalSeconds) - 0.35);
 
   if (await fileExists(finalPath)) {
@@ -273,11 +273,11 @@ async function resolveCleanVideoSource({ config, ffmpegPath, runDir, mainSeconds
     }
   }
 
-  const mainPath = path.join(runDir, "main-reel.webm");
-  const endPath = path.join(runDir, "end-scene.webm");
+  const mainPath = path.join(runDir, "main-reel.mp4");
+  const endPath = path.join(runDir, "end-scene.mp4");
   if (!(await fileExists(mainPath)) || !(await fileExists(endPath))) {
     throw new Error(
-      "Cannot rebuild voice-over base: required source segments are missing (main-reel.webm and/or end-scene.webm). Re-run render before rebuilding voice-over.",
+      "Cannot rebuild voice-over base: required source segments are missing (main-reel.mp4 and/or end-scene.mp4). Re-run render before rebuilding voice-over.",
     );
   }
   await concatMainAndEndForVoiceover({
@@ -376,10 +376,10 @@ async function resolveVoiceoverContext(runDir, config, log, options = {}) {
     Number(endSceneManifest?.totalDurationSeconds) || mainSeconds + endSeconds;
   const requireVideo = options.requireVideo !== false;
 
-  const videoPath = path.join(normalizedDir, "final-reel.webm");
+  const videoPath = path.join(normalizedDir, "final-reel.mp4");
   if (requireVideo) {
     await fs.access(videoPath).catch(() => {
-      throw new Error("final-reel.webm not found; compose the reel first.");
+      throw new Error("final-reel.mp4 not found; compose the reel first.");
     });
 
     const videoDurProbe = await probeMediaDuration(config.ffmpegPath, videoPath);
@@ -803,6 +803,8 @@ async function muxVideoWithAudio({ ffmpegPath, videoPath, audioPath, outPath, ta
   const vIn = rel(videoPath);
   const aIn = rel(audioPath);
   const outRel = rel(outPath);
+  const ext = String(path.extname(outPath || "") || "").toLowerCase();
+  const isMp4Target = ext === ".mp4";
 
   const args = [
     "-y",
@@ -814,16 +816,22 @@ async function muxVideoWithAudio({ ffmpegPath, videoPath, audioPath, outPath, ta
     "0:v:0",
     "-map",
     "1:a:0",
-    "-t",
-    String(Number(targetSeconds) > 0 ? Number(targetSeconds).toFixed(3) : 0),
     "-c:v",
     "copy",
-    "-c:a",
-    "libopus",
-    "-b:a",
-    "128k",
-    outRel,
   ];
+  if (Number(targetSeconds) > 0) {
+    args.push("-t", String(Number(targetSeconds).toFixed(3)));
+  }
+  args.push(
+    "-c:a",
+    isMp4Target ? "aac" : "libopus",
+    "-b:a",
+    isMp4Target ? "192k" : "128k",
+  );
+  if (isMp4Target) {
+    args.push("-movflags", "+faststart");
+  }
+  args.push(outRel);
 
   await runFfmpeg(ffmpegPath, args, { cwd: runDir });
 }
@@ -843,11 +851,32 @@ async function concatMainAndEndForVoiceover({
   durationSeconds,
 }) {
   const rel = (abs) => path.relative(runDir, path.resolve(abs)).split(path.sep).join("/");
-  const codec = String(config?.webmCodec || "libvpx-vp9").trim() || "libvpx-vp9";
-  const deadline = String(config?.webmDeadline || "").trim();
-  const cpuUsed = Number(config?.webmCpuUsed);
-  const threads = Number(config?.webmThreads);
-  const crf = Number(config?.webmCrf);
+  const concatListPath = path.join(runDir, "voiceover-concat-inputs.txt");
+  const concatList = [
+    `file '${escapeConcatFilePath(rel(mainPath))}'`,
+    `file '${escapeConcatFilePath(rel(endPath))}'`,
+  ].join("\n");
+  await fs.writeFile(concatListPath, `${concatList}\n`, "utf8");
+  try {
+    await runFfmpeg(ffmpegPath, [
+      "-y",
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      path.basename(concatListPath),
+      "-c",
+      "copy",
+      rel(outPath),
+    ], { cwd: runDir });
+    return;
+  } catch {
+    // Fallback to reliable re-encode concat when stream-copy concat cannot be used.
+  } finally {
+    await fs.rm(concatListPath, { force: true }).catch(() => {});
+  }
+
   const args = [
     "-y",
     "-t",
@@ -862,30 +891,11 @@ async function concatMainAndEndForVoiceover({
     "[outv]",
     "-t",
     String(durationSeconds),
-    "-c:v",
-    codec,
-  ];
-  if (codec.includes("vp9")) {
-    args.push("-row-mt", "1");
-  }
-  if (deadline) {
-    args.push("-deadline", deadline);
-  }
-  if (Number.isFinite(cpuUsed)) {
-    args.push("-cpu-used", String(cpuUsed));
-  }
-  if (Number.isFinite(threads) && threads > 0) {
-    args.push("-threads", String(threads));
-  }
-  args.push(
     "-pix_fmt",
     "yuv420p",
-    "-crf",
-    String(Number.isFinite(crf) ? crf : 20),
-    "-b:v",
-    "0",
-    rel(outPath),
-  );
+  ];
+  appendMp4EncodingArgs(args, config);
+  args.push(rel(outPath));
   await runFfmpeg(ffmpegPath, args, { cwd: runDir });
 }
 
@@ -902,7 +912,7 @@ async function normalizeVideoDurationForTarget({ config, ffmpegPath, runDir, inp
 
   if (delta < 0) {
     const inRel = path.relative(runDir, path.resolve(inputPath)).split(path.sep).join("/");
-    const tempPath = path.join(runDir, "final-reel-clean-trimmed.webm");
+    const tempPath = path.join(runDir, "final-reel-clean-trimmed.mp4");
     const outRel = path.relative(runDir, path.resolve(tempPath)).split(path.sep).join("/");
     await runFfmpeg(ffmpegPath, [
       "-y",
@@ -919,12 +929,7 @@ async function normalizeVideoDurationForTarget({ config, ffmpegPath, runDir, inp
     return;
   }
 
-  const codec = String(config?.webmCodec || "libvpx-vp9").trim() || "libvpx-vp9";
-  const deadline = String(config?.webmDeadline || "").trim();
-  const cpuUsed = Number(config?.webmCpuUsed);
-  const threads = Number(config?.webmThreads);
-  const crf = Number(config?.webmCrf);
-  const tempPath = path.join(runDir, "final-reel-clean-padded.webm");
+  const tempPath = path.join(runDir, "final-reel-clean-padded.mp4");
   const inRel = path.relative(runDir, path.resolve(inputPath)).split(path.sep).join("/");
   const outRel = path.relative(runDir, path.resolve(tempPath)).split(path.sep).join("/");
   const args = [
@@ -934,33 +939,38 @@ async function normalizeVideoDurationForTarget({ config, ffmpegPath, runDir, inp
     "-vf",
     `tpad=stop_mode=clone:stop_duration=${delta.toFixed(3)}`,
     "-an",
-    "-c:v",
-    codec,
-  ];
-  if (codec.includes("vp9")) {
-    args.push("-row-mt", "1");
-  }
-  if (deadline) {
-    args.push("-deadline", deadline);
-  }
-  if (Number.isFinite(cpuUsed)) {
-    args.push("-cpu-used", String(cpuUsed));
-  }
-  if (Number.isFinite(threads) && threads > 0) {
-    args.push("-threads", String(threads));
-  }
-  args.push(
     "-pix_fmt",
     "yuv420p",
-    "-crf",
-    String(Number.isFinite(crf) ? crf : 22),
-    "-b:v",
-    "0",
-    outRel,
-  );
+  ];
+  appendMp4EncodingArgs(args, config);
+  args.push(outRel);
   await runFfmpeg(ffmpegPath, args, { cwd: runDir });
   await fs.rename(tempPath, inputPath);
   log(`Extended video by ${delta.toFixed(2)}s to keep full ${Number(targetSeconds).toFixed(1)}s reel.`);
+}
+
+function appendMp4EncodingArgs(args, config = {}) {
+  const codec = String(config?.mp4VideoCodec || "libx264").trim() || "libx264";
+  const preset = String(config?.mp4Preset || "medium").trim() || "medium";
+  const crf = Number(config?.mp4Crf);
+  const threads = Number(config?.mp4Threads ?? config?.webmThreads);
+  args.push(
+    "-c:v",
+    codec,
+    "-preset",
+    preset,
+    "-crf",
+    String(Number.isFinite(crf) ? crf : 18),
+    "-movflags",
+    "+faststart",
+  );
+  if (Number.isFinite(threads) && threads > 0) {
+    args.push("-threads", String(threads));
+  }
+}
+
+function escapeConcatFilePath(value) {
+  return String(value || "").replace(/'/gu, "'\\''");
 }
 
 async function fileExists(filePath) {

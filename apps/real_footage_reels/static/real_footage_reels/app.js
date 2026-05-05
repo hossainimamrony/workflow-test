@@ -95,14 +95,14 @@
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '') || 'video';
-    let extension = 'webm';
+    let extension = 'mp4';
     try {
       const parsed = new URL(String(src || ''), window.location.origin);
       const filePath = parsed.searchParams.get('path') || parsed.pathname;
       const match = /\.([a-z0-9]{2,5})(?:$|\?)/iu.exec(filePath);
       if (match) extension = String(match[1] || '').toLowerCase();
     } catch (_err) {
-      extension = 'webm';
+      extension = 'mp4';
     }
     return `${safeTitle}.${extension}`;
   }
@@ -141,7 +141,8 @@
     if (compact) classes.push('video-player--compact');
     if (extraClass) classes.push(extraClass);
     const playerClassName = classes.join(' ');
-    const downloadName = buildVideoDownloadName(src, title);
+    const downloadSrc = String(options.downloadSrc || src || '');
+    const downloadName = buildVideoDownloadName(downloadSrc, title);
     return `
       <div class="${esc(playerClassName)}" data-video-player>
         <div class="video-player__stage">
@@ -152,7 +153,7 @@
           <div class="video-player__row">
             <button type="button" class="video-player__button" data-role="play">Play</button>
             <button type="button" class="video-player__button" data-role="restart">Restart</button>
-            <a class="video-player__button video-player__button--link" data-role="download" href="${esc(src || '')}" download="${esc(downloadName)}">Download</a>
+            <a class="video-player__button video-player__button--link" data-role="download" href="${esc(downloadSrc)}" download="${esc(downloadName)}">Download</a>
             <span class="video-player__time" data-role="time">0:00 / 0:00</span>
             <button type="button" class="video-player__button" data-role="mute">Mute</button>
             ${compact ? '' : `<input class="video-player__volume" data-role="volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume for ${esc(title || 'Video')}">`}
@@ -393,7 +394,7 @@
     if (command === 'compose') return 'Compose';
     return String(command || 'Job');
   }
-  function renderCurrentJob(jobs, maxParallelJobs) {
+  function renderCurrentJob(jobs, maxParallelJobs, workerMode) {
     if (!currentJobPanel) return;
     const activeJobs = Array.isArray(jobs) ? jobs.filter((job) => job && (job.status === 'queued' || job.status === 'running' || job.status === 'paused')) : [];
     if (!activeJobs.length) {
@@ -410,7 +411,9 @@
       const queuedCount = activeJobs.filter((job) => job.status === 'queued').length;
       const pausedCount = activeJobs.filter((job) => job.status === 'paused').length;
       const cap = Number(maxParallelJobs || 0);
-      currentJobMeta.textContent = `${activeJobs.length} active | ${queuedCount} queued | ${pausedCount} paused${cap > 0 ? ` | capacity ${cap}` : ''}`;
+      const mode = String(workerMode || '').trim();
+      const modeText = mode ? ` | worker ${mode}` : '';
+      currentJobMeta.textContent = `${activeJobs.length} active | ${queuedCount} queued | ${pausedCount} paused${cap > 0 ? ` | capacity ${cap}` : ''}${modeText}`;
     }
     if (currentJobList) {
       currentJobList.innerHTML = activeJobs.slice(0, 20).map((job) => {
@@ -470,10 +473,10 @@
     try {
       const payload = await api(base + '/jobs');
       const jobs = Array.isArray(payload.jobs) ? payload.jobs : [];
-      renderCurrentJob(jobs, payload.maxParallelJobs);
+      renderCurrentJob(jobs, payload.maxParallelJobs, payload.workerMode);
       return jobs;
     } catch (_err) {
-      renderCurrentJob([], 0);
+      renderCurrentJob([], 0, '');
       return [];
     }
   }
@@ -521,7 +524,8 @@
     const sequenceItems = Array.isArray(run?.plan?.composition?.segments) && run.plan.composition.segments.length
       ? run.plan.composition.segments
       : (Array.isArray(run?.plan?.sequence) ? run.plan.sequence : []);
-    const heroVideoUrl = run.finalReelUrl || run.mainReelUrl || (previewClips[0] ? previewClips[0].videoUrl : '');
+    const heroVideoUrl = run.finalReelPreviewUrl || run.finalReelUrl || run.mainReelUrl || (previewClips[0] ? previewClips[0].videoUrl : '');
+    const heroDownloadUrl = run.finalReelUrl || run.finalReelPreviewUrl || run.mainReelUrl || heroVideoUrl;
     const scriptVariants = Array.isArray(run?.voiceoverDraft?.variants) ? run.voiceoverDraft.variants : [];
     const analysisReady = Boolean(run?.pipeline?.analyze?.done);
     const priceIncludes = String(run.priceIncludes || (run.report && run.report.priceIncludes) || '').trim();
@@ -543,8 +547,8 @@
 
         <section class="panel detail-overview">
           <div class="detail-overview__media">
-            <p class="detail-overview__label">${heroVideoUrl ? (run.finalReelUrl ? 'Final Reel' : (run.mainReelUrl ? 'Main Reel (building final)' : 'Preview')) : 'Preview'}</p>
-            ${heroVideoUrl ? `<div class="preview-frame preview-frame--hero">${renderVideoPlayer(heroVideoUrl, run.listingTitle || run.runId || 'Video', { compact: false })}</div>` : '<div class="empty-block"><strong>No preview</strong></div>'}
+            <p class="detail-overview__label">${heroVideoUrl ? (run.finalReelPreviewUrl ? 'Final Reel (Preview Stream)' : (run.finalReelUrl ? 'Final Reel' : (run.mainReelUrl ? 'Main Reel (building final)' : 'Preview'))) : 'Preview'}</p>
+            ${heroVideoUrl ? `<div class="preview-frame preview-frame--hero">${renderVideoPlayer(heroVideoUrl, run.listingTitle || run.runId || 'Video', { compact: false, downloadSrc: heroDownloadUrl })}</div>` : '<div class="empty-block"><strong>No preview</strong></div>'}
           </div>
 
           <div class="detail-overview__sidebar">
@@ -897,7 +901,8 @@
         frames: 'extracting frames',
         analyze: 'analyzing clips',
         compose: 'composing reel',
-        voiceover: 'generating scripts',
+        voiceover: 'stitching voice-over',
+        publish: 'publishing output',
         done: 'completed',
         error: 'failed',
       }[phase] || 'running';

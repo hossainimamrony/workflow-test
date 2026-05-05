@@ -363,14 +363,14 @@ export async function composeSavedRun(runDir, config, hooks = {}) {
   progress({ phase: "compose", percent: 72, label: "Render" });
   log("Composing the selected local clips...");
 
-  const mainReelPath = path.join(normalizedRunDir, "main-reel.webm");
+  const mainReelPath = path.join(normalizedRunDir, "main-reel.mp4");
   await composeSelections(null, reelPlan, mainReelPath, config);
 
   const manifestForEnd = await readDownloadsManifest(normalizedRunDir);
   await appendEndSceneToReel(normalizedRunDir, config, manifestForEnd, log);
   await resetVoiceoverStateForSilentRebuild(normalizedRunDir);
 
-  const outputPath = path.join(normalizedRunDir, "final-reel.webm");
+  const outputPath = path.join(normalizedRunDir, "final-reel.mp4");
 
   progress({ phase: "voiceover", percent: 92, label: "Stitching voice-over" });
   if (approvedScript) {
@@ -382,7 +382,8 @@ export async function composeSavedRun(runDir, config, hooks = {}) {
     await maybeApplyVoiceover(normalizedRunDir, config, log);
   }
 
-  await publishFinalReelMp4(normalizedRunDir, config.ffmpegPath, log);
+  progress({ phase: "publish", percent: 98, label: "Publishing output" });
+  await publishFinalReelMp4(normalizedRunDir, config.ffmpegPath, log, config);
 
   progress({ phase: "compose", percent: 100, label: "Done" });
   log(`Composed reel: ${outputPath}`);
@@ -400,10 +401,10 @@ export async function rerenderRunEndScene(runDir, config, hooks = {}) {
   const log = hooks.log ?? (() => {});
   const progress = hooks.onProgress ?? (() => {});
   const normalizedRunDir = path.resolve(runDir);
-  const mainReelPath = path.join(normalizedRunDir, "main-reel.webm");
+  const mainReelPath = path.join(normalizedRunDir, "main-reel.mp4");
 
   await fs.access(mainReelPath).catch(() => {
-    throw new Error("main-reel.webm not found; build the reel once before rerendering only the ending.");
+    throw new Error("main-reel.mp4 not found; build the reel once before rerendering only the ending.");
   });
 
   progress({ phase: "compose", percent: 58, label: "End scene" });
@@ -418,11 +419,12 @@ export async function rerenderRunEndScene(runDir, config, hooks = {}) {
   if (!restoredVoiceover) {
     log("No saved voice-over assets were reapplied. Final reel remains silent unless you stitch voice-over again.");
   }
-  await publishFinalReelMp4(normalizedRunDir, config.ffmpegPath, log);
+  progress({ phase: "publish", percent: 98, label: "Publishing output" });
+  await publishFinalReelMp4(normalizedRunDir, config.ffmpegPath, log, config);
 
   const analysisManifest = await readJsonIfExists(path.join(normalizedRunDir, "analysis.json"));
   const reelPlan = await readJsonIfExists(path.join(normalizedRunDir, "reel-plan.json"));
-  const outputPath = path.join(normalizedRunDir, "final-reel.webm");
+  const outputPath = path.join(normalizedRunDir, "final-reel.mp4");
 
   progress({ phase: "compose", percent: 100, label: "Done" });
   log(`Updated reel ending: ${outputPath}`);
@@ -495,7 +497,7 @@ async function analyzeAndMaybeCompose(input, browserContext) {
     logReservedEndSceneTiming(config, log);
     log("Composing the selected local clips...");
 
-    const mainReelPath = path.join(runDir, "main-reel.webm");
+    const mainReelPath = path.join(runDir, "main-reel.mp4");
     if (browserContext) {
       await composeSelections(browserContext, reelPlan, mainReelPath, config, { log });
     } else {
@@ -515,7 +517,7 @@ async function analyzeAndMaybeCompose(input, browserContext) {
     });
     await resetVoiceoverStateForSilentRebuild(runDir);
 
-    outputPath = path.join(runDir, "final-reel.webm");
+    outputPath = path.join(runDir, "final-reel.mp4");
 
     progress({ phase: "voiceover", percent: 92, label: "Stitching voice-over" });
     if (approvedScript) {
@@ -527,7 +529,8 @@ async function analyzeAndMaybeCompose(input, browserContext) {
       await maybeApplyVoiceover(runDir, config, log);
     }
 
-    await publishFinalReelMp4(runDir, config.ffmpegPath, log);
+    progress({ phase: "publish", percent: 98, label: "Publishing output" });
+    await publishFinalReelMp4(runDir, config.ffmpegPath, log, config);
 
     log(`Composed reel: ${outputPath}`);
     progress({ phase: "compose", percent: 100, label: "Done" });
@@ -582,6 +585,10 @@ async function composeSelections(browserContext, reelPlan, outputPath, config, h
       webmCpuUsed: config.webmCpuUsed,
       webmCrf: config.webmCrf,
       webmThreads: config.webmThreads,
+      mp4VideoCodec: config.mp4VideoCodec,
+      mp4Preset: config.mp4Preset,
+      mp4Crf: config.mp4Crf,
+      mp4Threads: config.mp4Threads,
       log: hooks.log,
     },
   );

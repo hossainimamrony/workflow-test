@@ -38,8 +38,11 @@ class ReelRenderService:
         "download": 18,
         "frames": 42,
         "analyze": 68,
+        "prepare": 74,
         "compose": 90,
         "voiceover": 95,
+        "publish": 98,
+        "thumbnail": 96,
         "done": 100,
         "error": 100,
     }
@@ -59,6 +62,22 @@ class ReelRenderService:
         "compose": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_COMPOSE_SEC", "1800") or "1800"),
         "run": int(os.environ.get("REAL_FOOTAGE_TIMEOUT_RUN_SEC", "2400") or "2400"),
     }
+
+    @classmethod
+    def _env_flag(cls, key: str, default: bool = False) -> bool:
+        raw = str(os.environ.get(key, "") or "").strip().lower()
+        if not raw:
+            return bool(default)
+        if raw in {"1", "true", "yes", "y", "on"}:
+            return True
+        if raw in {"0", "false", "no", "n", "off"}:
+            return False
+        return bool(default)
+
+    @classmethod
+    def uses_external_worker(cls) -> bool:
+        default_for_env = cls._is_pythonanywhere()
+        return cls._env_flag("REAL_FOOTAGE_USE_EXTERNAL_WORKER", default=default_for_env)
 
     @classmethod
     def _initial_run_report(cls, *, command: str, run_id: str) -> dict:
@@ -96,7 +115,12 @@ class ReelRenderService:
         for stale in stale_qs:
             command = str((stale.payload or {}).get("command", "")).strip().lower()
             if stale.status == "queued":
-                if cls._is_pythonanywhere():
+                if cls.uses_external_worker():
+                    stale.error = stale.error or (
+                        "Job stayed queued and never started. External worker mode is enabled, but no worker "
+                        "picked up this job. Start/verify the queue worker process and retry."
+                    )
+                elif cls._is_pythonanywhere():
                     stale.error = stale.error or (
                         "Job stayed queued and never started. PythonAnywhere web workers do not run background threads "
                         "reliably for this workflow. Use an Always-on task / queue worker, then retry."
@@ -162,12 +186,18 @@ class ReelRenderService:
                     command=normalized_payload.get("command", "prepare"),
                     status="queued",
                     payload=normalized_payload,
-                    result={"runId": run_id, "progress": {"phase": "queued", "label": "Waiting in queue..", "percent": 2}},
+                    result={"runId": run_id, "progress": {"phase": "queued", "label": "Waiting in queue...", "percent": 2}},
                 )
             except (OperationalError, ProgrammingError) as exc:
                 raise RuntimeError("Database schema is not up to date. Run migrations.") from exc
 
-        threading.Thread(target=cls._run_job, args=(job.id,), daemon=True).start()
+        if cls.uses_external_worker():
+            cls._append_log(
+                job,
+                "Queued for external worker processing. Run the queue worker (Always-on task) to start this job.",
+            )
+        else:
+            threading.Thread(target=cls._run_job, args=(job.id,), daemon=True).start()
         return job
 
     @classmethod
@@ -192,8 +222,12 @@ class ReelRenderService:
                 run_dir = cls._runs_root / run_id
                 ReelRun.objects.filter(run_id=run_id).update(status="running")
 
-                if command == "script-draft":
+                if command in {"script-draft", "voiceover-draft"}:
                     cls._update_progress(job, "voiceover", "Generating script options...")
+                elif command == "voiceover-apply":
+                    cls._update_progress(job, "voiceover", "Applying approved voice-over...")
+                elif command in {"compose", "end-scene-rerender"}:
+                    cls._update_progress(job, "compose", "Starting compose...")
                 else:
                     cls._update_progress(job, "download", "Starting workflow process...")
                 if source_url:
@@ -267,6 +301,17 @@ class ReelRenderService:
                     )
         finally:
             cls._job_slots.release()
+
+    @classmethod
+    def run_next_queued_job(cls) -> bool:
+        with cls._lock:
+            cls._recover_stale_jobs()
+            job = ReelRenderJob.objects.filter(status="queued").order_by("created_at").first()
+            if not job:
+                return False
+            db_id = job.id
+        cls._run_job(db_id)
+        return True
 
     @classmethod
     def _append_log(cls, job: ReelRenderJob, message: str) -> None:
@@ -661,6 +706,7 @@ class ReelRenderService:
             "jobs": {
                 "activeCount": active_jobs,
                 "maxParallelJobs": cls._max_parallel_jobs,
+                "workerMode": "external" if cls.uses_external_worker() else "inline-thread",
             },
         }
 
@@ -709,6 +755,12 @@ class ReelRenderService:
         if "muxing final reel with voice-over audio" in lower:
             cls._update_progress(job, "voiceover", "Stitching voice-over into reel...")
             return
+        if "publishing mp4 final reel" in lower or "publishing output" in lower:
+            cls._update_progress(job, "publish", "Publishing output...")
+            return
+        if "building preview mp4 for faster playback" in lower:
+            cls._update_progress(job, "publish", "Building preview stream...")
+            return
         if "voice-over complete" in lower:
             cls._update_progress(job, "voiceover", "Voice-over complete.")
             return
@@ -739,6 +791,8 @@ class ReelRenderService:
 
         final_reel_webm = run_dir / "final-reel.webm"
         final_reel_mp4 = run_dir / "final-reel.mp4"
+        final_reel_preview_mp4 = run_dir / "final-reel-preview.mp4"
+        main_reel_mp4 = run_dir / "main-reel.mp4"
         main_reel_webm = run_dir / "main-reel.webm"
         draft_variants = (
             voiceover_draft_manifest.get("variants", [])
@@ -785,8 +839,9 @@ class ReelRenderService:
             "voiceoverStatus": voiceover_status,
             "voiceoverLastError": str((voiceover_status_manifest or {}).get("lastError", "")).strip(),
             "hasVoiceover": has_voiceover,
-            "mainReelUrl": str(main_reel_webm) if main_reel_webm.exists() else "",
+            "mainReelUrl": str(main_reel_mp4 if main_reel_mp4.exists() else (main_reel_webm if main_reel_webm.exists() else "")),
             "finalReelUrl": str(final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")),
+            "finalReelPreviewUrl": str(final_reel_preview_mp4) if final_reel_preview_mp4.exists() else "",
             "finalReelWebmUrl": str(final_reel_webm) if final_reel_webm.exists() else "",
             "videos": analyzed_clips if analyzed_clips else framed_videos,
         }
@@ -813,6 +868,7 @@ class ReelRenderService:
             "activeJobId": active.job_id if active else None,
             "activeJobIds": [j.job_id for j in active_jobs],
             "maxParallelJobs": ReelRenderService._max_parallel_jobs,
+            "workerMode": "external" if ReelRenderService.uses_external_worker() else "inline-thread",
             "jobs": [ReelRenderService._job_to_public(j) for j in jobs],
         }
 
@@ -849,7 +905,13 @@ class ReelRenderService:
             cls._update_progress(job, "queued", "Waiting in queue...")
             if run_id:
                 ReelRun.objects.filter(run_id=run_id).update(status="queued")
-            threading.Thread(target=cls._run_job, args=(job.id,), daemon=True).start()
+            if cls.uses_external_worker():
+                cls._append_log(
+                    job,
+                    "Resumed and queued for external worker processing.",
+                )
+            else:
+                threading.Thread(target=cls._run_job, args=(job.id,), daemon=True).start()
             job.refresh_from_db()
             return cls._job_to_public(job)
 
@@ -929,6 +991,11 @@ class ReelRenderService:
                 age_seconds = (timezone.now() - run.updated_at).total_seconds()
                 if age_seconds > 90:
                     base = f"Run is {run_status} but has no active job record for {cls._duration_label(age_seconds)}."
+                    if cls.uses_external_worker():
+                        return (
+                            f"{base} External worker mode is enabled. Start/verify the queue worker "
+                            "process to consume queued jobs."
+                        )
                     if cls._is_pythonanywhere():
                         return (
                             f"{base} PythonAnywhere web workers do not support this thread-based background runner; "
@@ -961,6 +1028,11 @@ class ReelRenderService:
             age_seconds = (timezone.now() - latest_job.created_at).total_seconds()
             if age_seconds > 90:
                 base = f"Job has been queued for {cls._duration_label(age_seconds)} and has not started."
+                if cls.uses_external_worker():
+                    return (
+                        f"{base} External worker mode is enabled. Start/verify the queue worker process "
+                        "(for PythonAnywhere: Always-on task) to process queued jobs."
+                    )
                 if cls._is_pythonanywhere():
                     return (
                         f"{base} PythonAnywhere WSGI web apps do not support this background thread pattern. "
@@ -974,7 +1046,7 @@ class ReelRenderService:
             warn_seconds = int(os.environ.get("REAL_FOOTAGE_RUNNING_WARN_SEC", "900") or "900")
             if phase == "compose":
                 warn_seconds = max(warn_seconds, int(os.environ.get("REAL_FOOTAGE_COMPOSE_WARN_SEC", "1200") or "1200"))
-            if age_seconds > warn_seconds and phase in {"voiceover", "download", "frames", "analyze", "compose"}:
+            if age_seconds > warn_seconds and phase in {"voiceover", "download", "frames", "analyze", "compose", "publish"}:
                 return f"Job has been running for {cls._duration_label(age_seconds)} at phase '{phase or 'unknown'}'. Last update: {label or '-'}."
 
         return ""

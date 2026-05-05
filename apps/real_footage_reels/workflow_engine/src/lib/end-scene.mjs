@@ -11,7 +11,6 @@ const DEFAULT_PRICE_INCLUDES = ["6 Months NSW Registration", "Fresh Roadworthy C
 const DEFAULT_END_FPS = 30;
 const SAMPLE_END_SCENE_VERSION = 24;
 const END_SCENE_SUPERSAMPLE = 2;
-const END_SCENE_VP9_CRF = 18;
 const END_SCENE_FONT_DIR = new URL("../../ui/fontfamily/", import.meta.url);
 const END_SCENE_TEMPLATE_FILE = new URL("./templates/end-scene.browser.html", import.meta.url);
 const DEFAULT_END_SCENE_SAMPLE = Object.freeze({
@@ -26,18 +25,18 @@ const DEFAULT_END_SCENE_SAMPLE = Object.freeze({
 });
 
 /**
- * Renders a branded Carbarn end card (silent .webm), then concatenates after main reel.
+ * Renders a branded Carbarn end card (silent .mp4), then concatenates after main reel.
  * Main length + end length must stay within config.maxTotalReelDurationSeconds (default 17).
  */
 export async function appendEndSceneToReel(runDir, config, manifest, log = () => {}, options = {}) {
-  const mainPath = path.join(runDir, "main-reel.webm");
-  const finalPath = path.join(runDir, "final-reel.webm");
+  const mainPath = path.join(runDir, "main-reel.mp4");
+  const finalPath = path.join(runDir, "final-reel.mp4");
   const reelDurations = resolveReelDurations(config);
   const mainSec = reelDurations.composeMainDurationSeconds;
   const endSec = reelDurations.endSceneDurationSeconds;
 
   await fs.access(mainPath).catch(() => {
-    throw new Error("main-reel.webm not found; compose step must run first.");
+    throw new Error("main-reel.mp4 not found; compose step must run first.");
   });
 
   const meta = buildEndSceneMeta(manifest);
@@ -55,11 +54,11 @@ export async function appendEndSceneToReel(runDir, config, manifest, log = () =>
     config,
     ffmpegPath: config.ffmpegPath,
     cwd: runDir,
-    mainRelativePath: "main-reel.webm",
-    endRelativePath: "end-scene.webm",
+    mainRelativePath: "main-reel.mp4",
+    endRelativePath: "end-scene.mp4",
     mainDurationSeconds: mainSec,
     endDurationSeconds: endSec,
-    outRelativePath: "final-reel.webm",
+    outRelativePath: "final-reel.mp4",
   });
 
   await writeJson(path.join(runDir, "end-scene-manifest.json"), {
@@ -79,7 +78,7 @@ export async function appendEndSceneToReel(runDir, config, manifest, log = () =>
 export async function ensureSampleEndScene(rootDir, config, log = () => {}, options = {}) {
   const sampleDir = path.join(rootDir, ".ui-cache", "end-scene-sample");
   const manifestPath = path.join(sampleDir, "sample-manifest.json");
-  const videoPath = path.join(sampleDir, "end-scene.webm");
+  const videoPath = path.join(sampleDir, "end-scene.mp4");
   const sourceVersion = await getEndSceneSourceVersion();
   const durationSeconds = clampEndSceneSeconds(
     options.durationSeconds ?? config.endSceneDurationSeconds ?? 3.5,
@@ -227,14 +226,14 @@ async function renderAnimatedEndScene({ runDir, config, meta, durationSeconds, l
     }
   }
 
-  await encodeFramesToWebm({
+  await encodeFramesToMp4({
     config,
     ffmpegPath: config.ffmpegPath,
     cwd: runDir,
     fps,
     durationSeconds,
     framesRelativePattern: path.join("end-scene-frames", "frame-%04d.png"),
-    outRelativePath: "end-scene.webm",
+    outRelativePath: "end-scene.mp4",
     width,
     height,
   });
@@ -345,14 +344,15 @@ async function renderStaticEndScene({ runDir, config, meta, durationSeconds, log
   await fs.writeFile(assPath, buildEndSceneAss(meta, config.composeWidth, config.composeHeight, durationSeconds), "utf8");
 
   log(`Rendering ${durationSeconds.toFixed(1)}s fallback static end scene...`);
-  await renderEndSceneWebm({
+  await renderEndSceneMp4({
     ffmpegPath: config.ffmpegPath,
     cwd: runDir,
     assRelativePath: "end-scene.ass",
-    outRelativePath: "end-scene.webm",
+    outRelativePath: "end-scene.mp4",
     durationSeconds,
     width: config.composeWidth,
     height: config.composeHeight,
+    config,
   });
 }
 
@@ -1231,7 +1231,16 @@ function formatAssTime(seconds) {
   return `${h}:${String(m).padStart(2, "0")}:${String(whole).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
 }
 
-async function renderEndSceneWebm({ ffmpegPath, cwd, assRelativePath, outRelativePath, durationSeconds, width, height }) {
+async function renderEndSceneMp4({
+  config,
+  ffmpegPath,
+  cwd,
+  assRelativePath,
+  outRelativePath,
+  durationSeconds,
+  width,
+  height,
+}) {
   const panelX = Math.round(width * 0.082);
   const panelY = Math.round(height * 0.113);
   const panelWidth = Math.round(width * 0.836);
@@ -1253,12 +1262,22 @@ async function renderEndSceneWebm({ ffmpegPath, cwd, assRelativePath, outRelativ
     "-pix_fmt",
     "yuv420p",
   ];
-  appendWebmEncodingArgs(args, { codec: "libvpx-vp9", crf: END_SCENE_VP9_CRF });
+  appendMp4EncodingArgs(args, config);
   args.push(outRelativePath);
   await runProcess(ffmpegPath, args, { cwd });
 }
 
-async function encodeFramesToWebm({ config, ffmpegPath, cwd, fps, durationSeconds, framesRelativePattern, outRelativePath, width, height }) {
+async function encodeFramesToMp4({
+  config,
+  ffmpegPath,
+  cwd,
+  fps,
+  durationSeconds,
+  framesRelativePattern,
+  outRelativePath,
+  width,
+  height,
+}) {
   const args = [
     "-y",
     "-framerate",
@@ -1273,13 +1292,7 @@ async function encodeFramesToWebm({ config, ffmpegPath, cwd, fps, durationSecond
     "-vf",
     `scale=${width}:${height}:flags=lanczos,format=yuv420p`,
   ];
-  appendWebmEncodingArgs(args, {
-    codec: String(config?.webmCodec || "libvpx-vp9"),
-    deadline: String(config?.webmDeadline || "").trim(),
-    cpuUsed: config?.webmCpuUsed,
-    threads: config?.webmThreads,
-    crf: Number.isFinite(Number(config?.webmCrf)) ? Number(config.webmCrf) : END_SCENE_VP9_CRF,
-  });
+  appendMp4EncodingArgs(args, config);
   args.push(outRelativePath);
   await runProcess(ffmpegPath, args, { cwd });
 }
@@ -1294,6 +1307,33 @@ async function concatVideosVertical({
   endDurationSeconds,
   outRelativePath,
 }) {
+  // Fast path: copy concatenation without re-encoding if both MP4 parts match.
+  const concatListPath = path.join(cwd, "concat-inputs.txt");
+  const concatList = [
+    `file '${escapeConcatFilePath(mainRelativePath)}'`,
+    `file '${escapeConcatFilePath(endRelativePath)}'`,
+  ].join("\n");
+  await fs.writeFile(concatListPath, `${concatList}\n`, "utf8");
+  try {
+    await runProcess(ffmpegPath, [
+      "-y",
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      path.basename(concatListPath),
+      "-c",
+      "copy",
+      outRelativePath,
+    ], { cwd });
+    return;
+  } catch {
+    // Fallback: reliable re-encode concat.
+  } finally {
+    await fs.rm(concatListPath, { force: true }).catch(() => {});
+  }
+
   const args = [
     "-y",
     "-t",
@@ -1311,43 +1351,33 @@ async function concatVideosVertical({
     "-pix_fmt",
     "yuv420p",
   ];
-  appendWebmEncodingArgs(args, {
-    codec: String(config?.webmCodec || "libvpx-vp9"),
-    deadline: String(config?.webmDeadline || "").trim(),
-    cpuUsed: config?.webmCpuUsed,
-    threads: config?.webmThreads,
-    crf: Number.isFinite(Number(config?.webmCrf)) ? Number(config.webmCrf) : END_SCENE_VP9_CRF,
-  });
+  appendMp4EncodingArgs(args, config);
   args.push(outRelativePath);
   await runProcess(ffmpegPath, args, { cwd });
 }
 
-function appendWebmEncodingArgs(args, profile = {}) {
-  const codec = String(profile.codec || "libvpx-vp9").trim() || "libvpx-vp9";
-  const deadline = String(profile.deadline || "").trim();
-  const cpuUsed = Number(profile.cpuUsed);
-  const threads = Number(profile.threads);
-  const crf = Number(profile.crf);
-
-  args.push("-c:v", codec);
-  if (codec.includes("vp9")) {
-    args.push("-row-mt", "1");
-  }
-  if (deadline) {
-    args.push("-deadline", deadline);
-  }
-  if (Number.isFinite(cpuUsed)) {
-    args.push("-cpu-used", String(cpuUsed));
-  }
+function appendMp4EncodingArgs(args, config = {}) {
+  const codec = String(config?.mp4VideoCodec || "libx264").trim() || "libx264";
+  const preset = String(config?.mp4Preset || "medium").trim() || "medium";
+  const crf = Number(config?.mp4Crf);
+  const threads = Number(config?.mp4Threads ?? config?.webmThreads);
+  args.push(
+    "-c:v",
+    codec,
+    "-preset",
+    preset,
+    "-crf",
+    String(Number.isFinite(crf) ? crf : 18),
+    "-movflags",
+    "+faststart",
+  );
   if (Number.isFinite(threads) && threads > 0) {
     args.push("-threads", String(threads));
   }
-  args.push(
-    "-crf",
-    String(Number.isFinite(crf) ? crf : END_SCENE_VP9_CRF),
-    "-b:v",
-    "0",
-  );
+}
+
+function escapeConcatFilePath(value) {
+  return String(value || "").replace(/'/gu, "'\\''");
 }
 
 function runProcess(command, args, options = {}) {
