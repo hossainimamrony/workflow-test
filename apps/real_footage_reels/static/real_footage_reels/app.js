@@ -629,9 +629,9 @@
           ` : '<div class="empty-block"><strong>No script options yet</strong></div>'}
           <div class="voiceover-script-panel__row">
             <button id="btn-regenerate-scripts" class="button button--secondary" type="button">Regenerate options</button>
-            <button id="btn-generate-full" class="button button--primary" type="button">${analysisReady ? 'Compose Final Video' : 'Prepare Footage + Plan'}</button>
+            <button id="btn-generate-full" class="button button--primary" type="button">${analysisReady ? 'Compose Final Video' : 'Generate Full Video'}</button>
           </div>
-          <p class="field__hint">${analysisReady ? 'Step 3: compose and stitch voice-over.' : 'Step 2: download footage, extract frames, analyze, and build sequence. Then compose in a separate click.'}</p>
+          <p class="field__hint">${analysisReady ? 'Step 2: compose and stitch voice-over.' : 'Step 2: after script approval, the system auto-runs prepare + compose (no second click needed).'}</p>
         </section>
 
         <section class="panel">
@@ -859,9 +859,9 @@
           await api(base + '/runs/' + encodeURIComponent(runId) + '/prepare-analysis', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ script }),
+            body: JSON.stringify({ script, autoComposeAfterPrepare: true }),
           });
-          alert('Preparation started (download + frames + AI + sequence). When it finishes, click Compose Final Video.');
+          alert('Queued. It will now auto-run prepare + compose without another click.');
           window.location.href = `${appBase}/workflow`;
           return;
         }
@@ -916,7 +916,7 @@
     } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
       state = 'video ready';
     } else if (run.pipeline && run.pipeline.analyze && run.pipeline.analyze.done) {
-      state = 'generating scripts';
+      state = 'prepared for compose';
     }
     return `<article class="run-row">
       <div class="run-row__main">

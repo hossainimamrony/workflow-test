@@ -2,6 +2,7 @@ import threading
 import time
 import uuid
 import os
+import shutil
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -32,6 +33,7 @@ class ReelRenderService:
     _workflow_package_json = _workflow_root / "package.json"
     _workflow_env_file = _workflow_root / ".env"
     _workflow_node_modules = _workflow_root / "node_modules"
+    _legacy_runs_root = Path(__file__).resolve().parent / "Carbarn-Au-real-footage-reels" / "runs"
     _node_bin = os.environ.get("NODE_BIN", "node")
     _PHASE_PERCENT = {
         "queued": 2,
@@ -272,6 +274,7 @@ class ReelRenderService:
                 job.result = result
                 job.finished_at = timezone.now()
                 job.save(update_fields=["status", "result", "finished_at"])
+                cls._maybe_enqueue_compose_followup(parent_job=job, run=run, command=command)
             except Exception as exc:  # noqa: BLE001
                 cls._append_log(job, f"ERROR: {exc}")
                 cls._update_progress(job, "error", "Failed.")
@@ -306,12 +309,76 @@ class ReelRenderService:
     def run_next_queued_job(cls) -> bool:
         with cls._lock:
             cls._recover_stale_jobs()
-            job = ReelRenderJob.objects.filter(status="queued").order_by("created_at").first()
+            job = None
+            prioritize_script = cls._env_flag("REAL_FOOTAGE_SCRIPT_DRAFT_PRIORITY", default=True)
+            if prioritize_script:
+                job = (
+                    ReelRenderJob.objects
+                    .filter(status="queued", command__in=["script-draft", "voiceover-draft"])
+                    .order_by("created_at")
+                    .first()
+                )
+            if not job:
+                job = ReelRenderJob.objects.filter(status="queued").order_by("created_at").first()
             if not job:
                 return False
             db_id = job.id
         cls._run_job(db_id)
         return True
+
+    @classmethod
+    def _maybe_enqueue_compose_followup(cls, *, parent_job: ReelRenderJob, run: ReelRun, command: str) -> None:
+        normalized_command = str(command or "").strip().lower()
+        if normalized_command != "run":
+            return
+        payload = dict(parent_job.payload or {})
+        if not bool(payload.get("prepareAnalysis")):
+            return
+        if not cls._env_flag("REAL_FOOTAGE_AUTO_CHAIN_COMPOSE", default=True):
+            return
+        if not bool(payload.get("autoComposeAfterPrepare", True)):
+            return
+
+        run_id = str(run.run_id or "").strip()
+        if not run_id:
+            return
+        if bool((run.report or {}).get("pipeline", {}).get("render", {}).get("done", False)):
+            cls._append_log(parent_job, "Auto-compose skipped: reel already rendered.")
+            return
+        existing_active = ReelRenderJob.objects.filter(
+            command="compose",
+            status__in=["queued", "running"],
+        ).filter(
+            Q(payload__resumeRunId=run_id) | Q(payload__runId=run_id) | Q(result__runId=run_id),
+        ).exists()
+        if existing_active:
+            cls._append_log(parent_job, "Auto-compose already queued/running for this run.")
+            return
+
+        approved_script = str(payload.get("approvedScript") or payload.get("script") or "").strip()
+        compose_payload = {
+            "command": "compose",
+            "resumeRunId": run_id,
+            "runId": run_id,
+            "compose": True,
+            "voiceoverScriptApproval": True,
+            "approvedScript": approved_script,
+            "script": approved_script,
+            "listingTitle": str(run.listing_title or payload.get("listingTitle") or "").strip(),
+            "stockId": str(run.stock_id or payload.get("stockId") or "").strip(),
+            "carDescription": str(run.car_description or payload.get("carDescription") or "").strip(),
+            "listingPrice": str(run.listing_price or payload.get("listingPrice") or "").strip(),
+            "priceIncludes": payload.get("priceIncludes", None),
+            "autoQueuedByJobId": str(parent_job.job_id or ""),
+        }
+        try:
+            queued = cls.start_job(compose_payload)
+            cls._append_log(
+                parent_job,
+                f"Auto-compose queued as {queued.job_id}.",
+            )
+        except Exception as exc:  # noqa: BLE001
+            cls._append_log(parent_job, f"Auto-compose queue failed: {exc}")
 
     @classmethod
     def _append_log(cls, job: ReelRenderJob, message: str) -> None:
@@ -1152,8 +1219,52 @@ class ReelRenderService:
 
     @staticmethod
     def delete_run(run_id: str) -> bool:
+        normalized_run_id = str(run_id or "").strip()
+        if not normalized_run_id:
+            return False
         try:
-            deleted, _ = ReelRun.objects.filter(run_id=run_id).delete()
+            run = ReelRun.objects.filter(run_id=normalized_run_id).first()
+            related_jobs = list(
+                ReelRenderJob.objects
+                .filter(
+                    Q(payload__runId=normalized_run_id)
+                    | Q(payload__resumeRunId=normalized_run_id)
+                    | Q(result__runId=normalized_run_id),
+                )
+                .order_by("-created_at")
+            )
+            for job in related_jobs:
+                with ReelRenderService._process_lock:
+                    proc = ReelRenderService._active_processes.get(job.job_id)
+                if proc and proc.poll() is None:
+                    with contextlib.suppress(Exception):
+                        proc.terminate()
+                if job.status in {"queued", "running", "paused"}:
+                    job.status = "cancelled"
+                    job.error = "Run deleted by user."
+                    job.finished_at = timezone.now()
+                    job.save(update_fields=["status", "error", "finished_at"])
+                with contextlib.suppress(Exception):
+                    job.delete()
+
+            candidate_dirs: list[Path] = [ReelRenderService._runs_root / normalized_run_id]
+            if run and isinstance(run.report, dict):
+                run_dir_value = str(run.report.get("runDir", "")).strip()
+                if run_dir_value:
+                    with contextlib.suppress(Exception):
+                        candidate_dirs.append(Path(run_dir_value).resolve())
+
+            for candidate in candidate_dirs:
+                with contextlib.suppress(Exception):
+                    resolved = candidate.resolve()
+                    allowed_roots = [
+                        ReelRenderService._runs_root.resolve(),
+                        ReelRenderService._legacy_runs_root.resolve(),
+                    ]
+                    if any(resolved == root or root in resolved.parents for root in allowed_roots):
+                        shutil.rmtree(resolved, ignore_errors=True)
+
+            deleted, _ = ReelRun.objects.filter(run_id=normalized_run_id).delete()
             return deleted > 0
         except (OperationalError, ProgrammingError):
             return False

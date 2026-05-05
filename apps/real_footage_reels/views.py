@@ -273,6 +273,7 @@ class JobsApiView(APIView):
                 payload["compose"] = False
                 payload["voiceoverScriptApproval"] = False
                 payload["prepareAnalysis"] = True
+                payload["autoComposeAfterPrepare"] = bool(payload.get("autoComposeAfterPrepare", True))
             elif path_text.endswith("/compose"):
                 payload["command"] = "compose"
                 payload["compose"] = True

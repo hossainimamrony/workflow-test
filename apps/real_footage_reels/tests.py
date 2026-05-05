@@ -113,6 +113,56 @@ class JobsApiPayloadTests(TestCase):
         self.assertEqual(sent_payload.get("resumeRunId"), "run-123")
         self.assertEqual(sent_payload.get("approvedScript"), "Approved script body")
 
+    def test_prepare_analysis_defaults_auto_compose_followup(self):
+        job = ReelRenderJob.objects.create(
+            job_id="job-prepare-auto-compose",
+            command="run",
+            status="queued",
+            payload={},
+        )
+
+        with patch.object(ReelRenderService, "start_job", return_value=job) as start_job_mock:
+            response = self.client.post(
+                "/workflows/real-footage-reels/api/runs/run-456/prepare-analysis",
+                data=json.dumps({"script": "Approved script body"}),
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, 202)
+        sent_payload = start_job_mock.call_args.args[0]
+        self.assertEqual(sent_payload.get("command"), "run")
+        self.assertEqual(sent_payload.get("resumeRunId"), "run-456")
+        self.assertTrue(sent_payload.get("prepareAnalysis"))
+        self.assertTrue(sent_payload.get("autoComposeAfterPrepare"))
+
+
+class RunDeletionCleanupTests(TestCase):
+    def test_delete_run_removes_run_directory(self):
+        run_id = f"delete-run-{uuid.uuid4().hex[:8]}"
+        run_dir = (
+            Path(__file__).resolve().parent
+            / "workflow_engine"
+            / "runs"
+            / run_id
+        )
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "final-reel.mp4").write_bytes(b"video")
+        self.assertTrue(run_dir.exists())
+
+        ReelRun.objects.create(
+            run_id=run_id,
+            listing_title="Delete test",
+            stock_id="DEL1",
+            car_description="cleanup",
+            listing_price="AU$1",
+            status="completed",
+            report={"runDir": str(run_dir)},
+        )
+
+        deleted = ReelRenderService.delete_run(run_id)
+        self.assertTrue(deleted)
+        self.assertFalse(run_dir.exists())
+
 
 @override_settings(ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])
 class RunDetailAssetResolutionTests(TestCase):
