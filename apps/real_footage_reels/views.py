@@ -205,13 +205,6 @@ class WorkflowHomeView(View):
 
 class MetaApiView(APIView):
     def get(self, request):
-        final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
-        final_reel_url = ""
-        if _is_remote_http_url(final_reel_url_value):
-            final_reel_url = final_reel_url_value
-        elif final_reel_path:
-            final_reel_url = _asset_url(run_id, final_reel_path)
-
         return Response(
             {
                 "appName": "AU Real Footage Reels",
@@ -365,6 +358,12 @@ class RunDetailApiView(APIView):
         final_reel_preview_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelPreviewUrl"))
         final_reel_webm_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelWebmUrl"))
         main_reel_path = _resolve_report_asset_path(run_dir_value, report.get("mainReelUrl"))
+        final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
+        final_reel_url = ""
+        if _is_remote_http_url(final_reel_url_value):
+            final_reel_url = final_reel_url_value
+        elif final_reel_path:
+            final_reel_url = _asset_url(run_id, final_reel_path)
         return Response(
             {
                 "runId": run.run_id,
