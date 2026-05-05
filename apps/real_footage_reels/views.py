@@ -315,17 +315,16 @@ class RunDetailApiView(APIView):
         run = get_object_or_404(ReelRun, run_id=run_id)
         report = dict(run.report or {})
         run_dir_path = _resolve_run_dir_path(report.get("runDir")) or (_WORKFLOW_ROOT / "runs" / run_id)
-        if str(run.status or "").strip().lower() in {"queued", "running"}:
-            try:
-                live_report = ReelRenderService._build_run_report_from_outputs(
-                    run_dir_path,
-                    str(report.get("command", "run")).strip() or "run",
-                )
-                if isinstance(live_report, dict) and live_report:
-                    report = {**report, **live_report}
-            except Exception:
-                # Keep API resilient while background processing is still writing files.
-                pass
+        try:
+            live_report = ReelRenderService._build_run_report_from_outputs(
+                run_dir_path,
+                str(report.get("command", "run")).strip() or "run",
+            )
+            if isinstance(live_report, dict) and live_report:
+                report = {**report, **live_report}
+        except Exception:
+            # Keep API resilient while background processing is still writing files.
+            pass
         run_dir_value = str(run_dir_path) if run_dir_path else str(report.get("runDir") or "").strip()
         videos = report.get("videos") or []
         decorated_videos = [
