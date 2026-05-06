@@ -623,6 +623,156 @@ class ReelRenderService:
         }
 
     @classmethod
+    def debug_remote_upload(
+        cls,
+        *,
+        run_id: str,
+        force: bool = True,
+    ) -> dict:
+        normalized_run_id = str(run_id or "").strip()
+        if not normalized_run_id:
+            raise RuntimeError("Run ID is required.")
+
+        run = ReelRun.objects.filter(run_id=normalized_run_id).first()
+        if not run:
+            raise RuntimeError("Run not found.")
+
+        report = run.report if isinstance(run.report, dict) else {}
+        run_dir = cls._runs_root / normalized_run_id
+        run_dir_value = str(report.get("runDir", "")).strip()
+        if run_dir_value:
+            raw_dir = Path(run_dir_value)
+            try:
+                resolved = raw_dir.resolve()
+            except Exception:
+                resolved = raw_dir
+            if not resolved.exists():
+                with contextlib.suppress(Exception):
+                    relative = resolved.relative_to(cls._legacy_runs_root.resolve())
+                    migrated = (cls._workflow_root / relative).resolve()
+                    if migrated.exists():
+                        resolved = migrated
+            run_dir = resolved
+        if not run_dir.exists():
+            raise RuntimeError(f"Run directory not found: {run_dir}")
+
+        final_mp4 = run_dir / "final-reel.mp4"
+        if not final_mp4.exists():
+            raise RuntimeError("final-reel.mp4 was not found for this run. Compose the run first.")
+
+        if not cls._bridge_path.exists():
+            raise RuntimeError(f"Workflow bridge not found at: {cls._bridge_path}")
+        cls._ensure_node_runtime_ready()
+
+        payload = {
+            "command": "remote-upload-debug",
+            "resumeRunId": normalized_run_id,
+            "listingTitle": str(run.listing_title or "").strip(),
+            "stockId": str(run.stock_id or "").strip(),
+            "carDescription": str(run.car_description or "").strip(),
+            "listingPrice": str(run.listing_price or "").strip(),
+            "priceIncludes": report.get("priceIncludes", None),
+            "force": bool(force),
+            "headless": True,
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".json", delete=False) as tmp:
+            tmp.write(json.dumps(payload))
+            payload_file = tmp.name
+
+        cmd = [
+            cls._node_bin,
+            str(cls._bridge_path),
+            "--payload",
+            payload_file,
+        ]
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(cls._workflow_root),
+            env=cls._workflow_subprocess_env(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        result_payload = None
+        bridge_errors: list[str] = []
+        raw_output_tail: list[str] = []
+        try:
+            stream = proc.stdout
+            if stream is not None:
+                for raw_line in stream:
+                    line = str(raw_line).rstrip("\r\n")
+                    if not line:
+                        continue
+                    raw_output_tail.append(line)
+                    if len(raw_output_tail) > 80:
+                        raw_output_tail = raw_output_tail[-80:]
+                    if line.startswith("[RESULT] "):
+                        with contextlib.suppress(Exception):
+                            parsed = json.loads(line[9:])
+                            if isinstance(parsed, dict):
+                                result_payload = parsed
+                        continue
+                    if line.startswith("[ERROR] "):
+                        err_line = line[8:].strip()
+                        if err_line:
+                            bridge_errors.append(err_line)
+                        continue
+            proc.wait()
+        finally:
+            with contextlib.suppress(Exception):
+                Path(payload_file).unlink(missing_ok=True)
+
+        if proc.returncode != 0:
+            if bridge_errors:
+                raise RuntimeError(bridge_errors[-1])
+            tail_preview = " | ".join(raw_output_tail[-8:]).strip()
+            if tail_preview:
+                raise RuntimeError(f"Remote upload debug failed. Details: {tail_preview}")
+            raise RuntimeError(f"Remote upload debug failed with exit code {proc.returncode}.")
+
+        if not isinstance(result_payload, dict):
+            raise RuntimeError("Remote upload debug did not return a valid result payload.")
+
+        result_run_dir = str(result_payload.get("runDir", "")).strip()
+        resolved_run_dir = Path(result_run_dir).resolve() if result_run_dir else run_dir.resolve()
+        final_report = result_payload.get("report") if isinstance(result_payload.get("report"), dict) else {}
+        publish_manifest = (
+            result_payload.get("publishManifest")
+            if isinstance(result_payload.get("publishManifest"), dict)
+            else cls._read_json(resolved_run_dir / "final-reel-publish.json")
+        ) or {}
+
+        if final_report:
+            run.report = final_report
+            run.save(update_fields=["report"])
+
+        cdn_url = str((publish_manifest or {}).get("cdnUrl", "")).strip()
+        preview_cdn_url = str((publish_manifest or {}).get("previewCdnUrl", "")).strip()
+        upload_ok = bool((publish_manifest or {}).get("ok") is True and cdn_url)
+        error_text = str((publish_manifest or {}).get("error", "")).strip()
+
+        return {
+            "runId": normalized_run_id,
+            "runDir": str(resolved_run_dir),
+            "uploadOk": upload_ok,
+            "downloadCheckOk": upload_ok,  # uploader validates remote URL by HEAD/GET before success.
+            "cdnUrl": cdn_url,
+            "previewCdnUrl": preview_cdn_url,
+            "error": error_text,
+            "provider": str((publish_manifest or {}).get("provider", "")).strip(),
+            "endpoint": str((publish_manifest or {}).get("endpoint", "")).strip(),
+            "directory": str((publish_manifest or {}).get("directory", "")).strip(),
+            "uploadResponseStatus": (publish_manifest or {}).get("uploadResponseStatus"),
+            "uploadResponseHeaders": (publish_manifest or {}).get("uploadResponseHeaders", {}),
+            "uploadResponseText": str((publish_manifest or {}).get("uploadResponseText", "")).strip(),
+            "manifest": publish_manifest,
+        }
+
+    @classmethod
     def _update_progress(cls, job: ReelRenderJob, phase: str, label: str) -> None:
         result = job.result or {}
         result["progress"] = {

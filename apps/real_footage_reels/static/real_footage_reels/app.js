@@ -585,6 +585,7 @@
           </div>
           <div class="detail-actions">
             <button class="button button--secondary" type="button" id="back-studio">Back</button>
+            <button class="button button--ghost" type="button" id="debug-remote-upload">S3 Upload Debug</button>
             <button class="button button--danger" type="button" id="delete-run">Delete</button>
           </div>
         </section>
@@ -621,6 +622,7 @@
             ${priceIncludes ? `<details class="run-detail__description" open><summary>Price Includes</summary><p class="run-detail__description-body">${esc(priceIncludes)}</p></details>` : ''}
             ${run.hasVoiceover && run.voiceoverScript ? `<details class="run-detail__voiceover" open><summary>Voice-over</summary><p class="run-detail__voiceover-body">${esc(run.voiceoverScript)}</p></details>` : ''}
             ${remotePublishFailed ? `<div class="callout callout--warning"><div class="callout__copy"><strong>Remote download unavailable</strong><p>${esc(remotePublishError)}</p></div></div>` : ''}
+            <div id="remote-upload-debug-wrap"></div>
           </div>
         </section>
 
@@ -858,6 +860,56 @@
 
     const backBtn = document.getElementById('back-studio');
     if (backBtn) backBtn.onclick = () => { window.location.href = `${appBase}/workflow`; };
+    const debugRemoteUploadBtn = document.getElementById('debug-remote-upload');
+    const debugRemoteUploadWrap = document.getElementById('remote-upload-debug-wrap');
+    const renderRemoteUploadDebug = (payload, isError) => {
+      if (!debugRemoteUploadWrap) return;
+      if (isError) {
+        const errText = String(payload || 'Unknown error').trim() || 'Unknown error';
+        debugRemoteUploadWrap.innerHTML = `<div class="callout callout--danger"><div class="callout__copy"><strong>Upload Debug Failed</strong><p>${esc(errText)}</p></div></div>`;
+        return;
+      }
+      const details = {
+        runId: payload.runId || run.runId || '',
+        uploadOk: Boolean(payload.uploadOk),
+        downloadCheckOk: Boolean(payload.downloadCheckOk),
+        provider: String(payload.provider || ''),
+        directory: String(payload.directory || ''),
+        endpoint: String(payload.endpoint || ''),
+        cdnUrl: String(payload.cdnUrl || ''),
+        previewCdnUrl: String(payload.previewCdnUrl || ''),
+        uploadResponseStatus: payload.uploadResponseStatus ?? null,
+        error: String(payload.error || ''),
+      };
+      const tone = details.uploadOk ? 'info' : 'warning';
+      debugRemoteUploadWrap.innerHTML = `
+        <div class="callout callout--${tone}">
+          <div class="callout__copy">
+            <strong>${details.uploadOk ? 'Upload Debug Success' : 'Upload Debug Result'}</strong>
+            <p>${details.uploadOk ? 'Upload + remote download validation passed.' : (details.error || 'Upload debug did not pass.')}</p>
+            <pre>${esc(JSON.stringify(details, null, 2))}</pre>
+          </div>
+        </div>
+      `;
+    };
+    if (debugRemoteUploadBtn) debugRemoteUploadBtn.onclick = async () => {
+      debugRemoteUploadBtn.disabled = true;
+      const oldText = debugRemoteUploadBtn.textContent;
+      debugRemoteUploadBtn.textContent = 'Running...';
+      try {
+        const payload = await api(base + '/runs/' + encodeURIComponent(runId) + '/remote-upload-debug', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: true }),
+        });
+        renderRemoteUploadDebug(payload, false);
+      } catch (err) {
+        renderRemoteUploadDebug(err && err.message ? err.message : String(err || 'Unknown error'), true);
+      } finally {
+        debugRemoteUploadBtn.disabled = false;
+        debugRemoteUploadBtn.textContent = oldText || 'S3 Upload Debug';
+      }
+    };
     const delBtn = document.getElementById('delete-run');
     if (delBtn) delBtn.onclick = async () => {
       if (!confirm('Delete this run?')) return;

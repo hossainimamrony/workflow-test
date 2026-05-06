@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 
 import { createRuntimeConfig, hasGeminiApiKey, loadEnvConfig } from "../src/lib/config.mjs";
+import { publishFinalReelMp4 } from "../src/lib/final-reel-output.mjs";
 import { buildRunReport } from "../src/lib/run-report.mjs";
 import {
   composeSavedRun,
@@ -100,6 +101,52 @@ async function main() {
       runDir,
       imagePath: generated.imagePath,
       imageMimeType: generated.imageMimeType,
+    };
+  } else if (command === "remote-upload-debug") {
+    if (!runDir) {
+      throw new Error("Missing resumeRunId or outDir for remote-upload-debug.");
+    }
+
+    const forceRaw = String(payload.force ?? "1").trim().toLowerCase();
+    const forceUpload = !["0", "false", "no", "off"].includes(forceRaw);
+    if (forceUpload) {
+      await fs.rm(path.join(runDir, "final-reel-publish.json"), { force: true });
+    }
+
+    const config = createRuntimeConfig(
+      {
+        command: "compose",
+        urls: [],
+        listingTitle: payload.listingTitle ?? "",
+        stockId: payload.stockId ?? "",
+        carDescription: payload.carDescription ?? "",
+        listingPrice: payload.listingPrice ?? "",
+        priceIncludes: payload.priceIncludes ?? null,
+        outDir: runDir,
+        compose: true,
+        headless: true,
+        voiceoverScriptApproval: false,
+        browserProfileDir: path.join(runDir, ".browser-profile"),
+      },
+      env,
+    );
+
+    onProgress({ phase: "publish", percent: 20, label: "Uploading final reel" });
+    const publishedPath = await publishFinalReelMp4(runDir, config.ffmpegPath, log, config);
+    if (!publishedPath) {
+      throw new Error("final-reel.mp4 was not found in this run. Compose the run first.");
+    }
+    const manifestPath = path.join(runDir, "final-reel-publish.json");
+    let publishManifest = null;
+    try {
+      publishManifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+    } catch {
+      publishManifest = null;
+    }
+    onProgress({ phase: "publish", percent: 100, label: "Done" });
+    result = {
+      runDir,
+      publishManifest,
     };
   } else if (command === "script-draft") {
     if (!runDir) {
@@ -256,6 +303,7 @@ async function main() {
       report: finalReport,
       imagePath: result?.imagePath ?? "",
       imageMimeType: result?.imageMimeType ?? "",
+      publishManifest: result?.publishManifest ?? null,
     })}\n`,
   );
 }
