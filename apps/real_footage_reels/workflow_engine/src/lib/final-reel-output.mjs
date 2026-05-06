@@ -247,16 +247,19 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
   const endpoint = String(
     config.finalReelUploadEndpoint ??
       process.env.FINAL_REEL_UPLOAD_ENDPOINT ??
+      process.env.S3_UPLOAD_URL ??
       "https://www.cbs.s1.carbarn.com.au/carbarnau/s3/uploadfiles",
   ).trim();
   const directory = String(
     config.finalReelUploadDirectory ??
       process.env.FINAL_REEL_UPLOAD_DIRECTORY ??
+      process.env.S3_UPLOAD_DIRECTORY ??
       "social-media-content/reels",
   ).trim().replace(/^\/+|\/+$/gu, "");
   const cdnBase = String(
     config.finalReelCdnBase ??
       process.env.FINAL_REEL_CDN_BASE ??
+      process.env.S3_CDN_BASE_URL ??
       "https://www.storage.importautos.com.au/social-media-content/reels",
   ).trim().replace(/\/+$/gu, "");
   const provider = String(
@@ -355,10 +358,10 @@ async function publishFinalReelToMultipartApi({
   log = () => {},
 }) {
   if (!endpoint) {
-    throw new Error("Remote upload endpoint is empty. Set FINAL_REEL_UPLOAD_ENDPOINT.");
+    throw new Error("Remote upload endpoint is empty. Set FINAL_REEL_UPLOAD_ENDPOINT or S3_UPLOAD_URL.");
   }
   if (!cdnBase) {
-    throw new Error("Remote CDN base is empty. Set FINAL_REEL_CDN_BASE.");
+    throw new Error("Remote CDN base is empty. Set FINAL_REEL_CDN_BASE or S3_CDN_BASE_URL.");
   }
 
   log(`Uploading final reel to remote API (${directory}/${fileName})...`);

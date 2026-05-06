@@ -216,7 +216,9 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelUploadEndpoint,
       env.FINAL_REEL_UPLOAD_ENDPOINT,
+      env.S3_UPLOAD_URL,
       process.env.FINAL_REEL_UPLOAD_ENDPOINT,
+      process.env.S3_UPLOAD_URL,
       "https://www.cbs.s1.carbarn.com.au/carbarnau/s3/uploadfiles",
     ),
   ).trim();
@@ -224,7 +226,9 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelUploadDirectory,
       env.FINAL_REEL_UPLOAD_DIRECTORY,
+      env.S3_UPLOAD_DIRECTORY,
       process.env.FINAL_REEL_UPLOAD_DIRECTORY,
+      process.env.S3_UPLOAD_DIRECTORY,
       "social-media-content/reels",
     ),
   ).trim();
@@ -232,7 +236,9 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelCdnBase,
       env.FINAL_REEL_CDN_BASE,
+      env.S3_CDN_BASE_URL,
       process.env.FINAL_REEL_CDN_BASE,
+      process.env.S3_CDN_BASE_URL,
       "https://www.storage.importautos.com.au/social-media-content/reels",
     ),
   ).trim();
@@ -332,15 +338,12 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
       "",
     ),
   ).trim();
-  const finalReelRemoteProviderFinal =
-    finalReelRemoteProvider ||
-    (
-      finalReelS3Bucket &&
-      finalReelS3AccessKeyId &&
-      finalReelS3SecretAccessKey
-        ? "s3"
-        : "multipart"
-    );
+  const normalizedRemoteProvider = (
+    finalReelRemoteProvider === "s3" || finalReelRemoteProvider === "multipart"
+  )
+    ? finalReelRemoteProvider
+    : "";
+  const finalReelRemoteProviderFinal = normalizedRemoteProvider || "multipart";
 
   if (strictEndScene) {
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);
