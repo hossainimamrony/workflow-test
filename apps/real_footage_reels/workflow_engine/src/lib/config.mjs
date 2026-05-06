@@ -393,6 +393,8 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     urls: arrayValue(input.urls ?? []),
     listingTitle: String(input.listingTitle ?? "").trim(),
     stockId: String(input.stockId ?? "").trim(),
+    make: String(input.make ?? "").trim(),
+    model: String(input.model ?? "").trim(),
     carDescription: String(input.carDescription ?? "").trim(),
     listingPrice: String(
       input.listingPrice ?? firstEnv(env.LISTING_PRICE, process.env.LISTING_PRICE) ?? "",

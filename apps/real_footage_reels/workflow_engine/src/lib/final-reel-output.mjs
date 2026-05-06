@@ -318,8 +318,9 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
   }
 
   const runId = path.basename(path.resolve(runDir));
-  const fileName = sanitizeRemoteFileName(`${runId}-final-reel.mp4`);
-  const previewFileName = sanitizeRemoteFileName(`${runId}-final-reel-preview.mp4`);
+  const namingContext = await buildVideoNamingContext(runDir, config, runId);
+  const fileName = sanitizeRemoteFileName(`${namingContext.baseName}-final-reel.mp4`);
+  const previewFileName = sanitizeRemoteFileName(`${namingContext.baseName}-final-reel-preview.mp4`);
   const timeoutMs = Number(
     config.finalReelUploadTimeoutMs ?? process.env.FINAL_REEL_UPLOAD_TIMEOUT_MS ?? 180000,
   );
@@ -337,6 +338,10 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     rawBaseUrl,
     s3Bucket,
     s3Region,
+    stockId: namingContext.stockId,
+    make: namingContext.make,
+    model: namingContext.model,
+    runId,
   };
 
   try {
@@ -967,6 +972,62 @@ function sanitizeRemoteFileName(value) {
     .replace(/[^a-z0-9._-]+/giu, "-")
     .replace(/-+/gu, "-")
     .replace(/^-|-$/gu, "") || "final-reel.mp4";
+}
+
+async function buildVideoNamingContext(runDir, config = {}, fallbackRunId = "") {
+  const manifest = await readJsonIfExists(path.join(runDir, "downloads-manifest.json"));
+  const stockId = normalizeSlugSegment(
+    firstNonEmpty(config.stockId, manifest?.stockId, fallbackRunId),
+    "run",
+  );
+  const directMake = firstNonEmpty(config.make, manifest?.make, manifest?.listingMake);
+  const directModel = firstNonEmpty(config.model, manifest?.model, manifest?.listingModel);
+  const listingTitle = String(firstNonEmpty(config.listingTitle, manifest?.listingTitle)).trim();
+  const inferred = inferMakeModelFromListingTitle(listingTitle);
+  const make = normalizeSlugSegment(firstNonEmpty(directMake, inferred.make), "vehicle");
+  const model = normalizeSlugSegment(firstNonEmpty(directModel, inferred.model), "model");
+  return {
+    stockId,
+    make,
+    model,
+    baseName: `${stockId}-${make}-${model}`,
+  };
+}
+
+function inferMakeModelFromListingTitle(listingTitle) {
+  const tokens = String(listingTitle || "")
+    .trim()
+    .split(/\s+/u)
+    .filter(Boolean);
+  if (!tokens.length) {
+    return { make: "", model: "" };
+  }
+  const first = tokens[0] || "";
+  const hasYearPrefix = /^\d{4}$/u.test(first);
+  const makeIndex = hasYearPrefix ? 1 : 0;
+  const modelIndex = hasYearPrefix ? 2 : 1;
+  return {
+    make: tokens[makeIndex] || "",
+    model: tokens[modelIndex] || "",
+  };
+}
+
+function normalizeSlugSegment(value, fallback) {
+  const cleaned = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/-+/gu, "-")
+    .replace(/^-|-$/gu, "");
+  return cleaned || fallback;
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const text = String(value ?? "").trim();
+    if (text) return text;
+  }
+  return "";
 }
 
 function tryParseJson(value) {
