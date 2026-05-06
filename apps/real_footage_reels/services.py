@@ -1271,30 +1271,14 @@ class ReelRenderService:
 
     @staticmethod
     def cleanup_trash_files() -> dict:
-        runs_root = ReelRenderService._runs_root
-        if not runs_root.exists():
+        runs_roots = [ReelRenderService._runs_root, ReelRenderService._legacy_runs_root]
+        if not any(root.exists() for root in runs_roots):
             return {"ok": True, "deletedFiles": 0, "deletedBytes": 0, "deletedDirs": 0}
 
         keep_names = {
             "final-reel.mp4",
-            "final-reel-preview.mp4",
-            "final-reel.webm",
-            "main-reel.mp4",
-            "end-scene.mp4",
         }
         removable_suffixes = {".mov", ".mp4"}
-        removable_name_tokens = (
-            "sample",
-            "temp",
-            "tmp",
-            "broken",
-            "failed",
-            "draft",
-            "clip-",
-            "download",
-            "source",
-            "raw",
-        )
 
         deleted_files = 0
         deleted_bytes = 0
@@ -1308,63 +1292,50 @@ class ReelRenderService:
                 if proc and proc.poll() is None and job is not None
             }
 
-        try:
-            run_dirs = list(runs_root.iterdir())
-        except Exception:
-            return {
-                "ok": False,
-                "deletedFiles": 0,
-                "deletedBytes": 0,
-                "deletedDirs": 0,
-                "error": f"Cannot read runs directory: {runs_root}",
-            }
-
-        for run_dir in run_dirs:
-            if not run_dir.is_dir():
+        for runs_root in runs_roots:
+            if not runs_root.exists():
                 continue
-            run_id = run_dir.name
-            if run_id in active_run_ids:
-                continue
-
             try:
-                run_paths = list(run_dir.rglob("*"))
+                run_dirs = list(runs_root.iterdir())
             except Exception:
                 continue
 
-            for path in run_paths:
-                if not path.is_file():
+            for run_dir in run_dirs:
+                if not run_dir.is_dir():
                     continue
-                name = path.name.lower()
-                suffix = path.suffix.lower()
-                if name in keep_names:
-                    continue
-                if suffix not in removable_suffixes:
-                    continue
-
-                parent_hint = str(path.parent).lower().replace("\\", "/")
-                is_raw_folder = any(
-                    token in parent_hint for token in ("/downloads", "/download", "/raw", "/source", "/clips", "/cache")
-                )
-                is_temp_named = any(token in name for token in removable_name_tokens)
-                if not (is_raw_folder or is_temp_named):
+                run_id = run_dir.name
+                if run_id in active_run_ids:
                     continue
 
                 try:
-                    size = path.stat().st_size
-                except OSError:
-                    size = 0
-                with contextlib.suppress(Exception):
-                    path.unlink()
-                    deleted_files += 1
-                    deleted_bytes += max(0, int(size))
+                    run_paths = list(run_dir.rglob("*"))
+                except Exception:
+                    continue
 
-            # remove known temp folders left by failed/broken runs
-            for folder in ("downloads", "download", "raw", "cache", "clips", "tmp", "temp", "samples"):
-                candidate = run_dir / folder
-                if candidate.exists() and candidate.is_dir():
+                for path in run_paths:
+                    if not path.is_file():
+                        continue
+                    name = path.name.lower()
+                    suffix = path.suffix.lower()
+                    if name in keep_names or suffix not in removable_suffixes:
+                        continue
+
+                    try:
+                        size = path.stat().st_size
+                    except OSError:
+                        size = 0
                     with contextlib.suppress(Exception):
-                        shutil.rmtree(candidate, ignore_errors=True)
-                        deleted_dirs += 1
+                        path.unlink()
+                        deleted_files += 1
+                        deleted_bytes += max(0, int(size))
+
+                # remove known temp folders left by failed/broken runs
+                for folder in ("downloads", "download", "raw", "cache", "clips", "tmp", "temp", "samples"):
+                    candidate = run_dir / folder
+                    if candidate.exists() and candidate.is_dir():
+                        with contextlib.suppress(Exception):
+                            shutil.rmtree(candidate, ignore_errors=True)
+                            deleted_dirs += 1
         return {
             "ok": True,
             "deletedFiles": deleted_files,

@@ -170,9 +170,13 @@ class RunDeletionCleanupTests(TestCase):
         downloads_dir.mkdir(parents=True, exist_ok=True)
 
         final_video = run_dir / "final-reel.mp4"
+        preview_video = run_dir / "final-reel-preview.mp4"
+        main_video = run_dir / "main-reel.mp4"
         raw_mov = downloads_dir / "001-raw.mov"
         broken_sample = run_dir / "broken-sample.mp4"
         final_video.write_bytes(b"final")
+        preview_video.write_bytes(b"preview")
+        main_video.write_bytes(b"main")
         raw_mov.write_bytes(b"rawmov")
         broken_sample.write_bytes(b"broken")
 
@@ -180,6 +184,8 @@ class RunDeletionCleanupTests(TestCase):
 
         self.assertTrue(result.get("ok"))
         self.assertTrue(final_video.exists())
+        self.assertFalse(preview_video.exists())
+        self.assertFalse(main_video.exists())
         self.assertFalse(raw_mov.exists())
         self.assertFalse(broken_sample.exists())
 
@@ -226,6 +232,12 @@ class RunsTrashCleanupApiTests(TestCase):
         payload = response.json()
         self.assertTrue(payload.get("ok"))
         self.assertIn("deletedFiles", payload)
+
+    def test_cleanup_endpoint_supports_get_fallback_when_confirmed(self):
+        response = self.client.get("/workflows/real-footage-reels/api/runs/trash-cleanup?confirmed=1")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("ok"))
 
 
 @override_settings(ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])

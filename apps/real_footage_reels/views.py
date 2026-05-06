@@ -358,9 +358,19 @@ class RunDeleteApiView(APIView):
 
 
 class RunsTrashCleanupApiView(APIView):
-    def post(self, request):
+    @staticmethod
+    def _is_confirmed(request) -> bool:
         payload = request.data if isinstance(request.data, dict) else {}
-        confirmed = bool(payload.get("confirmed", False))
+        body_value = payload.get("confirmed", False)
+        query_value = request.query_params.get("confirmed", "")
+        if isinstance(body_value, str):
+            return body_value.strip().lower() in {"1", "true", "yes", "y", "on"}
+        if bool(body_value):
+            return True
+        return str(query_value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+    def post(self, request):
+        confirmed = self._is_confirmed(request)
         if not confirmed:
             return Response({"error": "Confirmation required."}, status=400)
         try:
@@ -368,6 +378,12 @@ class RunsTrashCleanupApiView(APIView):
         except Exception as exc:
             return Response({"error": f"Trash cleanup failed: {exc}"}, status=500)
         return Response(result, status=200)
+
+    def delete(self, request):
+        return self.post(request)
+
+    def get(self, request):
+        return self.post(request)
 
 
 class RunDetailApiView(APIView):

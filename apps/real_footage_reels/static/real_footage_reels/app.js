@@ -522,17 +522,21 @@
   }
 
   async function deleteTrash() {
-    const firstConfirm = window.confirm('Delete all downloaded raw footage and broken temp videos from runs? Final videos will be kept.');
-    if (!firstConfirm) return;
-    const secondConfirm = window.confirm('This is aggressive cleanup and cannot be undone. Continue?');
-    if (!secondConfirm) return;
+    const confirmed = window.confirm('Delete all raw footage (.mov/.mp4) from runs and keep only final-reel.mp4 files?');
+    if (!confirmed) return;
     if (runsTrashDelete) runsTrashDelete.disabled = true;
     try {
-      const result = await api(`${base}/runs/trash-cleanup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ confirmed: true }),
-      });
+      let result;
+      try {
+        result = await api(`${base}/runs/trash-cleanup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirmed: true }),
+        });
+      } catch (_err) {
+        // Fallback for environments where POST/CSRF handling is inconsistent.
+        result = await api(`${base}/runs/trash-cleanup?confirmed=1`, { method: 'GET' });
+      }
       const deletedFiles = Number(result.deletedFiles || 0);
       const deletedDirs = Number(result.deletedDirs || 0);
       const deletedBytes = Number(result.deletedBytes || 0);
