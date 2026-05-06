@@ -86,7 +86,8 @@ function isEligibleForRole(clip, role) {
       roleLabel === "driver_door_interior_reveal" ||
       primaryLabel === "driver_door_interior_reveal" ||
       Number(scores.driver_door_interior_reveal || 0) > 0 ||
-      Boolean(clip.analysis.doorOpen && clip.analysis.interiorVisible)
+      Boolean(clip.analysis.doorOpen && clip.analysis.interiorVisible) ||
+      middleRevealRoleScore(clip) > 0
     );
   }
 
@@ -342,6 +343,9 @@ function roundDuration(value) {
 }
 
 function roleBaseScore(clip, role) {
+  if (role === "driver_door_interior_reveal") {
+    return Math.max(clip.analysis.scores?.[role] ?? 0, middleRevealRoleScore(clip));
+  }
   if (role === "interior") {
     return interiorRoleScore(clip);
   }
@@ -387,6 +391,49 @@ function interiorRoleScore(clip) {
   }
   if (secondaryLabels.includes("odometer") || secondaryLabels.includes("dashboard")) {
     score += 12;
+  }
+
+  return Math.max(0, Math.min(100, score));
+}
+
+function middleRevealRoleScore(clip) {
+  const roleLabel = clip.analysis.roleLabel ?? deriveRoleLabel(clip.analysis.primaryLabel);
+  const primaryLabel = clip.analysis.primaryLabel ?? "";
+  const secondaryLabels = normalizeSecondaryLabels(clip);
+
+  // Keep native driver-door reveal strongest when present.
+  let score = 0;
+  if (roleLabel === "driver_door_interior_reveal" || primaryLabel === "driver_door_interior_reveal") {
+    score += 95;
+  }
+  if (clip.analysis.doorOpen && clip.analysis.interiorVisible) {
+    score += 70;
+  }
+
+  // Accept steering/odometer/dashboard as the stage-2 reveal fallback.
+  if (secondaryLabels.includes("odometer")) {
+    score += 82;
+  }
+  if (secondaryLabels.includes("dashboard")) {
+    score += 76;
+  }
+  if (secondaryLabels.includes("steering") || secondaryLabels.includes("steering_wheel")) {
+    score += 78;
+  }
+
+  // A plain interior clip can be used, but should be weaker than true reveal candidates.
+  if (roleLabel === "interior" || primaryLabel === "interior" || clip.analysis.interiorVisible) {
+    score += 26;
+  }
+
+  // Avoid exterior clips in stage-2 fallback.
+  if (
+    roleLabel === "front_exterior" ||
+    roleLabel === "rear_exterior" ||
+    primaryLabel.startsWith("front_") ||
+    primaryLabel.startsWith("rear_")
+  ) {
+    score = Math.max(0, score - 60);
   }
 
   return Math.max(0, Math.min(100, score));

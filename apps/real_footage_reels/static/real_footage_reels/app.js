@@ -731,10 +731,7 @@
 
     let thumbSubmitting = false;
     let thumbReferenceImageDataUrl = '';
-    let thumbImageUrl = withVersionToken(
-      String(run.thumbnailRemoteUrl || run.thumbnailUrl || '').trim(),
-      Date.now(),
-    );
+    let thumbImageUrl = '';
 
     function setThumbnailError(message) {
       if (!thumbnailErrorWrap) return;
@@ -750,12 +747,64 @@
       return thumbImageUrl || thumbReferenceImageDataUrl || '';
     }
 
+    function normalizeImageUrl(url) {
+      return String(url || '').trim();
+    }
+
+    function uniqueUrls(urls) {
+      const seen = new Set();
+      const out = [];
+      for (const raw of urls || []) {
+        const url = normalizeImageUrl(raw);
+        if (!url || seen.has(url)) continue;
+        seen.add(url);
+        out.push(url);
+      }
+      return out;
+    }
+
+    function buildThumbnailUrlCandidates() {
+      const direct = [
+        run.thumbnailRemoteUrl,
+        run.thumbnailUrl,
+      ];
+      const base = 'https://fastlycb.s3.ap-southeast-2.amazonaws.com/social-media-content/reels/thumbnails';
+      const stock = String(run.stockId || '').trim();
+      const runIdValue = String(run.runId || '').trim();
+      const exts = ['png', 'jpg', 'jpeg', 'webp'];
+      const derived = [];
+      for (const ext of exts) {
+        if (stock) derived.push(`${base}/${encodeURIComponent(stock)}.${ext}`);
+        if (runIdValue) derived.push(`${base}/${encodeURIComponent(runIdValue)}.${ext}`);
+      }
+      return uniqueUrls([...direct, ...derived]);
+    }
+
+    function loadImageProbe(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = withVersionToken(url, Date.now());
+      });
+    }
+
+    async function resolveExistingThumbnailUrl() {
+      const candidates = buildThumbnailUrlCandidates();
+      for (const candidate of candidates) {
+        // eslint-disable-next-line no-await-in-loop
+        const ok = await loadImageProbe(candidate);
+        if (ok) return candidate;
+      }
+      return '';
+    }
+
     function renderThumbnailPreview() {
       if (!thumbnailPreviewPick) return;
       const imageUrl = getThumbnailDisplayImageUrl();
       if (imageUrl) {
         const label = thumbImageUrl ? 'Generated thumbnail preview' : 'Reference image preview';
-        thumbnailPreviewPick.innerHTML = `<img src="${esc(imageUrl)}" alt="${esc(label)}">`;
+        thumbnailPreviewPick.innerHTML = `<img src="${esc(imageUrl)}" alt="${esc(label)}" onerror="this.closest('button').innerHTML='<div class=&quot;thumbnail-generator__placeholder&quot;><strong>Thumbnail unavailable</strong><span>Choose a reference image to generate a new thumbnail.</span></div>';">`;
       } else {
         thumbnailPreviewPick.innerHTML = '<div class="thumbnail-generator__placeholder"><strong>Choose reference image</strong><span>Click here to select the car photo.</span></div>';
       }
@@ -876,7 +925,11 @@
         run.runId || '',
       );
     }
-    renderThumbnailPreview();
+    void (async () => {
+      const resolved = await resolveExistingThumbnailUrl();
+      thumbImageUrl = resolved ? withVersionToken(resolved, Date.now()) : '';
+      renderThumbnailPreview();
+    })();
     setThumbnailSubmitting(false);
     if (thumbnailInput) thumbnailInput.addEventListener('change', (event) => { void handleReferenceImageChange(event); });
     if (thumbnailPreviewPick) thumbnailPreviewPick.addEventListener('click', pickThumbnailImage);
