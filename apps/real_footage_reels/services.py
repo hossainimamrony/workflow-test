@@ -1308,14 +1308,30 @@ class ReelRenderService:
                 if proc and proc.poll() is None and job is not None
             }
 
-        for run_dir in runs_root.iterdir():
+        try:
+            run_dirs = list(runs_root.iterdir())
+        except Exception:
+            return {
+                "ok": False,
+                "deletedFiles": 0,
+                "deletedBytes": 0,
+                "deletedDirs": 0,
+                "error": f"Cannot read runs directory: {runs_root}",
+            }
+
+        for run_dir in run_dirs:
             if not run_dir.is_dir():
                 continue
             run_id = run_dir.name
             if run_id in active_run_ids:
                 continue
 
-            for path in run_dir.rglob("*"):
+            try:
+                run_paths = list(run_dir.rglob("*"))
+            except Exception:
+                continue
+
+            for path in run_paths:
                 if not path.is_file():
                     continue
                 name = path.name.lower()
@@ -1349,7 +1365,6 @@ class ReelRenderService:
                     with contextlib.suppress(Exception):
                         shutil.rmtree(candidate, ignore_errors=True)
                         deleted_dirs += 1
-
         return {
             "ok": True,
             "deletedFiles": deleted_files,

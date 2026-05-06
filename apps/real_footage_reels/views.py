@@ -350,6 +350,12 @@ class RunDeleteApiView(APIView):
             return Response({"error": "Run not found."}, status=404)
         return Response({"ok": True, "runId": run_id})
 
+    def post(self, request, run_id):
+        deleted = ReelRenderService.delete_run(run_id)
+        if not deleted:
+            return Response({"error": "Run not found."}, status=404)
+        return Response({"ok": True, "runId": run_id})
+
 
 class RunsTrashCleanupApiView(APIView):
     def post(self, request):
@@ -357,7 +363,10 @@ class RunsTrashCleanupApiView(APIView):
         confirmed = bool(payload.get("confirmed", False))
         if not confirmed:
             return Response({"error": "Confirmation required."}, status=400)
-        result = ReelRenderService.cleanup_trash_files()
+        try:
+            result = ReelRenderService.cleanup_trash_files()
+        except Exception as exc:
+            return Response({"error": f"Trash cleanup failed: {exc}"}, status=500)
         return Response(result, status=200)
 
 

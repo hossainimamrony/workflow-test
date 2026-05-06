@@ -73,6 +73,18 @@
     return data;
   }
 
+  async function deleteRunById(runId) {
+    const encodedRunId = encodeURIComponent(String(runId || '').trim());
+    if (!encodedRunId) {
+      throw new Error('Missing run id.');
+    }
+    try {
+      return await api(base + '/runs/' + encodedRunId, { method: 'DELETE' });
+    } catch (_err) {
+      return api(base + '/runs/' + encodedRunId + '/delete', { method: 'POST' });
+    }
+  }
+
   function esc(v) { return String(v || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function fmtDate(v) {
     if (!v) return 'Unknown';
@@ -504,7 +516,7 @@
     });
     runsList.querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => {
       if (!confirm('Delete this run?')) return;
-      await api(base + '/runs/' + encodeURIComponent(b.dataset.del), { method: 'DELETE' });
+      await deleteRunById(b.dataset.del);
       await loadRuns();
     });
   }
@@ -845,7 +857,7 @@
     const delBtn = document.getElementById('delete-run');
     if (delBtn) delBtn.onclick = async () => {
       if (!confirm('Delete this run?')) return;
-      await api(base + '/runs/' + encodeURIComponent(runId), { method: 'DELETE' });
+      await deleteRunById(runId);
       window.location.href = `${appBase}/workflow`;
     };
     const scriptRadios = runDetailPanel.querySelectorAll('input[name="script-variant"]');

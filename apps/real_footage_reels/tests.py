@@ -183,6 +183,28 @@ class RunDeletionCleanupTests(TestCase):
         self.assertFalse(raw_mov.exists())
         self.assertFalse(broken_sample.exists())
 
+    def test_delete_endpoint_accepts_post_fallback(self):
+        run_id = f"delete-api-{uuid.uuid4().hex[:8]}"
+        run_dir = Path(__file__).resolve().parent / "workflow_engine" / "runs" / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "final-reel.mp4").write_bytes(b"video")
+
+        ReelRun.objects.create(
+            run_id=run_id,
+            listing_title="Delete API test",
+            stock_id="DEL2",
+            car_description="cleanup",
+            listing_price="AU$2",
+            status="completed",
+            report={"runDir": str(run_dir)},
+        )
+
+        response = self.client.post(f"/workflows/real-footage-reels/api/runs/{run_id}/delete")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json().get("ok"))
+        self.assertFalse(ReelRun.objects.filter(run_id=run_id).exists())
+        self.assertFalse(run_dir.exists())
+
 
 class RunsTrashCleanupApiTests(TestCase):
     def test_cleanup_requires_confirmation(self):
