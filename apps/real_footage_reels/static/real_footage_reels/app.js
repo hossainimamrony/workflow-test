@@ -663,7 +663,7 @@
         </section>
 
         <section class="panel thumbnail-generator">
-          <div class="section-heading section-heading--compact"><h3 class="section-heading__title section-heading__title--panel">Photo Generator</h3></div>
+          <div class="section-heading section-heading--compact"><h3 class="section-heading__title section-heading__title--panel">Thumbnail Generator</h3></div>
           <div class="thumbnail-generator__grid">
             <form id="thumbnail-form" class="thumbnail-generator__form">
               <input id="thumbnail-reference-input" type="file" accept="image/*" tabindex="-1" class="thumbnail-generator__file-input">
@@ -731,7 +731,10 @@
 
     let thumbSubmitting = false;
     let thumbReferenceImageDataUrl = '';
-    let thumbImageUrl = '';
+    let thumbImageUrl = withVersionToken(
+      String(run.thumbnailRemoteUrl || run.thumbnailUrl || '').trim(),
+      Date.now(),
+    );
 
     function setThumbnailError(message) {
       if (!thumbnailErrorWrap) return;

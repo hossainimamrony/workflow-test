@@ -453,6 +453,7 @@ class RunDetailApiView(APIView):
         final_reel_preview_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelPreviewUrl"))
         final_reel_webm_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelWebmUrl"))
         main_reel_path = _resolve_report_asset_path(run_dir_value, report.get("mainReelUrl"))
+        thumbnail_path = _resolve_report_asset_path(run_dir_value, report.get("thumbnailUrl"))
         final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
         remote_upload_ok_value = report.get("finalReelRemoteUploadOk")
         remote_upload_ok = None if remote_upload_ok_value is None else bool(remote_upload_ok_value)
@@ -484,6 +485,9 @@ class RunDetailApiView(APIView):
                 "finalReelRemoteError": str(report.get("finalReelRemoteError") or "").strip(),
                 "finalReelPreviewUrl": _as_public_asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
                 "finalReelWebmUrl": _as_public_asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
+                "thumbnailUrl": _as_public_asset_url(run_id, thumbnail_path) if thumbnail_path else "",
+                "thumbnailRemoteUrl": str(report.get("thumbnailRemoteUrl") or "").strip(),
+                "thumbnailObjectKey": str(report.get("thumbnailObjectKey") or "").strip(),
                 "videos": decorated_videos,
                 "plan": {
                     **plan,

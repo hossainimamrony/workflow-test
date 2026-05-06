@@ -8,11 +8,15 @@ import {
 
 export function buildReelPlan(clips, sequenceRoles = LOCKED_MONTAGE_ROLE_ORDER, options = {}) {
   const lockedSequenceRoles = ensureLockedTargetSequence(sequenceRoles);
-  const remaining = [...clips];
+  const remaining = clips.map((clip, index) => ({ ...clip, __timelineIndex: index }));
   const sequence = [];
+  let lastChosenTimelineIndex = -1;
 
   for (const role of lockedSequenceRoles) {
-    const ranked = [...remaining].sort((left, right) => {
+    const eligible = remaining.filter((clip) => isEligibleForRole(clip, role));
+    const inOrderPool = eligible.filter((clip) => clip.__timelineIndex > lastChosenTimelineIndex);
+    const pool = inOrderPool.length ? inOrderPool : eligible;
+    const ranked = [...pool].sort((left, right) => {
       return scoreForRole(right, role) - scoreForRole(left, role);
     });
 
@@ -22,11 +26,13 @@ export function buildReelPlan(clips, sequenceRoles = LOCKED_MONTAGE_ROLE_ORDER, 
       continue;
     }
 
+    const { __timelineIndex: _timelineIndex, ...chosenPublic } = chosen;
     sequence.push({
-      ...chosen,
+      ...chosenPublic,
       role,
       score: chosenScore,
     });
+    lastChosenTimelineIndex = chosen.__timelineIndex;
 
     const chosenIndex = remaining.findIndex((clip) => clip.clipId === chosen.clipId);
     if (chosenIndex >= 0) {
@@ -60,6 +66,43 @@ export function buildReelPlan(clips, sequenceRoles = LOCKED_MONTAGE_ROLE_ORDER, 
         scores: clip.analysis.scores,
       })),
   };
+}
+
+function isEligibleForRole(clip, role) {
+  const roleLabel = clip.analysis.roleLabel ?? deriveRoleLabel(clip.analysis.primaryLabel);
+  const primaryLabel = clip.analysis.primaryLabel ?? "";
+  const scores = clip.analysis.scores ?? {};
+
+  if (role === "front_exterior") {
+    return (
+      roleLabel === "front_exterior" ||
+      primaryLabel.startsWith("front_") ||
+      Number(scores.front_exterior || 0) > 0
+    );
+  }
+
+  if (role === "driver_door_interior_reveal") {
+    return (
+      roleLabel === "driver_door_interior_reveal" ||
+      primaryLabel === "driver_door_interior_reveal" ||
+      Number(scores.driver_door_interior_reveal || 0) > 0 ||
+      Boolean(clip.analysis.doorOpen && clip.analysis.interiorVisible)
+    );
+  }
+
+  if (role === "interior") {
+    return interiorRoleScore(clip) > 0;
+  }
+
+  if (role === "rear_exterior") {
+    return (
+      roleLabel === "rear_exterior" ||
+      primaryLabel.startsWith("rear_") ||
+      Number(scores.rear_exterior || 0) > 0
+    );
+  }
+
+  return scoreForRole(clip, role) > 0;
 }
 
 export function renderPlanSummary(plan) {
