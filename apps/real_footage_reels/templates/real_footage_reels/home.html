@@ -11,7 +11,7 @@
   .vehicle-lookup__control { flex: 1 1 auto; min-width: 0; width: 100%; }
   .vehicle-lookup__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
 </style>
-<link rel="stylesheet" href="{% static 'real_footage_reels/app.css' %}?v=20260504c">
+<link rel="stylesheet" href="{% static 'real_footage_reels/app.css' %}?v=20260506g">
 {% endblock %}
 
 {% block content %}
@@ -86,6 +86,23 @@
           <button id="runs-trash-delete" class="button button--danger" type="button">Delete Trash</button>
         </div>
       </div>
+      <div class="runs-filters">
+        <input id="runs-search" class="field__input" type="search" placeholder="Search title, make, model, stock, run id...">
+        <select id="runs-status-filter" class="field__input">
+          <option value="">All Status</option>
+          <option value="video ready">Video Ready</option>
+          <option value="scripts ready">Scripts Ready</option>
+          <option value="running">Running</option>
+          <option value="queued">Queued</option>
+          <option value="failed">Failed</option>
+        </select>
+        <select id="runs-make-filter" class="field__input">
+          <option value="">All Makes</option>
+        </select>
+        <select id="runs-model-filter" class="field__input">
+          <option value="">All Models</option>
+        </select>
+      </div>
       <div id="runs-list" class="run-table"></div>
     </section>
 
@@ -95,5 +112,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'real_footage_reels/app.js' %}?v=20260506f"></script>
+<script src="{% static 'real_footage_reels/app.js' %}?v=20260506g"></script>
 {% endblock %}

@@ -267,6 +267,9 @@ class ReelRenderService:
                 report = bridge_result.get("report") if isinstance(bridge_result, dict) else None
                 if not isinstance(report, dict):
                     report = cls._build_run_report_from_outputs(run_dir, command)
+                approved_script = str(job.payload.get("approvedScript") or job.payload.get("script") or "").strip()
+                if approved_script:
+                    report["approvedScript"] = approved_script
                 bridge_run_dir = str((bridge_result or {}).get("runDir", "")).strip() if isinstance(bridge_result, dict) else ""
                 report_run_dir = str((report or {}).get("runDir", "")).strip() if isinstance(report, dict) else ""
                 resolved_run_dir = bridge_run_dir or report_run_dir

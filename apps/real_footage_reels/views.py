@@ -152,6 +152,27 @@ def _is_remote_http_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
+def _versioned_remote_url(value: str, version_token: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    parsed = urlparse(text)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return text
+    query_map = parse_qs(parsed.query, keep_blank_values=True)
+    query_map["v"] = [str(version_token or "").strip() or "1"]
+    # Keep implementation dependency-free with a tiny manual rebuild.
+    query_parts = []
+    for key, values in query_map.items():
+        for item in values:
+            query_parts.append(f"{quote(str(key), safe='')}={quote(str(item), safe='')}")
+    query_text = "&".join(query_parts)
+    base_path = parsed.path or ""
+    suffix = f"?{query_text}" if query_text else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{parsed.scheme}://{parsed.netloc}{base_path}{suffix}{fragment}"
+
+
 def _is_empty_report_value(value) -> bool:
     if value is None:
         return True
@@ -184,6 +205,7 @@ def _merge_report_prefer_non_empty(base_report: dict, live_report: dict) -> dict
 
 
 def _serialize_stock_video_record(record: ReelStockVideoRecord) -> dict:
+    version_token = record.updated_at.isoformat() if record.updated_at else str(record.id)
     return {
         "id": int(record.id),
         "stockId": str(record.stock_id or "").strip(),
@@ -191,9 +213,9 @@ def _serialize_stock_video_record(record: ReelStockVideoRecord) -> dict:
         "carTitle": str(record.listing_title or "").strip(),
         "price": str(record.listing_price or "").strip(),
         "videoScript": str(record.video_script or "").strip(),
-        "finalReelUrl": str(record.final_reel_url or "").strip(),
-        "previewReelUrl": str(record.preview_reel_url or "").strip(),
-        "thumbnailImageUrl": str(record.thumbnail_image_url or "").strip(),
+        "finalReelUrl": _versioned_remote_url(str(record.final_reel_url or "").strip(), version_token),
+        "previewReelUrl": _versioned_remote_url(str(record.preview_reel_url or "").strip(), version_token),
+        "thumbnailImageUrl": _versioned_remote_url(str(record.thumbnail_image_url or "").strip(), version_token),
         "thumbnailObjectKey": str(record.thumbnail_object_key or "").strip(),
         "createdAt": record.created_at.isoformat() if record.created_at else None,
         "updatedAt": record.updated_at.isoformat() if record.updated_at else None,
@@ -474,9 +496,10 @@ class RunDetailApiView(APIView):
         final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
         remote_upload_ok_value = report.get("finalReelRemoteUploadOk")
         remote_upload_ok = None if remote_upload_ok_value is None else bool(remote_upload_ok_value)
+        version_token = run.updated_at.isoformat() if run.updated_at else run.created_at.isoformat()
         final_reel_url = ""
         if _is_remote_http_url(final_reel_url_value) and remote_upload_ok is not False:
-            final_reel_url = final_reel_url_value
+            final_reel_url = _versioned_remote_url(final_reel_url_value, version_token)
         elif final_reel_path:
             final_reel_url = _as_public_asset_url(run_id, final_reel_path)
         return Response(
@@ -497,13 +520,17 @@ class RunDetailApiView(APIView):
                 "hasVoiceover": bool(report.get("hasVoiceover", False)),
                 "mainReelUrl": _as_public_asset_url(run_id, main_reel_path) if main_reel_path else "",
                 "finalReelUrl": final_reel_url,
-                "finalReelRemoteUrl": str(report.get("finalReelRemoteUrl") or "").strip(),
+                "finalReelRemoteUrl": _versioned_remote_url(str(report.get("finalReelRemoteUrl") or "").strip(), version_token),
                 "finalReelRemoteUploadOk": bool(report.get("finalReelRemoteUploadOk", False)),
                 "finalReelRemoteError": str(report.get("finalReelRemoteError") or "").strip(),
-                "finalReelPreviewUrl": _as_public_asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
+                "finalReelPreviewUrl": (
+                    _as_public_asset_url(run_id, final_reel_preview_path)
+                    if final_reel_preview_path
+                    else _versioned_remote_url(str(report.get("finalReelPreviewUrl") or "").strip(), version_token)
+                ),
                 "finalReelWebmUrl": _as_public_asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
                 "thumbnailUrl": _as_public_asset_url(run_id, thumbnail_path) if thumbnail_path else "",
-                "thumbnailRemoteUrl": thumbnail_remote_url,
+                "thumbnailRemoteUrl": _versioned_remote_url(thumbnail_remote_url, version_token),
                 "thumbnailObjectKey": thumbnail_object_key,
                 "videos": decorated_videos,
                 "plan": {

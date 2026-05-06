@@ -5,6 +5,10 @@
   const runsList = document.getElementById('runs-list');
   const runsRefresh = document.getElementById('runs-refresh');
   const runsTrashDelete = document.getElementById('runs-trash-delete');
+  const runsSearch = document.getElementById('runs-search');
+  const runsStatusFilter = document.getElementById('runs-status-filter');
+  const runsMakeFilter = document.getElementById('runs-make-filter');
+  const runsModelFilter = document.getElementById('runs-model-filter');
   const appMain = document.getElementById('app-main');
   const pageTitle = document.getElementById('page-title');
   const navStudio = document.getElementById('nav-studio');
@@ -22,6 +26,8 @@
   const currentJobMeta = document.getElementById('current-job-meta');
   const currentJobList = document.getElementById('current-job-list');
   let latestInventoryMatches = [];
+  let runsCache = [];
+  let runJobsByRunId = new Map();
   const routePath = appMain ? String(appMain.dataset.routePath || window.location.pathname || '') : String(window.location.pathname || '');
   const routeRunId = appMain ? String(appMain.dataset.runId || '') : '';
   const runRouteMatch = /\/workflows\/real-footage-reels\/runs\/([^/]+)$/u.exec(routePath);
@@ -126,6 +132,127 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '') || 'thumbnail';
     return `${safeBase}.png`;
+  }
+  function inferMakeModelFromTitle(title) {
+    const tokens = String(title || '').trim().split(/\s+/u).filter(Boolean);
+    if (!tokens.length) return { make: '', model: '' };
+    const hasYearPrefix = /^\d{4}$/u.test(tokens[0] || '');
+    return {
+      make: String(tokens[hasYearPrefix ? 1 : 0] || '').trim(),
+      model: String(tokens[hasYearPrefix ? 2 : 1] || '').trim(),
+    };
+  }
+  function parseStatusForRun(run, activeJob) {
+    const latestJob = activeJob || (run && run.lastJob ? run.lastJob : null);
+    const runStatus = String(run.status || '').toLowerCase();
+    const jobStatus = String(latestJob && latestJob.status ? latestJob.status : '').toLowerCase();
+    const progress = latestJob && latestJob.progress && typeof latestJob.progress === 'object' ? latestJob.progress : {};
+    const phase = String(progress.phase || '').toLowerCase();
+    const phaseLabel = String(progress.label || '').trim();
+    let state = 'processing';
+    if (runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') {
+      state = 'failed';
+    } else if (jobStatus === 'queued') {
+      state = 'queued';
+    } else if (jobStatus === 'paused') {
+      state = 'paused';
+    } else if (jobStatus === 'running') {
+      state = phaseLabel || {
+        queued: 'queued',
+        download: 'downloading clips',
+        frames: 'extracting frames',
+        analyze: 'analyzing clips',
+        compose: 'composing reel',
+        voiceover: 'stitching voice-over',
+        publish: 'publishing output',
+        done: 'completed',
+        error: 'failed',
+      }[phase] || 'running';
+    } else if (jobStatus === 'completed' && !run.pipeline?.render?.done && !(run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length)) {
+      state = 'script generation completed';
+    } else if (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length) {
+      state = 'scripts ready';
+    } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
+      state = 'video ready';
+    } else if (run.pipeline && run.pipeline.analyze && run.pipeline.analyze.done) {
+      state = 'prepared for compose';
+    }
+    return state;
+  }
+  function createPopupHost() {
+    const host = document.createElement('div');
+    host.id = 'app-popup-host';
+    host.className = 'app-popup-host';
+    host.innerHTML = `
+      <div class="app-popup-backdrop" data-role="backdrop" hidden></div>
+      <div class="app-popup" data-role="dialog" hidden>
+        <h4 class="app-popup__title" data-role="title">Notice</h4>
+        <p class="app-popup__message" data-role="message"></p>
+        <div class="app-popup__actions" data-role="actions"></div>
+      </div>
+    `;
+    document.body.appendChild(host);
+    return host;
+  }
+  const popupHost = createPopupHost();
+  function showPopup({ title = 'Notice', message = '', tone = 'info', confirmText = 'OK', cancelText = '', dangerous = false }) {
+    return new Promise((resolve) => {
+      const backdrop = popupHost.querySelector('[data-role="backdrop"]');
+      const dialog = popupHost.querySelector('[data-role="dialog"]');
+      const titleEl = popupHost.querySelector('[data-role="title"]');
+      const messageEl = popupHost.querySelector('[data-role="message"]');
+      const actionsEl = popupHost.querySelector('[data-role="actions"]');
+      if (!backdrop || !dialog || !titleEl || !messageEl || !actionsEl) {
+        resolve(false);
+        return;
+      }
+      dialog.className = `app-popup app-popup--${tone}`;
+      titleEl.textContent = String(title || 'Notice');
+      messageEl.textContent = String(message || '');
+      actionsEl.innerHTML = '';
+
+      function cleanup(answer) {
+        backdrop.hidden = true;
+        dialog.hidden = true;
+        backdrop.onclick = null;
+        resolve(Boolean(answer));
+      }
+
+      if (cancelText) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'button button--secondary';
+        cancelBtn.textContent = cancelText;
+        cancelBtn.onclick = () => cleanup(false);
+        actionsEl.appendChild(cancelBtn);
+      }
+      const confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = dangerous ? 'button button--danger' : 'button button--primary';
+      confirmBtn.textContent = confirmText;
+      confirmBtn.onclick = () => cleanup(true);
+      actionsEl.appendChild(confirmBtn);
+
+      backdrop.hidden = false;
+      dialog.hidden = false;
+      backdrop.onclick = () => {
+        if (cancelText) cleanup(false);
+      };
+      confirmBtn.focus();
+    });
+  }
+  async function popupAlert(message, title = 'Notice', tone = 'info') {
+    await showPopup({ title, message, tone, confirmText: 'OK' });
+  }
+  async function popupConfirm(message, title = 'Confirm', dangerous = false) {
+    return showPopup({
+      title,
+      message,
+      tone: dangerous ? 'danger' : 'warning',
+      confirmText: dangerous ? 'Yes, continue' : 'Confirm',
+      cancelText: 'Cancel',
+      dangerous,
+    });
   }
   function withVersionToken(url, token) {
     const value = String(url || '').trim();
@@ -516,7 +643,7 @@
             await loadCurrentJob();
             await loadRuns();
           } catch (err) {
-            alert(err.message || String(err));
+            await popupAlert(err.message || String(err), 'Job Action Failed', 'danger');
           } finally {
             button.disabled = false;
           }
@@ -550,21 +677,81 @@
       if (!runId) return;
       if (!latestJobsByRunId.has(runId)) latestJobsByRunId.set(runId, job);
     });
-    runsList.innerHTML = runs.length ? runs.map((run) => runRow(run, latestJobsByRunId.get(String(run.runId || '')))).join('') : '<div class="empty-block"><strong>No runs</strong></div>';
+    runsCache = Array.isArray(runs) ? runs : [];
+    runJobsByRunId = latestJobsByRunId;
+    renderRunsList();
+    bindRunRowEvents();
+    syncRunFilterOptions();
+  }
+
+  function bindRunRowEvents() {
     runsList.querySelectorAll('[data-view]').forEach((b) => b.onclick = () => {
       const runId = b.dataset.view;
       if (!runId) return;
       window.location.href = `/workflows/real-footage-reels/runs/${encodeURIComponent(runId)}`;
     });
     runsList.querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => {
-      if (!confirm('Delete this run?')) return;
+      const ok = await popupConfirm('Delete this run permanently?', 'Delete Run', true);
+      if (!ok) return;
       await deleteRunById(b.dataset.del);
       await loadRuns();
     });
   }
 
+  function syncRunFilterOptions() {
+    if (!runsMakeFilter || !runsModelFilter) return;
+    const makes = new Set();
+    const models = new Set();
+    for (const run of runsCache) {
+      const inferred = inferMakeModelFromTitle(run.listingTitle || '');
+      if (inferred.make) makes.add(inferred.make);
+      if (inferred.model) models.add(inferred.model);
+    }
+    const existingMake = String(runsMakeFilter.value || '');
+    const existingModel = String(runsModelFilter.value || '');
+    runsMakeFilter.innerHTML = '<option value="">All Makes</option>' + Array.from(makes).sort((a, b) => a.localeCompare(b)).map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    runsModelFilter.innerHTML = '<option value="">All Models</option>' + Array.from(models).sort((a, b) => a.localeCompare(b)).map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    if (existingMake && Array.from(makes).includes(existingMake)) runsMakeFilter.value = existingMake;
+    if (existingModel && Array.from(models).includes(existingModel)) runsModelFilter.value = existingModel;
+  }
+
+  function renderRunsList() {
+    const q = String(runsSearch && runsSearch.value ? runsSearch.value : '').trim().toLowerCase();
+    const statusFilter = String(runsStatusFilter && runsStatusFilter.value ? runsStatusFilter.value : '').trim().toLowerCase();
+    const makeFilter = String(runsMakeFilter && runsMakeFilter.value ? runsMakeFilter.value : '').trim().toLowerCase();
+    const modelFilter = String(runsModelFilter && runsModelFilter.value ? runsModelFilter.value : '').trim().toLowerCase();
+    const filtered = runsCache.filter((run) => {
+      const inferred = inferMakeModelFromTitle(run.listingTitle || '');
+      const make = String(inferred.make || '').toLowerCase();
+      const model = String(inferred.model || '').toLowerCase();
+      const state = parseStatusForRun(run, runJobsByRunId.get(String(run.runId || ''))).toLowerCase();
+      if (statusFilter && !state.includes(statusFilter)) return false;
+      if (makeFilter && make !== makeFilter) return false;
+      if (modelFilter && model !== modelFilter) return false;
+      if (q) {
+        const hay = [
+          run.listingTitle,
+          run.stockId,
+          run.runId,
+          inferred.make,
+          inferred.model,
+          state,
+        ].map((x) => String(x || '').toLowerCase()).join(' ');
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    runsList.innerHTML = filtered.length
+      ? filtered.map((run) => runRow(run, runJobsByRunId.get(String(run.runId || '')))).join('')
+      : '<div class="empty-block"><strong>No matching runs</strong><p>Try clearing one or more filters.</p></div>';
+  }
+
   async function deleteTrash() {
-    const confirmed = window.confirm('Delete all raw footage (.mov/.mp4) from runs and keep only final-reel.mp4 files?');
+    const confirmed = await popupConfirm(
+      'Delete all raw footage (.mov/.mp4) from runs and keep only final-reel.mp4 files?',
+      'Delete Trash',
+      true,
+    );
     if (!confirmed) return;
     if (runsTrashDelete) runsTrashDelete.disabled = true;
     try {
@@ -583,10 +770,10 @@
       const deletedDirs = Number(result.deletedDirs || 0);
       const deletedBytes = Number(result.deletedBytes || 0);
       const deletedMb = (deletedBytes / (1024 * 1024)).toFixed(1);
-      window.alert(`Trash cleaned.\nDeleted files: ${deletedFiles}\nDeleted folders: ${deletedDirs}\nFreed: ${deletedMb} MB`);
+      await popupAlert(`Trash cleaned. Deleted files: ${deletedFiles}. Deleted folders: ${deletedDirs}. Freed: ${deletedMb} MB.`, 'Cleanup Complete', 'success');
       await loadRuns();
     } catch (err) {
-      window.alert(err.message || 'Trash cleanup failed.');
+      await popupAlert(err.message || 'Trash cleanup failed.', 'Cleanup Failed', 'danger');
     } finally {
       if (runsTrashDelete) runsTrashDelete.disabled = false;
     }
@@ -968,7 +1155,8 @@
     if (backBtn) backBtn.onclick = () => { window.location.href = `${appBase}/workflow`; };
     const delBtn = document.getElementById('delete-run');
     if (delBtn) delBtn.onclick = async () => {
-      if (!confirm('Delete this run?')) return;
+      const ok = await popupConfirm('Delete this run permanently?', 'Delete Run', true);
+      if (!ok) return;
       await deleteRunById(runId);
       window.location.href = `${appBase}/workflow`;
     };
@@ -992,7 +1180,7 @@
         });
         await loadRunDetail(runId);
       } catch (err) {
-        alert(err.message || String(err));
+        await popupAlert(err.message || String(err), 'Regeneration Failed', 'danger');
       } finally {
         regenBtn.disabled = false;
       }
@@ -1011,7 +1199,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ script, autoComposeAfterPrepare: true }),
           });
-          alert('Queued. It will now auto-run prepare + compose without another click.');
+          await popupAlert('Queued. It will now auto-run prepare + compose without another click.', 'Queued', 'success');
           window.location.href = `${appBase}/workflow`;
           return;
         }
@@ -1022,7 +1210,7 @@
         });
         window.location.href = `${appBase}/workflow`;
       } catch (err) {
-        alert(err.message || String(err));
+        await popupAlert(err.message || String(err), 'Compose Failed', 'danger');
       } finally {
         fullBtn.disabled = false;
       }
@@ -1040,42 +1228,26 @@
     const jobError = String(latestJob && latestJob.error ? latestJob.error : '').trim();
     const debugReason = String(run && run.debugReason ? run.debugReason : '').trim();
     const failureReason = String(run.error || jobError).trim();
-    let state = 'processing';
-    if (runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') {
-      state = 'failed';
-    } else if (jobStatus === 'queued') {
-      state = 'queued';
-    } else if (jobStatus === 'paused') {
-      state = 'paused';
-    } else if (jobStatus === 'running') {
-      state = phaseLabel || {
-        queued: 'queued',
-        download: 'downloading clips',
-        frames: 'extracting frames',
-        analyze: 'analyzing clips',
-        compose: 'composing reel',
-        voiceover: 'stitching voice-over',
-        publish: 'publishing output',
-        done: 'completed',
-        error: 'failed',
-      }[phase] || 'running';
-    } else if (jobStatus === 'completed' && !run.pipeline?.render?.done && !(run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length)) {
-      state = debugReason ? 'script generation failed' : 'script generation completed';
-    } else if (run.voiceoverDraft && run.voiceoverDraft.variants && run.voiceoverDraft.variants.length) {
-      state = 'scripts ready';
-    } else if (runStatus === 'completed' || (run.pipeline && run.pipeline.render && run.pipeline.render.done)) {
-      state = 'video ready';
-    } else if (run.pipeline && run.pipeline.analyze && run.pipeline.analyze.done) {
-      state = 'prepared for compose';
-    }
+    const state = parseStatusForRun(run, activeJob);
+    const inferred = inferMakeModelFromTitle(run.listingTitle || '');
+    const stateKey = state.toLowerCase().includes('fail')
+      ? 'failed'
+      : state.toLowerCase().includes('video ready')
+        ? 'ready'
+        : state.toLowerCase().includes('running')
+          ? 'running'
+          : state.toLowerCase().includes('queued')
+            ? 'queued'
+            : 'processing';
     return `<article class="run-row">
       <div class="run-row__main">
         <div class="run-row__header">
-          <strong class="run-row__title">${esc(run.listingTitle || run.runId)}</strong>
-          <span class="run-row__meta">${esc(new Date(run.createdAt || run.updatedAt || Date.now()).toLocaleString())} | ${esc(run.stockId || '-')} | ${esc(run.runId || '-')}</span>
+          <strong class="run-row__title">${esc(run.listingTitle || 'Untitled Run')}</strong>
+          <span class="run-row__meta">Stock ${esc(run.stockId || '-')} • ${esc(inferred.make || '-')} ${esc(inferred.model || '')} • ${esc(fmtDate(run.createdAt || run.updatedAt || Date.now()))}</span>
+          <span class="run-row__id">Run ID: ${esc(run.runId || '-')}</span>
         </div>
         <div class="pipeline-dots"><span class="pipeline-dot ${(run.pipeline&&run.pipeline.download&&run.pipeline.download.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&((run.pipeline.frames&&run.pipeline.frames.done)||(run.pipeline.prepare&&run.pipeline.prepare.done)))?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.analyze&&run.pipeline.analyze.done)?'pipeline-dot--on':''}"></span><span class="pipeline-dot ${(run.pipeline&&run.pipeline.render&&run.pipeline.render.done)?'pipeline-dot--on':''}"></span></div>
-        <div class="run-row__stats"><span>${state}</span><span>${s.downloads||0} clips</span><span>${s.frames||0} frames</span><span>${s.analyzed||0} AI</span><span>${s.planned||0} cut</span></div>
+        <div class="run-row__stats"><span class="run-status run-status--${esc(stateKey)}">${esc(state)}</span><span>${s.downloads||0} clips</span><span>${s.frames||0} frames</span><span>${s.analyzed||0} AI tags</span><span>${s.planned||0} cuts</span></div>
         ${((runStatus === 'failed' || runStatus === 'cancelled' || jobStatus === 'failed' || phase === 'error') && failureReason) ? `<div class="run-row__error"><strong>Failure reason:</strong> ${esc(failureReason)}</div>` : ''}
         ${(debugReason && !failureReason) ? `<div class="run-row__error"><strong>Reason:</strong> ${esc(debugReason)}</div>` : ''}
       </div>
@@ -1233,6 +1405,10 @@
   if (runsRefresh) {
     runsRefresh.addEventListener('click', () => loadRuns().catch((e) => { if (formStatus) formStatus.textContent = e.message; }));
   }
+  if (runsSearch) runsSearch.addEventListener('input', renderRunsList);
+  if (runsStatusFilter) runsStatusFilter.addEventListener('change', renderRunsList);
+  if (runsMakeFilter) runsMakeFilter.addEventListener('change', renderRunsList);
+  if (runsModelFilter) runsModelFilter.addEventListener('change', renderRunsList);
   if (runsTrashDelete) {
     const runTrashHandler = () => {
       if (formStatus) formStatus.textContent = 'Preparing trash cleanup...';

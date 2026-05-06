@@ -307,7 +307,12 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
   const previewMtime = previewStats ? Math.trunc(previewStats.mtimeMs) : 0;
   const manifestPath = path.join(runDir, FINAL_REEL_PUBLISH_MANIFEST);
   const existing = await readJsonIfExists(manifestPath);
+  const forceRemoteUpload = parseBooleanLike(
+    config.finalReelForceRemoteUpload ?? process.env.FINAL_REEL_FORCE_REMOTE_UPLOAD,
+    true,
+  );
   if (
+    !forceRemoteUpload &&
     existing &&
     String(existing.provider || "") === provider &&
     Number(existing.sourceMtimeMs) === sourceMtime &&
@@ -573,6 +578,11 @@ async function publishFinalReelToS3({
       process.env.FINAL_REEL_S3_ACL ??
       "",
   ).trim();
+  const cacheControl = String(
+    config.finalReelS3CacheControl ??
+      process.env.FINAL_REEL_S3_CACHE_CONTROL ??
+      "no-cache, max-age=0, must-revalidate",
+  ).trim();
   const explicitPublicBaseUrl = String(
     config.finalReelS3PublicBaseUrl ??
       process.env.FINAL_REEL_S3_PUBLIC_BASE_URL ??
@@ -610,7 +620,7 @@ async function publishFinalReelToS3({
       Key: reelKey,
       Body: reelBytes,
       ContentType: "video/mp4",
-      CacheControl: "public, max-age=31536000, immutable",
+      CacheControl: cacheControl,
       ...(acl ? { ACL: acl } : {}),
     }));
   } catch (error) {
@@ -627,7 +637,7 @@ async function publishFinalReelToS3({
         Key: previewKey,
         Body: previewBytes,
         ContentType: "video/mp4",
-        CacheControl: "public, max-age=31536000, immutable",
+        CacheControl: cacheControl,
         ...(acl ? { ACL: acl } : {}),
       }));
     } catch (error) {
