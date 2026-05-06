@@ -871,6 +871,7 @@
       }
       const details = {
         runId: payload.runId || run.runId || '',
+        uploadAccepted: Boolean(payload.uploadAccepted),
         uploadOk: Boolean(payload.uploadOk),
         downloadCheckOk: Boolean(payload.downloadCheckOk),
         provider: String(payload.provider || ''),
@@ -882,11 +883,16 @@
         error: String(payload.error || ''),
       };
       const tone = details.uploadOk ? 'info' : 'warning';
+      const summaryText = details.uploadOk
+        ? 'Upload + remote download validation passed.'
+        : (details.uploadAccepted
+          ? 'Upload was accepted by remote API, but download validation failed.'
+          : (details.error || 'Upload debug did not pass.'));
       debugRemoteUploadWrap.innerHTML = `
         <div class="callout callout--${tone}">
           <div class="callout__copy">
             <strong>${details.uploadOk ? 'Upload Debug Success' : 'Upload Debug Result'}</strong>
-            <p>${details.uploadOk ? 'Upload + remote download validation passed.' : (details.error || 'Upload debug did not pass.')}</p>
+            <p>${esc(summaryText)}</p>
             <pre>${esc(JSON.stringify(details, null, 2))}</pre>
           </div>
         </div>

@@ -343,10 +343,15 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     log(`Remote final reel ready: ${uploadResult.cdnUrl}`);
     return uploadResult.cdnUrl;
   } catch (error) {
+    const uploadDebug =
+      error && typeof error === "object" && error.uploadDebug && typeof error.uploadDebug === "object"
+        ? error.uploadDebug
+        : {};
     await writePublishManifest(manifestPath, {
       ...manifestBase,
       ok: false,
       error: String(error?.message || error || "Remote upload failed."),
+      ...uploadDebug,
     });
     throw error;
   }
@@ -401,21 +406,50 @@ async function publishFinalReelToMultipartApi({
   }
 
   const remoteResponse = tryParseJson(responseText) ?? responseText.slice(0, 4000);
-  const cdnUrl = resolveUploadCdnUrl({
+  let cdnUrl = resolveUploadCdnUrl({
     remoteResponse,
     responseText,
     directory,
     fileName,
     cdnBase,
   });
+  const fallbackCandidates = buildMultipartCdnFallbackCandidates({ cdnBase, directory, fileName });
   if (!cdnUrl) {
-    throw new Error(
-      "Remote upload returned HTTP 200, but no URL/path metadata for the uploaded file. " +
-        "This upload API currently returns an empty body/headers, so a public video URL cannot be derived automatically.",
+    cdnUrl = await findFirstReachableVideoUrl(fallbackCandidates, timeoutMs);
+  }
+  if (!cdnUrl) {
+    const error = new Error(
+      "Remote upload accepted (HTTP 200), but no valid public video URL could be derived. " +
+        "The upload API returned no URL metadata and fallback CDN candidates were not reachable as video.",
     );
+    error.uploadDebug = {
+      uploadAccepted: true,
+      uploadResponseStatus: response.status,
+      uploadResponseHeaders: responseHeaders,
+      uploadResponseText: String(responseText || "").slice(0, 4000),
+      candidateUrls: fallbackCandidates,
+      provider: "multipart",
+    };
+    throw error;
   }
 
-  await validateRemoteVideoUrl(cdnUrl, timeoutMs);
+  try {
+    await validateRemoteVideoUrl(cdnUrl, timeoutMs);
+  } catch (validationError) {
+    const error = new Error(
+      `Remote upload accepted (HTTP 200), but CDN download validation failed for ${cdnUrl}: ` +
+        `${String(validationError?.message || validationError || "unknown error")}`,
+    );
+    error.uploadDebug = {
+      uploadAccepted: true,
+      uploadResponseStatus: response.status,
+      uploadResponseHeaders: responseHeaders,
+      uploadResponseText: String(responseText || "").slice(0, 4000),
+      candidateUrls: [cdnUrl, ...fallbackCandidates.filter((url) => url !== cdnUrl)],
+      provider: "multipart",
+    };
+    throw error;
+  }
   return {
     cdnUrl,
     previewCdnUrl: "",
@@ -424,6 +458,38 @@ async function publishFinalReelToMultipartApi({
     uploadResponseHeaders: responseHeaders,
     uploadResponseText: String(responseText || "").slice(0, 4000),
   };
+}
+
+function buildMultipartCdnFallbackCandidates({ cdnBase, directory, fileName }) {
+  const base = String(cdnBase || "").trim().replace(/\/+$/gu, "");
+  const cleanDir = String(directory || "").trim().replace(/^\/+|\/+$/gu, "");
+  const encodedFile = encodeURIComponent(String(fileName || "").trim());
+  if (!base || !encodedFile) return [];
+
+  const candidates = [];
+  candidates.push(`${base}/${encodedFile}`);
+  if (cleanDir) {
+    const dirEncoded = cleanDir
+      .split("/")
+      .map((segment) => encodeURIComponent(decodeURIComponentSafe(segment)))
+      .join("/");
+    candidates.push(`${base}/${dirEncoded}/${encodedFile}`);
+  }
+  return [...new Set(candidates)];
+}
+
+async function findFirstReachableVideoUrl(candidates, timeoutMs) {
+  for (const candidate of candidates) {
+    const url = String(candidate || "").trim();
+    if (!url) continue;
+    try {
+      await validateRemoteVideoUrl(url, timeoutMs);
+      return url;
+    } catch {
+      // Continue trying other candidate URLs.
+    }
+  }
+  return "";
 }
 
 async function publishFinalReelToS3({

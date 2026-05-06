@@ -752,12 +752,17 @@ class ReelRenderService:
 
         cdn_url = str((publish_manifest or {}).get("cdnUrl", "")).strip()
         preview_cdn_url = str((publish_manifest or {}).get("previewCdnUrl", "")).strip()
+        upload_accepted = bool(
+            (publish_manifest or {}).get("uploadAccepted")
+            or str((publish_manifest or {}).get("uploadResponseStatus", "")).strip() == "200"
+        )
         upload_ok = bool((publish_manifest or {}).get("ok") is True and cdn_url)
         error_text = str((publish_manifest or {}).get("error", "")).strip()
 
         return {
             "runId": normalized_run_id,
             "runDir": str(resolved_run_dir),
+            "uploadAccepted": upload_accepted,
             "uploadOk": upload_ok,
             "downloadCheckOk": upload_ok,  # uploader validates remote URL by HEAD/GET before success.
             "cdnUrl": cdn_url,
