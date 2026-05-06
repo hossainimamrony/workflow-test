@@ -29,3 +29,21 @@ class ReelRenderJob(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class ReelStockVideoRecord(models.Model):
+    stock_id = models.CharField(max_length=128, db_index=True)
+    run_id = models.CharField(max_length=64, blank=True, db_index=True)
+    listing_title = models.CharField(max_length=255, blank=True)
+    listing_price = models.CharField(max_length=128, blank=True)
+    video_script = models.TextField(blank=True)
+    final_reel_url = models.TextField(blank=True)
+    preview_reel_url = models.TextField(blank=True)
+    thumbnail_image_url = models.TextField(blank=True)
+    thumbnail_object_key = models.CharField(max_length=1024, blank=True)
+    source_created_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]

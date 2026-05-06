@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase, override_settings
 
-from .models import ReelRenderJob, ReelRun
+from .models import ReelRenderJob, ReelRun, ReelStockVideoRecord
 from .services import ReelRenderService
 
 
@@ -502,6 +502,8 @@ class RunThumbnailApiTests(TestCase):
                 "runDir": str(run_dir),
                 "imagePath": str(output_image),
                 "imageMimeType": "image/png",
+                "remoteImageUrl": "https://fastlycb.s3.ap-southeast-2.amazonaws.com/social-media-content/reels/thumbnails/thumb-run-200-thumbnail.png",
+                "remoteObjectKey": "social-media-content/reels/thumbnails/thumb-run-200-thumbnail.png",
             },
         ) as gen_mock:
             response = self.client.post(
@@ -521,6 +523,8 @@ class RunThumbnailApiTests(TestCase):
         payload = response.json()
         self.assertEqual(payload.get("runId"), run_id)
         self.assertEqual(payload.get("mimeType"), "image/png")
+        self.assertTrue(str(payload.get("remoteImageUrl") or "").startswith("https://"))
+        self.assertIn("thumbnail", str(payload.get("remoteObjectKey") or ""))
         self.assertIn(f"/workflows/real-footage-reels/api/runs/{run_id}/asset?path=", payload.get("imageUrl", ""))
 
         kwargs = gen_mock.call_args.kwargs
@@ -552,4 +556,73 @@ class RunThumbnailApiTests(TestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("subtitle is required", response.json().get("error", ""))
+
+
+@override_settings(ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])
+class PublicStockVideoApiTests(TestCase):
+    def test_endpoints_catalog_is_public(self):
+        response = self.client.get("/workflows/real-footage-reels/api/public/stock-videos/endpoints")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("endpoints", data)
+        self.assertTrue(any("/api/public/stock-videos" in item.get("path", "") for item in data.get("endpoints", [])))
+
+    def test_latest_by_stock_returns_newest_record(self):
+        ReelStockVideoRecord.objects.create(
+            stock_id="ABC-1",
+            run_id="old",
+            listing_title="Old title",
+            listing_price="AU$10",
+            video_script="Old script",
+            final_reel_url="https://example.com/old.mp4",
+            preview_reel_url="https://example.com/old-preview.mp4",
+            thumbnail_image_url="https://example.com/old-thumb.png",
+        )
+        latest = ReelStockVideoRecord.objects.create(
+            stock_id="ABC-1",
+            run_id="new",
+            listing_title="New title",
+            listing_price="AU$20",
+            video_script="New script",
+            final_reel_url="https://example.com/new.mp4",
+            preview_reel_url="https://example.com/new-preview.mp4",
+            thumbnail_image_url="https://example.com/new-thumb.png",
+        )
+
+        response = self.client.get("/workflows/real-footage-reels/api/public/stock-videos/ABC-1")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload.get("id"), latest.id)
+        self.assertEqual(payload.get("runId"), "new")
+        self.assertEqual(payload.get("stockId"), "ABC-1")
+
+    def test_list_groups_latest_per_stock_and_supports_filter(self):
+        ReelStockVideoRecord.objects.create(
+            stock_id="S1",
+            run_id="s1-a",
+            final_reel_url="https://example.com/s1-a.mp4",
+        )
+        latest_s1 = ReelStockVideoRecord.objects.create(
+            stock_id="S1",
+            run_id="s1-b",
+            final_reel_url="https://example.com/s1-b.mp4",
+        )
+        ReelStockVideoRecord.objects.create(
+            stock_id="S2",
+            run_id="s2-a",
+            final_reel_url="https://example.com/s2-a.mp4",
+        )
+
+        response = self.client.get("/workflows/real-footage-reels/api/public/stock-videos")
+        self.assertEqual(response.status_code, 200)
+        results = response.json().get("results", [])
+        self.assertEqual(len(results), 2)
+        ids = {item.get("id") for item in results}
+        self.assertIn(latest_s1.id, ids)
+
+        filtered = self.client.get("/workflows/real-footage-reels/api/public/stock-videos?stockId=S1")
+        self.assertEqual(filtered.status_code, 200)
+        filtered_results = filtered.json().get("results", [])
+        self.assertEqual(len(filtered_results), 1)
+        self.assertEqual(filtered_results[0].get("runId"), "s1-b")
 

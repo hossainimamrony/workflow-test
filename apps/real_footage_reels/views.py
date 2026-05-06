@@ -8,10 +8,11 @@ from django.http import FileResponse, Http404, HttpResponse, StreamingHttpRespon
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.views import View
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ReelRun
+from .models import ReelRun, ReelStockVideoRecord
 from .services import ReelRenderService, VehicleInventoryService
 
 _WORKFLOW_ROOT = Path(__file__).resolve().parent / "workflow_engine"
@@ -179,6 +180,24 @@ def _merge_report_prefer_non_empty(base_report: dict, live_report: dict) -> dict
             if not _is_empty_report_value(base_value):
                 merged[key] = base_value
     return merged
+
+
+def _serialize_stock_video_record(record: ReelStockVideoRecord) -> dict:
+    return {
+        "id": int(record.id),
+        "stockId": str(record.stock_id or "").strip(),
+        "runId": str(record.run_id or "").strip(),
+        "carTitle": str(record.listing_title or "").strip(),
+        "price": str(record.listing_price or "").strip(),
+        "videoScript": str(record.video_script or "").strip(),
+        "finalReelUrl": str(record.final_reel_url or "").strip(),
+        "previewReelUrl": str(record.preview_reel_url or "").strip(),
+        "thumbnailImageUrl": str(record.thumbnail_image_url or "").strip(),
+        "thumbnailObjectKey": str(record.thumbnail_object_key or "").strip(),
+        "createdAt": record.created_at.isoformat() if record.created_at else None,
+        "updatedAt": record.updated_at.isoformat() if record.updated_at else None,
+        "sourceCreatedAt": record.source_created_at.isoformat() if record.source_created_at else None,
+    }
 
 
 def _resolve_run_dir_path(run_dir_value: str) -> Path | None:
@@ -537,6 +556,8 @@ class RunThumbnailApiView(APIView):
                 "runId": run_id,
                 "imageUrl": _asset_url(run_id, str(candidate)),
                 "mimeType": str(generated.get("imageMimeType", "")).strip() or "image/png",
+                "remoteImageUrl": str(generated.get("remoteImageUrl", "")).strip(),
+                "remoteObjectKey": str(generated.get("remoteObjectKey", "")).strip(),
             }
         )
 
@@ -560,6 +581,117 @@ class VehicleInventoryRefreshApiView(APIView):
             return Response({"ok": True, "refreshing": False, "kicked": True, **result}, status=202)
         except Exception as exc:  # noqa: BLE001
             return Response({"error": str(exc)}, status=500)
+
+
+class PublicStockVideoEndpointsApiView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        base = "/workflows/real-footage-reels/api/public/stock-videos"
+        return Response(
+            {
+                "endpoints": [
+                    {"method": "GET", "path": f"{base}/endpoints", "description": "List available public stock-video endpoints."},
+                    {"method": "GET", "path": base, "description": "List latest video entry per stock (optionally filter by ?stockId=... )."},
+                    {"method": "GET", "path": f"{base}/{{stock_id}}", "description": "Get latest video entry for one stock ID."},
+                    {"method": "GET", "path": f"{base}/{{stock_id}}/history", "description": "Get all tracked entries for one stock ID."},
+                ]
+            }
+        )
+
+
+class PublicStockVideoListApiView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        stock_id = str(request.query_params.get("stockId", "")).strip()
+        limit_raw = request.query_params.get("limit", 200)
+        try:
+            limit = max(1, min(500, int(limit_raw)))
+        except Exception:
+            limit = 200
+
+        if stock_id:
+            record = (
+                ReelStockVideoRecord.objects
+                .filter(stock_id__iexact=stock_id)
+                .order_by("-created_at", "-id")
+                .first()
+            )
+            return Response(
+                {
+                    "stockId": stock_id,
+                    "count": 1 if record else 0,
+                    "latest": _serialize_stock_video_record(record) if record else None,
+                    "results": [_serialize_stock_video_record(record)] if record else [],
+                }
+            )
+
+        grouped_latest = []
+        seen_stocks: set[str] = set()
+        queryset = ReelStockVideoRecord.objects.order_by("stock_id", "-created_at", "-id")
+        for record in queryset.iterator():
+            key = str(record.stock_id or "").strip().lower()
+            if not key or key in seen_stocks:
+                continue
+            seen_stocks.add(key)
+            grouped_latest.append(record)
+            if len(grouped_latest) >= limit:
+                break
+        return Response(
+            {
+                "count": len(grouped_latest),
+                "results": [_serialize_stock_video_record(item) for item in grouped_latest],
+            }
+        )
+
+
+class PublicStockVideoLatestApiView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request, stock_id):
+        normalized = str(stock_id or "").strip()
+        if not normalized:
+            return Response({"error": "stock_id is required."}, status=400)
+        record = (
+            ReelStockVideoRecord.objects
+            .filter(stock_id__iexact=normalized)
+            .order_by("-created_at", "-id")
+            .first()
+        )
+        if not record:
+            return Response({"error": "Stock video not found."}, status=404)
+        return Response(_serialize_stock_video_record(record))
+
+
+class PublicStockVideoHistoryApiView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request, stock_id):
+        normalized = str(stock_id or "").strip()
+        if not normalized:
+            return Response({"error": "stock_id is required."}, status=400)
+        limit_raw = request.query_params.get("limit", 50)
+        try:
+            limit = max(1, min(500, int(limit_raw)))
+        except Exception:
+            limit = 50
+        rows = list(
+            ReelStockVideoRecord.objects
+            .filter(stock_id__iexact=normalized)
+            .order_by("-created_at", "-id")[:limit]
+        )
+        return Response(
+            {
+                "stockId": normalized,
+                "count": len(rows),
+                "results": [_serialize_stock_video_record(row) for row in rows],
+            }
+        )
 
 
 class RunAssetApiView(APIView):

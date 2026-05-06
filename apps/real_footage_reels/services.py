@@ -12,12 +12,13 @@ import tempfile
 import contextlib
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
+from urllib.parse import quote as url_quote
 
 from django.db import OperationalError, ProgrammingError
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import ReelRenderJob, ReelRun
+from .models import ReelRenderJob, ReelRun, ReelStockVideoRecord
 
 
 class ReelRenderService:
@@ -265,6 +266,8 @@ class ReelRenderService:
                     run_id=run_id,
                     defaults=run_defaults,
                 )
+                with contextlib.suppress(Exception):
+                    cls._upsert_stock_video_record(run=run, report=report)
 
                 cls._update_progress(job, "done", "Completed.")
                 cls._append_log(job, f"Run created: {run.run_id}")
@@ -616,10 +619,48 @@ class ReelRenderService:
         if not image_path:
             raise RuntimeError("Thumbnail generation did not return imagePath.")
 
+        run = ReelRun.objects.filter(run_id=payload["resumeRunId"]).first()
+        run_dir_text = str(result_payload.get("runDir", "")).strip()
+        run_dir_path = Path(run_dir_text).resolve() if run_dir_text else (cls._runs_root / payload["resumeRunId"]).resolve()
+        local_image_path = Path(image_path)
+        resolved_image_path = (
+            local_image_path.resolve()
+            if local_image_path.is_absolute()
+            else (run_dir_path / local_image_path).resolve()
+        )
+        remote_upload = {"remoteUrl": "", "objectKey": ""}
+        thumbnail_upload_required = cls._env_flag("FINAL_REEL_THUMBNAIL_REMOTE_REQUIRED", default=True)
+        if run is not None and resolved_image_path.exists():
+            remote_upload = cls._upload_thumbnail_image_to_s3(
+                run=run,
+                image_path=resolved_image_path,
+                image_mime_type=image_mime_type or "image/png",
+            )
+            if thumbnail_upload_required and not str(remote_upload.get("remoteUrl") or "").strip():
+                raise RuntimeError(
+                    "Thumbnail generated, but S3 upload is not configured. "
+                    "Set FINAL_REEL_S3_BUCKET / FINAL_REEL_S3_REGION / credentials."
+                )
+            if isinstance(run.report, dict):
+                report = dict(run.report)
+            else:
+                report = {}
+            report["thumbnailUrl"] = str(resolved_image_path)
+            if remote_upload.get("remoteUrl"):
+                report["thumbnailRemoteUrl"] = str(remote_upload.get("remoteUrl") or "").strip()
+            if remote_upload.get("objectKey"):
+                report["thumbnailObjectKey"] = str(remote_upload.get("objectKey") or "").strip()
+            run.report = report
+            run.save(update_fields=["report"])
+            with contextlib.suppress(Exception):
+                cls._upsert_stock_video_record(run=run, report=report)
+
         return {
             "runDir": str(result_payload.get("runDir", "")).strip(),
             "imagePath": image_path,
             "imageMimeType": image_mime_type or "image/png",
+            "remoteImageUrl": str(remote_upload.get("remoteUrl") or "").strip(),
+            "remoteObjectKey": str(remote_upload.get("objectKey") or "").strip(),
         }
 
     @classmethod
@@ -941,6 +982,11 @@ class ReelRenderService:
             "voiceoverStatus": voiceover_status,
             "voiceoverLastError": str((voiceover_status_manifest or {}).get("lastError", "")).strip(),
             "hasVoiceover": has_voiceover,
+            "voiceoverScript": (
+                str((voiceover_manifest or {}).get("script", "")).strip()
+                if isinstance(voiceover_manifest, dict)
+                else ""
+            ),
             "mainReelUrl": str(main_reel_mp4 if main_reel_mp4.exists() else (main_reel_webm if main_reel_webm.exists() else "")),
             "finalReelUrl": remote_final_url or str(
                 final_reel_mp4 if final_reel_mp4.exists() else (final_reel_webm if final_reel_webm.exists() else "")
@@ -961,6 +1007,198 @@ class ReelRenderService:
             return json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             return None
+
+    @staticmethod
+    def _first_non_empty(*values) -> str:
+        for value in values:
+            text = str(value or "").strip()
+            if text:
+                return text
+        return ""
+
+    @staticmethod
+    def _is_http_url(value: str) -> bool:
+        text = str(value or "").strip().lower()
+        return text.startswith("https://") or text.startswith("http://")
+
+    @classmethod
+    def _extract_video_script(cls, report: dict) -> str:
+        if not isinstance(report, dict):
+            return ""
+        direct = cls._first_non_empty(report.get("voiceoverScript"), report.get("approvedScript"), report.get("script"))
+        if direct:
+            return direct
+        draft = report.get("voiceoverDraft") or {}
+        if isinstance(draft, dict):
+            variants = draft.get("variants")
+            if isinstance(variants, list) and variants:
+                first = variants[0] if isinstance(variants[0], dict) else {}
+                return str(first.get("script", "")).strip()
+        return ""
+
+    @classmethod
+    def _resolve_s3_publish_config(cls) -> dict:
+        bucket = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_BUCKET"),
+            os.environ.get("S3_BUCKET"),
+            os.environ.get("cloud.aws.s3.bucket"),
+        )
+        region = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_REGION"),
+            os.environ.get("AWS_REGION"),
+            os.environ.get("AWS_DEFAULT_REGION"),
+            os.environ.get("cloud.aws.region.static"),
+            "ap-southeast-2",
+        )
+        access_key_id = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_ACCESS_KEY_ID"),
+            os.environ.get("AWS_ACCESS_KEY_ID"),
+            os.environ.get("cloud.aws.credentials.accessKey"),
+        )
+        secret_access_key = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_SECRET_ACCESS_KEY"),
+            os.environ.get("AWS_SECRET_ACCESS_KEY"),
+            os.environ.get("cloud.aws.credentials.secretKey"),
+        )
+        session_token = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_SESSION_TOKEN"),
+            os.environ.get("AWS_SESSION_TOKEN"),
+        )
+        reels_prefix = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_PREFIX"),
+            "social-media-content/reels",
+        ).strip("/")
+        thumbnail_prefix = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_THUMBNAIL_S3_PREFIX"),
+            f"{reels_prefix}/thumbnails" if reels_prefix else "social-media-content/reels/thumbnails",
+        ).strip("/")
+        public_base_url = cls._first_non_empty(
+            os.environ.get("FINAL_REEL_S3_PUBLIC_BASE_URL"),
+            "",
+        ).rstrip("/")
+        acl = cls._first_non_empty(os.environ.get("FINAL_REEL_S3_ACL"), "")
+        return {
+            "bucket": bucket,
+            "region": region,
+            "access_key_id": access_key_id,
+            "secret_access_key": secret_access_key,
+            "session_token": session_token,
+            "thumbnail_prefix": thumbnail_prefix,
+            "public_base_url": public_base_url,
+            "acl": acl,
+        }
+
+    @classmethod
+    def _build_s3_public_url(cls, *, bucket: str, region: str, object_key: str, public_base_url: str = "") -> str:
+        key = str(object_key or "").strip().lstrip("/")
+        if not key:
+            return ""
+        if public_base_url:
+            base = str(public_base_url).rstrip("/")
+            return f"{base}/{ '/'.join(url_quote(part, safe='') for part in key.split('/')) }"
+        if "." in bucket:
+            return (
+                f"https://s3.{region}.amazonaws.com/{url_quote(bucket, safe='')}/"
+                f"{'/'.join(url_quote(part, safe='') for part in key.split('/'))}"
+            )
+        return f"https://{bucket}.s3.{region}.amazonaws.com/{'/'.join(url_quote(part, safe='') for part in key.split('/'))}"
+
+    @classmethod
+    def _upload_thumbnail_image_to_s3(cls, *, run: ReelRun, image_path: Path, image_mime_type: str) -> dict:
+        cfg = cls._resolve_s3_publish_config()
+        bucket = str(cfg.get("bucket") or "").strip()
+        region = str(cfg.get("region") or "").strip() or "ap-southeast-2"
+        access_key_id = str(cfg.get("access_key_id") or "").strip()
+        secret_access_key = str(cfg.get("secret_access_key") or "").strip()
+        session_token = str(cfg.get("session_token") or "").strip()
+        prefix = str(cfg.get("thumbnail_prefix") or "").strip("/")
+        public_base = str(cfg.get("public_base_url") or "").strip()
+        acl = str(cfg.get("acl") or "").strip()
+
+        if not bucket or not access_key_id or not secret_access_key:
+            return {"remoteUrl": "", "objectKey": ""}
+
+        try:
+            import boto3  # type: ignore
+        except Exception as exc:  # pragma: no cover - depends on runtime env
+            raise RuntimeError(
+                "Thumbnail S3 upload requires boto3. Install dependencies from requirements.txt."
+            ) from exc
+
+        suffix = image_path.suffix.lower() or ".png"
+        object_key = "/".join(
+            part for part in [
+                prefix,
+                f"{str(run.run_id or '').strip()}-thumbnail{suffix}",
+            ] if part
+        )
+        extra_args = {
+            "ContentType": str(image_mime_type or "image/png").strip() or "image/png",
+            "CacheControl": "public, max-age=31536000, immutable",
+        }
+        if acl:
+            extra_args["ACL"] = acl
+
+        client = boto3.client(
+            "s3",
+            region_name=region,
+            aws_access_key_id=access_key_id,
+            aws_secret_access_key=secret_access_key,
+            aws_session_token=session_token or None,
+        )
+        try:
+            with image_path.open("rb") as handle:
+                client.upload_fileobj(handle, bucket, object_key, ExtraArgs=extra_args)
+        except Exception as exc:  # pragma: no cover - external I/O path
+            raise RuntimeError(
+                f"Thumbnail S3 upload failed for s3://{bucket}/{object_key}: {exc}"
+            ) from exc
+
+        remote_url = cls._build_s3_public_url(
+            bucket=bucket,
+            region=region,
+            object_key=object_key,
+            public_base_url=public_base,
+        )
+        return {"remoteUrl": remote_url, "objectKey": object_key}
+
+    @classmethod
+    def _upsert_stock_video_record(cls, *, run: ReelRun, report: dict | None = None) -> ReelStockVideoRecord | None:
+        report_data = report if isinstance(report, dict) else (run.report if isinstance(run.report, dict) else {})
+        stock_id = cls._first_non_empty(run.stock_id, report_data.get("stockId"), (report_data.get("downloadsManifest") or {}).get("stockId"))
+        if not stock_id:
+            return None
+
+        final_reel_url = cls._first_non_empty(report_data.get("finalReelRemoteUrl"), report_data.get("finalReelUrl"))
+        preview_reel_url = cls._first_non_empty(report_data.get("finalReelPreviewUrl"))
+        if final_reel_url and not cls._is_http_url(final_reel_url):
+            final_reel_url = ""
+        if preview_reel_url and not cls._is_http_url(preview_reel_url):
+            preview_reel_url = ""
+        thumbnail_image_url = cls._first_non_empty(
+            report_data.get("thumbnailRemoteUrl"),
+            report_data.get("thumbnailUrl"),
+            report_data.get("generatedThumbnailUrl"),
+        )
+        if thumbnail_image_url and not cls._is_http_url(thumbnail_image_url):
+            thumbnail_image_url = ""
+
+        if not final_reel_url and not preview_reel_url and not thumbnail_image_url:
+            return None
+
+        record = ReelStockVideoRecord.objects.create(
+            stock_id=stock_id,
+            run_id=str(run.run_id or "").strip(),
+            listing_title=cls._first_non_empty(run.listing_title, report_data.get("listingTitle")),
+            listing_price=cls._first_non_empty(run.listing_price, report_data.get("listingPrice")),
+            video_script=cls._extract_video_script(report_data),
+            final_reel_url=final_reel_url,
+            preview_reel_url=preview_reel_url,
+            thumbnail_image_url=thumbnail_image_url,
+            thumbnail_object_key=cls._first_non_empty(report_data.get("thumbnailObjectKey")),
+            source_created_at=run.created_at,
+        )
+        return record
 
     @staticmethod
     def jobs_payload() -> dict:
