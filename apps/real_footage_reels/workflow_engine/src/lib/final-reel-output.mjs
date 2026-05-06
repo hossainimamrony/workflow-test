@@ -628,11 +628,11 @@ async function publishFinalReelToS3({
   const s3PathStyleBase = `https://s3.${region}.amazonaws.com/${encodeURIComponent(bucket)}`;
   const shouldUsePathStyle = bucket.includes(".");
   const remoteUrl = publicBase
-    ? `${publicBase}/${encodeURIComponent(fileName)}`
+    ? buildObjectUrlFromPublicBase(publicBase, reelKey)
     : `${shouldUsePathStyle ? s3PathStyleBase : s3ObjectBase}/${encodeS3Key(reelKey)}`;
   const previewRemoteUrl = previewKey
     ? (publicBase
-        ? `${publicBase}/${encodeURIComponent(previewFileName)}`
+        ? buildObjectUrlFromPublicBase(publicBase, previewKey)
         : `${shouldUsePathStyle ? s3PathStyleBase : s3ObjectBase}/${encodeS3Key(previewKey)}`)
     : "";
   const { ok: downloadCheckOk, error: downloadCheckError } = await tryValidateRemoteVideoUrl(remoteUrl, timeoutMs);
@@ -894,6 +894,39 @@ function encodeS3Key(key) {
     .split("/")
     .map((segment) => encodeURIComponent(decodeURIComponentSafe(segment)))
     .join("/");
+}
+
+function buildObjectUrlFromPublicBase(publicBase, objectKey) {
+  const base = String(publicBase || "").trim().replace(/\/+$/gu, "");
+  const cleanKey = String(objectKey || "").trim().replace(/^\/+/u, "");
+  if (!base || !cleanKey) {
+    return "";
+  }
+
+  try {
+    const parsed = new URL(base);
+    const basePathSegments = parsed.pathname
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => decodeURIComponentSafe(segment));
+    const keySegments = cleanKey
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => decodeURIComponentSafe(segment));
+    const keyPrefix = keySegments.slice(0, -1);
+    const keyFile = keySegments[keySegments.length - 1] || "";
+    const baseMatchesKeyPrefix =
+      basePathSegments.length > 0 &&
+      basePathSegments.length === keyPrefix.length &&
+      basePathSegments.every((segment, index) => segment === keyPrefix[index]);
+    if (baseMatchesKeyPrefix && keyFile) {
+      return `${base}/${encodeURIComponent(keyFile)}`;
+    }
+  } catch {
+    // Keep fallback behavior below.
+  }
+
+  return `${base}/${encodeS3Key(cleanKey)}`;
 }
 
 function joinNonEmpty(...parts) {
