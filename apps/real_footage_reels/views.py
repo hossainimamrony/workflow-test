@@ -1,6 +1,7 @@
 import mimetypes
 import re
 import traceback
+import contextlib
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
@@ -606,6 +607,8 @@ class PublicStockVideoListApiView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        with contextlib.suppress(Exception):
+            ReelRenderService.backfill_stock_video_records(limit=400)
         stock_id = str(request.query_params.get("stockId", "")).strip()
         limit_raw = request.query_params.get("limit", 200)
         try:
@@ -653,6 +656,8 @@ class PublicStockVideoLatestApiView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, stock_id):
+        with contextlib.suppress(Exception):
+            ReelRenderService.backfill_stock_video_records(limit=400)
         normalized = str(stock_id or "").strip()
         if not normalized:
             return Response({"error": "stock_id is required."}, status=400)
@@ -672,6 +677,8 @@ class PublicStockVideoHistoryApiView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, stock_id):
+        with contextlib.suppress(Exception):
+            ReelRenderService.backfill_stock_video_records(limit=400)
         normalized = str(stock_id or "").strip()
         if not normalized:
             return Response({"error": "stock_id is required."}, status=400)

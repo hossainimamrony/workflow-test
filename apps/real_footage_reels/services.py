@@ -36,6 +36,7 @@ class ReelRenderService:
     _workflow_node_modules = _workflow_root / "node_modules"
     _legacy_runs_root = Path(__file__).resolve().parent / "Carbarn-Au-real-footage-reels" / "runs"
     _node_bin = os.environ.get("NODE_BIN", "node")
+    _workflow_env_cache: dict | None = None
     _PHASE_PERCENT = {
         "queued": 2,
         "download": 18,
@@ -67,8 +68,32 @@ class ReelRenderService:
     }
 
     @classmethod
+    def _load_workflow_env_cache(cls) -> dict:
+        if isinstance(cls._workflow_env_cache, dict):
+            return cls._workflow_env_cache
+        pairs: dict[str, str] = {}
+        try:
+            raw = cls._workflow_env_file.read_text(encoding="utf-8")
+            for line in raw.splitlines():
+                text = str(line or "").strip()
+                if not text or text.startswith("#") or "=" not in text:
+                    continue
+                key, value = text.split("=", 1)
+                key = str(key).strip()
+                value = str(value).strip().strip("'\"")
+                if key:
+                    pairs[key] = value
+        except Exception:
+            pairs = {}
+        cls._workflow_env_cache = pairs
+        return pairs
+
+    @classmethod
     def _env_flag(cls, key: str, default: bool = False) -> bool:
-        raw = str(os.environ.get(key, "") or "").strip().lower()
+        raw = str(os.environ.get(key, "") or "").strip()
+        if not raw:
+            raw = str(cls._load_workflow_env_cache().get(key, "") or "").strip()
+        raw = raw.lower()
         if not raw:
             return bool(default)
         if raw in {"1", "true", "yes", "y", "on"}:
@@ -254,11 +279,30 @@ class ReelRenderService:
                     except Exception:
                         pass
 
+                existing_run = ReelRun.objects.filter(run_id=run_id).first()
                 run_defaults = {
-                    "listing_title": str(job.payload.get("listingTitle", "")).strip(),
-                    "stock_id": str(job.payload.get("stockId", "")).strip(),
-                    "car_description": str(job.payload.get("carDescription", "")).strip(),
-                    "listing_price": str(job.payload.get("listingPrice", "")).strip(),
+                    "listing_title": cls._first_non_empty(
+                        job.payload.get("listingTitle", ""),
+                        (report or {}).get("listingTitle", ""),
+                        ((report or {}).get("downloadsManifest") or {}).get("listingTitle", ""),
+                        existing_run.listing_title if existing_run else "",
+                    ),
+                    "stock_id": cls._first_non_empty(
+                        job.payload.get("stockId", ""),
+                        (report or {}).get("stockId", ""),
+                        ((report or {}).get("downloadsManifest") or {}).get("stockId", ""),
+                        existing_run.stock_id if existing_run else "",
+                    ),
+                    "car_description": cls._first_non_empty(
+                        job.payload.get("carDescription", ""),
+                        existing_run.car_description if existing_run else "",
+                    ),
+                    "listing_price": cls._first_non_empty(
+                        job.payload.get("listingPrice", ""),
+                        (report or {}).get("listingPrice", ""),
+                        ((report or {}).get("downloadsManifest") or {}).get("listingPrice", ""),
+                        existing_run.listing_price if existing_run else "",
+                    ),
                     "status": "completed",
                     "report": report,
                 }
@@ -1038,45 +1082,49 @@ class ReelRenderService:
 
     @classmethod
     def _resolve_s3_publish_config(cls) -> dict:
+        workflow_env = cls._load_workflow_env_cache()
+        def _cfg(key: str) -> str:
+            return cls._first_non_empty(os.environ.get(key), workflow_env.get(key))
+
         bucket = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_BUCKET"),
-            os.environ.get("S3_BUCKET"),
-            os.environ.get("cloud.aws.s3.bucket"),
+            _cfg("FINAL_REEL_S3_BUCKET"),
+            _cfg("S3_BUCKET"),
+            _cfg("cloud.aws.s3.bucket"),
         )
         region = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_REGION"),
-            os.environ.get("AWS_REGION"),
-            os.environ.get("AWS_DEFAULT_REGION"),
-            os.environ.get("cloud.aws.region.static"),
+            _cfg("FINAL_REEL_S3_REGION"),
+            _cfg("AWS_REGION"),
+            _cfg("AWS_DEFAULT_REGION"),
+            _cfg("cloud.aws.region.static"),
             "ap-southeast-2",
         )
         access_key_id = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_ACCESS_KEY_ID"),
-            os.environ.get("AWS_ACCESS_KEY_ID"),
-            os.environ.get("cloud.aws.credentials.accessKey"),
+            _cfg("FINAL_REEL_S3_ACCESS_KEY_ID"),
+            _cfg("AWS_ACCESS_KEY_ID"),
+            _cfg("cloud.aws.credentials.accessKey"),
         )
         secret_access_key = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_SECRET_ACCESS_KEY"),
-            os.environ.get("AWS_SECRET_ACCESS_KEY"),
-            os.environ.get("cloud.aws.credentials.secretKey"),
+            _cfg("FINAL_REEL_S3_SECRET_ACCESS_KEY"),
+            _cfg("AWS_SECRET_ACCESS_KEY"),
+            _cfg("cloud.aws.credentials.secretKey"),
         )
         session_token = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_SESSION_TOKEN"),
-            os.environ.get("AWS_SESSION_TOKEN"),
+            _cfg("FINAL_REEL_S3_SESSION_TOKEN"),
+            _cfg("AWS_SESSION_TOKEN"),
         )
         reels_prefix = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_PREFIX"),
+            _cfg("FINAL_REEL_S3_PREFIX"),
             "social-media-content/reels",
         ).strip("/")
         thumbnail_prefix = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_THUMBNAIL_S3_PREFIX"),
+            _cfg("FINAL_REEL_THUMBNAIL_S3_PREFIX"),
             f"{reels_prefix}/thumbnails" if reels_prefix else "social-media-content/reels/thumbnails",
         ).strip("/")
         public_base_url = cls._first_non_empty(
-            os.environ.get("FINAL_REEL_S3_PUBLIC_BASE_URL"),
+            _cfg("FINAL_REEL_S3_PUBLIC_BASE_URL"),
             "",
         ).rstrip("/")
-        acl = cls._first_non_empty(os.environ.get("FINAL_REEL_S3_ACL"), "")
+        acl = cls._first_non_empty(_cfg("FINAL_REEL_S3_ACL"), "")
         return {
             "bucket": bucket,
             "region": region,
@@ -1126,10 +1174,14 @@ class ReelRenderService:
             ) from exc
 
         suffix = image_path.suffix.lower() or ".png"
+        stock_id_raw = cls._first_non_empty(run.stock_id, ((run.report or {}).get("downloadsManifest") or {}).get("stockId"))
+        stock_key = "".join(ch if (ch.isalnum() or ch in {"-", "_", "."}) else "-" for ch in stock_id_raw).strip("-._")
+        if not stock_key:
+            stock_key = str(run.run_id or "").strip()
         object_key = "/".join(
             part for part in [
                 prefix,
-                f"{str(run.run_id or '').strip()}-thumbnail{suffix}",
+                f"{stock_key}{suffix}",
             ] if part
         )
         extra_args = {
@@ -1186,19 +1238,38 @@ class ReelRenderService:
         if not final_reel_url and not preview_reel_url and not thumbnail_image_url:
             return None
 
-        record = ReelStockVideoRecord.objects.create(
-            stock_id=stock_id,
+        record, _created = ReelStockVideoRecord.objects.update_or_create(
             run_id=str(run.run_id or "").strip(),
-            listing_title=cls._first_non_empty(run.listing_title, report_data.get("listingTitle")),
-            listing_price=cls._first_non_empty(run.listing_price, report_data.get("listingPrice")),
-            video_script=cls._extract_video_script(report_data),
-            final_reel_url=final_reel_url,
-            preview_reel_url=preview_reel_url,
-            thumbnail_image_url=thumbnail_image_url,
-            thumbnail_object_key=cls._first_non_empty(report_data.get("thumbnailObjectKey")),
-            source_created_at=run.created_at,
+            defaults={
+                "stock_id": stock_id,
+                "listing_title": cls._first_non_empty(run.listing_title, report_data.get("listingTitle")),
+                "listing_price": cls._first_non_empty(run.listing_price, report_data.get("listingPrice")),
+                "video_script": cls._extract_video_script(report_data),
+                "final_reel_url": final_reel_url,
+                "preview_reel_url": preview_reel_url,
+                "thumbnail_image_url": thumbnail_image_url,
+                "thumbnail_object_key": cls._first_non_empty(report_data.get("thumbnailObjectKey")),
+                "source_created_at": run.created_at,
+            },
         )
         return record
+
+    @classmethod
+    def backfill_stock_video_records(cls, *, limit: int = 200) -> int:
+        try:
+            size = max(1, min(2000, int(limit)))
+        except Exception:
+            size = 200
+        runs = ReelRun.objects.exclude(report=None).order_by("-updated_at", "-id")[:size]
+        created_or_updated = 0
+        for run in runs:
+            try:
+                record = cls._upsert_stock_video_record(run=run, report=run.report if isinstance(run.report, dict) else None)
+                if record:
+                    created_or_updated += 1
+            except Exception:
+                continue
+        return created_or_updated
 
     @staticmethod
     def jobs_payload() -> dict:
