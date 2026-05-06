@@ -796,10 +796,40 @@ async function uploadBytesToS3({
 
   if (!response?.ok) {
     const bodyText = await safeReadBody(response);
+    const awsError = parseAwsXmlError(bodyText);
+    const bucketRegionHint = String(response.headers.get("x-amz-bucket-region") || "").trim();
+    const requestId = String(response.headers.get("x-amz-request-id") || "").trim();
+    const hostId = String(response.headers.get("x-amz-id-2") || "").trim();
+    const details = [
+      awsError.code ? `code=${awsError.code}` : "",
+      awsError.message ? `message=${awsError.message}` : "",
+      awsError.bucketName ? `bucket=${awsError.bucketName}` : "",
+      awsError.resource ? `resource=${awsError.resource}` : "",
+      bucketRegionHint ? `bucket-region=${bucketRegionHint}` : "",
+      requestId ? `request-id=${requestId}` : "",
+      hostId ? `host-id=${hostId}` : "",
+    ].filter(Boolean).join(", ");
     throw new Error(
-      `S3 upload failed for ${key} (${response?.status || "no-status"}): ${String(bodyText || "").slice(0, 500)}`,
+      `S3 upload failed for ${key} (${response?.status || "no-status"})` +
+        (details ? ` [${details}]` : "") +
+        `: ${String(bodyText || "").slice(0, 500)}`,
     );
   }
+}
+
+function parseAwsXmlError(xmlText) {
+  const text = String(xmlText || "");
+  const getTag = (tagName) => {
+    const re = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, "i");
+    const match = text.match(re);
+    return match ? String(match[1] || "").trim() : "";
+  };
+  return {
+    code: getTag("Code"),
+    message: getTag("Message"),
+    resource: getTag("Resource"),
+    bucketName: getTag("BucketName"),
+  };
 }
 
 function buildS3Key(prefix, fileName) {
