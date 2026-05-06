@@ -1095,7 +1095,12 @@
   }
 
   let t;
-  invQ.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => searchInventory().catch(e => invNote.textContent = e.message), 250); });
+  if (invQ) {
+    invQ.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => searchInventory().catch((e) => { if (invNote) invNote.textContent = e.message; }), 250);
+    });
+  }
   if (invClear) {
     invClear.addEventListener('click', () => {
       invQ.value = '';
@@ -1110,10 +1115,25 @@
     });
   }
 
-  invRefresh.addEventListener('click', () => refreshInventory().catch(e => invNote.textContent = e.message));
-  runsRefresh.addEventListener('click', () => loadRuns().catch(e => formStatus.textContent = e.message));
-  if (runsTrashDelete) runsTrashDelete.addEventListener('click', () => deleteTrash().catch(e => formStatus.textContent = e.message));
-  form.addEventListener('submit', submitRun);
+  if (invRefresh) {
+    invRefresh.addEventListener('click', () => refreshInventory().catch((e) => { if (invNote) invNote.textContent = e.message; }));
+  }
+  if (runsRefresh) {
+    runsRefresh.addEventListener('click', () => loadRuns().catch((e) => { if (formStatus) formStatus.textContent = e.message; }));
+  }
+  if (runsTrashDelete) {
+    const runTrashHandler = () => {
+      if (formStatus) formStatus.textContent = 'Preparing trash cleanup...';
+      return deleteTrash().catch((e) => {
+        if (formStatus) formStatus.textContent = e.message;
+      });
+    };
+    runsTrashDelete.addEventListener('click', runTrashHandler);
+    runsTrashDelete.onclick = runTrashHandler;
+  }
+  if (form) {
+    form.addEventListener('submit', submitRun);
+  }
 
   if (currentRunId) {
     loadRunDetail(currentRunId).catch(e => {
