@@ -262,11 +262,15 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
       process.env.S3_CDN_BASE_URL ??
       "https://www.storage.importautos.com.au/social-media-content/reels",
   ).trim().replace(/\/+$/gu, "");
-  const provider = String(
+  const providerFromConfig = String(
     config.finalReelRemoteProvider ??
       process.env.FINAL_REEL_REMOTE_PROVIDER ??
-      "multipart",
-  ).trim().toLowerCase() || "multipart";
+      "",
+  ).trim().toLowerCase();
+  // Prefer multipart endpoint uploads whenever an endpoint is configured.
+  const provider = endpoint
+    ? "multipart"
+    : ((providerFromConfig === "s3" || providerFromConfig === "multipart") ? providerFromConfig : "multipart");
 
   if (!directory) {
     throw new Error("Remote upload directory is empty. Set FINAL_REEL_UPLOAD_DIRECTORY.");

@@ -343,7 +343,11 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
   )
     ? finalReelRemoteProvider
     : "";
-  const finalReelRemoteProviderFinal = normalizedRemoteProvider || "multipart";
+  // Safety default: when an upload endpoint is available, use multipart API mode.
+  // This avoids accidental direct-S3 uploads when stale env vars still contain bucket settings.
+  const finalReelRemoteProviderFinal = finalReelUploadEndpoint
+    ? "multipart"
+    : (normalizedRemoteProvider || "multipart");
 
   if (strictEndScene) {
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);
