@@ -131,8 +131,12 @@
     const value = String(url || '').trim();
     if (!value) return '';
     try {
+      const isAbsoluteHttp = /^https?:\/\//iu.test(value);
       const parsed = new URL(value, window.location.origin);
       parsed.searchParams.set('v', String(token));
+      if (isAbsoluteHttp) {
+        return parsed.toString();
+      }
       return `${parsed.pathname}${parsed.search}${parsed.hash}`;
     } catch (_err) {
       return value;
@@ -763,6 +767,25 @@
       return out;
     }
 
+    function slugifySegment(value, fallback) {
+      const cleaned = String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      return cleaned || String(fallback || '').trim().toLowerCase();
+    }
+
+    function inferMakeModelFromTitle(title) {
+      const tokens = String(title || '').trim().split(/\s+/u).filter(Boolean);
+      if (!tokens.length) return { make: '', model: '' };
+      const hasYearPrefix = /^\d{4}$/u.test(tokens[0] || '');
+      const make = tokens[hasYearPrefix ? 1 : 0] || '';
+      const model = tokens[hasYearPrefix ? 2 : 1] || '';
+      return { make, model };
+    }
+
     function buildThumbnailUrlCandidates() {
       const direct = [
         run.thumbnailRemoteUrl,
@@ -771,9 +794,14 @@
       const base = 'https://fastlycb.s3.ap-southeast-2.amazonaws.com/social-media-content/reels/thumbnails';
       const stock = String(run.stockId || '').trim();
       const runIdValue = String(run.runId || '').trim();
+      const inferred = inferMakeModelFromTitle(run.listingTitle || run.carTitle || '');
+      const makeKey = slugifySegment(inferred.make, 'vehicle');
+      const modelKey = slugifySegment(inferred.model, 'model');
+      const stockKey = slugifySegment(stock, runIdValue || 'run');
       const exts = ['png', 'jpg', 'jpeg', 'webp'];
       const derived = [];
       for (const ext of exts) {
+        if (stockKey) derived.push(`${base}/${encodeURIComponent(`${stockKey}-${makeKey}-${modelKey}`)}.${ext}`);
         if (stock) derived.push(`${base}/${encodeURIComponent(stock)}.${ext}`);
         if (runIdValue) derived.push(`${base}/${encodeURIComponent(runIdValue)}.${ext}`);
       }

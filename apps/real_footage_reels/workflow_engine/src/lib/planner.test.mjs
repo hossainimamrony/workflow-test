@@ -130,6 +130,43 @@ runTest("ensureLockedTargetSequence rejects any reordered pattern", () => {
   );
 });
 
+runTest("buildReelPlan does not place interior before stage-2 reveal when reveal is missing", () => {
+  const clips = [
+    makeClip({
+      clipId: "front-1",
+      primaryLabel: "front_left_exterior",
+      scores: { front_exterior: 96, driver_door_interior_reveal: 0, rear_exterior: 0 },
+      frontVisible: true,
+    }),
+    makeClip({
+      clipId: "interior-1",
+      primaryLabel: "interior",
+      roleLabel: "interior",
+      secondaryLabels: ["interior"],
+      interiorVisible: true,
+    }),
+    makeClip({
+      clipId: "rear-1",
+      primaryLabel: "rear_left_exterior",
+      scores: { front_exterior: 0, driver_door_interior_reveal: 0, rear_exterior: 95 },
+      rearVisible: true,
+    }),
+  ];
+
+  const plan = buildReelPlan(clips, LOCKED_MONTAGE_ROLE_ORDER, {
+    totalDurationSeconds: 14,
+  });
+
+  assert.deepEqual(
+    plan.composition.segments.map((item) => item.purpose),
+    [
+      "front_exterior",
+      "rear_exterior",
+    ],
+  );
+  assert.deepEqual(plan.missingRoles, ["driver_door_interior_reveal", "interior"]);
+});
+
 function runTest(name, fn) {
   try {
     fn();

@@ -87,7 +87,7 @@ function isEligibleForRole(clip, role) {
       primaryLabel === "driver_door_interior_reveal" ||
       Number(scores.driver_door_interior_reveal || 0) > 0 ||
       Boolean(clip.analysis.doorOpen && clip.analysis.interiorVisible) ||
-      middleRevealRoleScore(clip) > 0
+      middleRevealRoleScore(clip) >= 60
     );
   }
 
@@ -177,10 +177,12 @@ function buildCompositionPlan(clips, sequence, options) {
     usedClipIds.add(rear.clipId);
   }
 
-  const interiorCandidates = [
-    ...(leadInterior ? [leadInterior] : []),
-    ...chooseInteriorCompositionClips(clips, usedClipIds),
-  ];
+  const interiorCandidates = driverReveal
+    ? [
+      ...(leadInterior ? [leadInterior] : []),
+      ...chooseInteriorCompositionClips(clips, usedClipIds),
+    ]
+    : [];
 
   const segments = [];
   if (front) {
@@ -421,9 +423,11 @@ function middleRevealRoleScore(clip) {
     score += 78;
   }
 
-  // A plain interior clip can be used, but should be weaker than true reveal candidates.
-  if (roleLabel === "interior" || primaryLabel === "interior" || clip.analysis.interiorVisible) {
-    score += 26;
+  if (secondaryLabels.includes("driver") || secondaryLabels.includes("driver-seat") || secondaryLabels.includes("driver_seat")) {
+    score += 74;
+  }
+  if (secondaryLabels.includes("steering-wheel")) {
+    score += 78;
   }
 
   // Avoid exterior clips in stage-2 fallback.

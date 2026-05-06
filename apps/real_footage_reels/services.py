@@ -1061,6 +1061,26 @@ class ReelRenderService:
         return ""
 
     @staticmethod
+    def _slugify_segment(value: str, fallback: str = "") -> str:
+        raw = str(value or "").strip().lower()
+        cleaned = "".join(ch if ch.isalnum() else "-" for ch in raw)
+        cleaned = "-".join(part for part in cleaned.split("-") if part)
+        return cleaned or str(fallback or "").strip().lower()
+
+    @classmethod
+    def _infer_make_model_from_title(cls, listing_title: str) -> tuple[str, str]:
+        tokens = [t for t in str(listing_title or "").strip().split() if t]
+        if not tokens:
+            return "", ""
+        first = tokens[0]
+        has_year_prefix = len(first) == 4 and first.isdigit()
+        make_idx = 1 if has_year_prefix else 0
+        model_idx = 2 if has_year_prefix else 1
+        make = tokens[make_idx] if len(tokens) > make_idx else ""
+        model = tokens[model_idx] if len(tokens) > model_idx else ""
+        return make, model
+
+    @staticmethod
     def _is_http_url(value: str) -> bool:
         text = str(value or "").strip().lower()
         return text.startswith("https://") or text.startswith("http://")
@@ -1173,15 +1193,40 @@ class ReelRenderService:
                 "Thumbnail S3 upload requires boto3. Install dependencies from requirements.txt."
             ) from exc
 
-        suffix = image_path.suffix.lower() or ".png"
-        stock_id_raw = cls._first_non_empty(run.stock_id, ((run.report or {}).get("downloadsManifest") or {}).get("stockId"))
-        stock_key = "".join(ch if (ch.isalnum() or ch in {"-", "_", "."}) else "-" for ch in stock_id_raw).strip("-._")
-        if not stock_key:
-            stock_key = str(run.run_id or "").strip()
+        report_data = run.report if isinstance(run.report, dict) else {}
+        downloads_manifest = report_data.get("downloadsManifest") or {}
+        listing_title = cls._first_non_empty(
+            run.listing_title,
+            report_data.get("listingTitle"),
+            downloads_manifest.get("listingTitle"),
+        )
+        inferred_make, inferred_model = cls._infer_make_model_from_title(listing_title)
+        stock_id_raw = cls._first_non_empty(
+            run.stock_id,
+            report_data.get("stockId"),
+            downloads_manifest.get("stockId"),
+            str(run.run_id or "").strip(),
+        )
+        make_raw = cls._first_non_empty(
+            report_data.get("make"),
+            downloads_manifest.get("make"),
+            inferred_make,
+            "vehicle",
+        )
+        model_raw = cls._first_non_empty(
+            report_data.get("model"),
+            downloads_manifest.get("model"),
+            inferred_model,
+            "model",
+        )
+        stock_key = cls._slugify_segment(stock_id_raw, "run")
+        make_key = cls._slugify_segment(make_raw, "vehicle")
+        model_key = cls._slugify_segment(model_raw, "model")
+        file_name = f"{stock_key}-{make_key}-{model_key}.jpg"
         object_key = "/".join(
             part for part in [
                 prefix,
-                f"{stock_key}{suffix}",
+                file_name,
             ] if part
         )
         extra_args = {
