@@ -485,38 +485,6 @@ class RunDetailApiView(APIView):
         return Response({"ok": True, "runId": run_id})
 
 
-class RunRemoteUploadDebugApiView(APIView):
-    @staticmethod
-    def _parse_force(request) -> bool:
-        payload = request.data if isinstance(request.data, dict) else {}
-        raw = payload.get("force", True)
-        if isinstance(raw, bool):
-            return raw
-        normalized = str(raw or "").strip().lower()
-        if not normalized:
-            return True
-        if normalized in {"1", "true", "yes", "y", "on"}:
-            return True
-        if normalized in {"0", "false", "no", "n", "off"}:
-            return False
-        return True
-
-    def post(self, request, run_id):
-        try:
-            result = ReelRenderService.debug_remote_upload(
-                run_id=run_id,
-                force=self._parse_force(request),
-            )
-        except RuntimeError as exc:
-            message = str(exc)
-            lower = message.lower()
-            status = 404 if "not found" in lower else 400
-            return Response({"error": message}, status=status)
-        except Exception as exc:  # pragma: no cover - defensive debug endpoint
-            return Response({"error": f"{exc.__class__.__name__}: {exc}"}, status=500)
-        return Response(result, status=200)
-
-
 class RunThumbnailApiView(APIView):
     def post(self, request, run_id):
         run = get_object_or_404(ReelRun, run_id=run_id)

@@ -240,65 +240,6 @@ class RunsTrashCleanupApiTests(TestCase):
         self.assertTrue(payload.get("ok"))
 
 
-class RunRemoteUploadDebugApiTests(TestCase):
-    def test_remote_upload_debug_endpoint_returns_payload(self):
-        run_id = "remote-debug-run-200"
-        run_dir = Path(__file__).resolve().parent / "workflow_engine" / "runs" / run_id
-        run_dir.mkdir(parents=True, exist_ok=True)
-        self.addCleanup(lambda: shutil.rmtree(run_dir, ignore_errors=True))
-
-        ReelRun.objects.create(
-            run_id=run_id,
-            listing_title="Remote debug",
-            stock_id="DBG1",
-            car_description="Debug",
-            listing_price="AU$1",
-            status="completed",
-            report={"runDir": str(run_dir)},
-        )
-
-        with patch.object(
-            ReelRenderService,
-            "debug_remote_upload",
-            return_value={
-                "runId": run_id,
-                "uploadOk": True,
-                "downloadCheckOk": True,
-                "cdnUrl": "https://cdn.example.com/reels/demo-final.mp4",
-                "error": "",
-            },
-        ) as debug_mock:
-            response = self.client.post(
-                f"/workflows/real-footage-reels/api/runs/{run_id}/remote-upload-debug",
-                data=json.dumps({"force": True}),
-                content_type="application/json",
-            )
-
-        self.assertEqual(response.status_code, 200)
-        payload = response.json()
-        self.assertTrue(payload.get("uploadOk"))
-        self.assertTrue(payload.get("downloadCheckOk"))
-        self.assertIn("cdnUrl", payload)
-        self.assertEqual(debug_mock.call_args.kwargs.get("run_id"), run_id)
-        self.assertTrue(debug_mock.call_args.kwargs.get("force"))
-
-    def test_remote_upload_debug_endpoint_returns_404_for_missing_run(self):
-        run_id = "remote-debug-run-404"
-        with patch.object(
-            ReelRenderService,
-            "debug_remote_upload",
-            side_effect=RuntimeError("Run not found."),
-        ):
-            response = self.client.post(
-                f"/workflows/real-footage-reels/api/runs/{run_id}/remote-upload-debug",
-                data=json.dumps({"force": True}),
-                content_type="application/json",
-            )
-
-        self.assertEqual(response.status_code, 404)
-        self.assertIn("error", response.json())
-
-
 @override_settings(ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])
 class RunDetailAssetResolutionTests(TestCase):
     def test_legacy_api_file_urls_are_resolved_to_django_asset_endpoint(self):

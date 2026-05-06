@@ -146,6 +146,35 @@
       reader.readAsDataURL(file);
     });
   }
+  async function startDirectDownload(url, fileName) {
+    const targetUrl = String(url || '').trim();
+    const targetName = String(fileName || 'video.mp4').trim() || 'video.mp4';
+    if (!targetUrl) return;
+    try {
+      const resp = await fetch(targetUrl, { method: 'GET' });
+      if (!resp.ok) throw new Error(`Download failed (${resp.status})`);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = targetName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      return;
+    } catch (_err) {
+      // Fallback if CORS/fetch is blocked: still trigger browser navigation.
+    }
+    const fallback = document.createElement('a');
+    fallback.href = targetUrl;
+    fallback.download = targetName;
+    fallback.style.display = 'none';
+    document.body.appendChild(fallback);
+    fallback.click();
+    document.body.removeChild(fallback);
+  }
   function renderVideoPlayer(src, title, opts) {
     const options = opts || {};
     const compact = Boolean(options.compact);
@@ -166,7 +195,7 @@
           <div class="video-player__row">
             <button type="button" class="video-player__button" data-role="play">Play</button>
             <button type="button" class="video-player__button" data-role="restart">Restart</button>
-            <a class="video-player__button video-player__button--link" data-role="download" href="${esc(downloadSrc)}" download="${esc(downloadName)}">Download</a>
+            <a class="video-player__button video-player__button--link" data-role="download" href="${esc(downloadSrc)}" download="${esc(downloadName)}" data-download-name="${esc(downloadName)}">Download</a>
             <span class="video-player__time" data-role="time">0:00 / 0:00</span>
             <button type="button" class="video-player__button" data-role="mute">Mute</button>
             ${compact ? '' : `<input class="video-player__volume" data-role="volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume for ${esc(title || 'Video')}">`}
@@ -196,6 +225,7 @@
       const restartBtn = player.querySelector('[data-role="restart"]');
       const muteBtn = player.querySelector('[data-role="mute"]');
       const fullscreenBtn = player.querySelector('[data-role="fullscreen"]');
+      const downloadLink = player.querySelector('[data-role="download"]');
       const volumeInput = player.querySelector('[data-role="volume"]');
       const timelineInput = player.querySelector('[data-role="timeline"]');
       const timeEl = player.querySelector('[data-role="time"]');
@@ -329,11 +359,18 @@
       const onTogglePlayClick = () => { void handleTogglePlay(); };
       const onToggleFullscreenClick = () => { void handleToggleFullscreen(); };
       const onVideoDoubleClick = () => { void handleToggleFullscreen(); };
+      const onDownloadClick = (event) => {
+        if (event && typeof event.preventDefault === 'function') event.preventDefault();
+        const src = String((downloadLink && downloadLink.getAttribute('href')) || video.currentSrc || video.src || '').trim();
+        const name = String((downloadLink && downloadLink.getAttribute('data-download-name')) || buildVideoDownloadName(src, '')).trim();
+        void startDirectDownload(src, name);
+      };
 
       playBtn.addEventListener('click', onTogglePlayClick);
       restartBtn.addEventListener('click', handleRestart);
       muteBtn.addEventListener('click', handleToggleMute);
       fullscreenBtn.addEventListener('click', onToggleFullscreenClick);
+      if (downloadLink) downloadLink.addEventListener('click', onDownloadClick);
       timelineInput.addEventListener('input', handleSeek);
       timelineInput.addEventListener('change', endScrub);
       timelineInput.addEventListener('pointerdown', startScrub);
@@ -364,6 +401,7 @@
         restartBtn.removeEventListener('click', handleRestart);
         muteBtn.removeEventListener('click', handleToggleMute);
         fullscreenBtn.removeEventListener('click', onToggleFullscreenClick);
+        if (downloadLink) downloadLink.removeEventListener('click', onDownloadClick);
         timelineInput.removeEventListener('input', handleSeek);
         timelineInput.removeEventListener('change', endScrub);
         timelineInput.removeEventListener('pointerdown', startScrub);
@@ -585,7 +623,6 @@
           </div>
           <div class="detail-actions">
             <button class="button button--secondary" type="button" id="back-studio">Back</button>
-            <button class="button button--ghost" type="button" id="debug-remote-upload">S3 Upload Debug</button>
             <button class="button button--danger" type="button" id="delete-run">Delete</button>
           </div>
         </section>
@@ -622,23 +659,8 @@
             ${priceIncludes ? `<details class="run-detail__description" open><summary>Price Includes</summary><p class="run-detail__description-body">${esc(priceIncludes)}</p></details>` : ''}
             ${run.hasVoiceover && run.voiceoverScript ? `<details class="run-detail__voiceover" open><summary>Voice-over</summary><p class="run-detail__voiceover-body">${esc(run.voiceoverScript)}</p></details>` : ''}
             ${remotePublishFailed ? `<div class="callout callout--warning"><div class="callout__copy"><strong>Remote download unavailable</strong><p>${esc(remotePublishError)}</p></div></div>` : ''}
-            <div id="remote-upload-debug-wrap"></div>
           </div>
         </section>
-
-        ${previewClips.length ? `
-          <section class="panel">
-            <h3 class="section-heading__title section-heading__title--panel">Source footage</h3>
-            <div class="source-preview-grid">
-              ${previewClips.map((clip) => `
-                <div class="source-preview-tile">
-                  ${renderVideoPlayer(clip.videoUrl, clip.title || clip.clipId || 'Clip', { compact: true, className: 'video-player--tile' })}
-                  <span class="source-preview-tile__id">${esc(clip.clipId || clip.title || 'clip')}</span>
-                </div>
-              `).join('')}
-            </div>
-          </section>
-        ` : ''}
 
         <section class="panel thumbnail-generator">
           <div class="section-heading section-heading--compact"><h3 class="section-heading__title section-heading__title--panel">Photo Generator</h3></div>
@@ -860,65 +882,6 @@
 
     const backBtn = document.getElementById('back-studio');
     if (backBtn) backBtn.onclick = () => { window.location.href = `${appBase}/workflow`; };
-    const debugRemoteUploadBtn = document.getElementById('debug-remote-upload');
-    const debugRemoteUploadWrap = document.getElementById('remote-upload-debug-wrap');
-    const renderRemoteUploadDebug = (payload, isError) => {
-      if (!debugRemoteUploadWrap) return;
-      if (isError) {
-        const errText = String(payload || 'Unknown error').trim() || 'Unknown error';
-        debugRemoteUploadWrap.innerHTML = `<div class="callout callout--danger"><div class="callout__copy"><strong>Upload Debug Failed</strong><p>${esc(errText)}</p></div></div>`;
-        return;
-      }
-      const details = {
-        runId: payload.runId || run.runId || '',
-        uploadAccepted: Boolean(payload.uploadAccepted),
-        uploadOk: Boolean(payload.uploadOk),
-        downloadCheckOk: Boolean(payload.downloadCheckOk),
-        provider: String(payload.provider || ''),
-        directory: String(payload.directory || ''),
-        endpoint: String(payload.endpoint || ''),
-        remoteUrl: String(payload.remoteUrl || payload.cdnUrl || ''),
-        previewRemoteUrl: String(payload.previewRemoteUrl || payload.previewCdnUrl || ''),
-        uploadResponseStatus: payload.uploadResponseStatus ?? null,
-        downloadCheckError: String(payload.downloadCheckError || ''),
-        error: String(payload.error || ''),
-      };
-      const tone = details.uploadOk ? 'info' : 'warning';
-      const summaryText = details.uploadOk
-        ? (details.downloadCheckOk
-          ? 'Upload succeeded and remote URL validation passed.'
-          : ('Upload succeeded, but remote URL validation failed. ' + (details.downloadCheckError || '')))
-        : (details.uploadAccepted
-          ? 'Upload was accepted by remote API, but final upload status is not confirmed.'
-          : (details.error || 'Upload debug did not pass.'));
-      debugRemoteUploadWrap.innerHTML = `
-        <div class="callout callout--${tone}">
-          <div class="callout__copy">
-            <strong>${details.uploadOk ? 'Upload Debug Success' : 'Upload Debug Result'}</strong>
-            <p>${esc(summaryText)}</p>
-            <pre>${esc(JSON.stringify(details, null, 2))}</pre>
-          </div>
-        </div>
-      `;
-    };
-    if (debugRemoteUploadBtn) debugRemoteUploadBtn.onclick = async () => {
-      debugRemoteUploadBtn.disabled = true;
-      const oldText = debugRemoteUploadBtn.textContent;
-      debugRemoteUploadBtn.textContent = 'Running...';
-      try {
-        const payload = await api(base + '/runs/' + encodeURIComponent(runId) + '/remote-upload-debug', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force: true }),
-        });
-        renderRemoteUploadDebug(payload, false);
-      } catch (err) {
-        renderRemoteUploadDebug(err && err.message ? err.message : String(err || 'Unknown error'), true);
-      } finally {
-        debugRemoteUploadBtn.disabled = false;
-        debugRemoteUploadBtn.textContent = oldText || 'S3 Upload Debug';
-      }
-    };
     const delBtn = document.getElementById('delete-run');
     if (delBtn) delBtn.onclick = async () => {
       if (!confirm('Delete this run?')) return;

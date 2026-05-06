@@ -116,6 +116,15 @@ export async function publishFinalReelMp4(runDir, ffmpegPath, log = () => {}, co
     }
   }
 
+  const autoDeleteSourceFootage = parseBooleanLike(
+    config.finalReelAutoDeleteSourceFootage ??
+      process.env.FINAL_REEL_AUTO_DELETE_SOURCE_FOOTAGE,
+    true,
+  );
+  if (autoDeleteSourceFootage) {
+    await cleanupSourceFootageAfterFinalized(normalizedDir, log);
+  }
+
   return publishedPath;
 }
 
@@ -984,6 +993,61 @@ async function statIfExists(filePath) {
     return await fs.stat(filePath);
   } catch {
     return null;
+  }
+}
+
+async function cleanupSourceFootageAfterFinalized(runDir, log = () => {}) {
+  const keepNames = new Set(["final-reel.mp4"]);
+  const removableExt = new Set([".mov", ".mp4"]);
+  const removableDirs = ["downloads", "download", "raw", "cache", "clips", "tmp", "temp", "samples"];
+  let deletedFiles = 0;
+  let deletedDirs = 0;
+
+  for (const dirName of removableDirs) {
+    const dirPath = path.join(runDir, dirName);
+    try {
+      await fs.rm(dirPath, { recursive: true, force: true });
+      deletedDirs += 1;
+    } catch {
+      // best-effort cleanup
+    }
+  }
+
+  const allPaths = [];
+  await collectAllPaths(runDir, allPaths);
+  for (const filePath of allPaths) {
+    const baseName = path.basename(filePath).toLowerCase();
+    const ext = path.extname(filePath).toLowerCase();
+    if (!removableExt.has(ext)) continue;
+    if (keepNames.has(baseName)) continue;
+    try {
+      await fs.unlink(filePath);
+      deletedFiles += 1;
+    } catch {
+      // best-effort cleanup
+    }
+  }
+  if (deletedFiles > 0 || deletedDirs > 0) {
+    log(`Source footage cleanup complete: deleted ${deletedFiles} media file(s), ${deletedDirs} folder(s).`);
+  }
+}
+
+async function collectAllPaths(dirPath, out) {
+  let entries = [];
+  try {
+    entries = await fs.readdir(dirPath, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      await collectAllPaths(fullPath, out);
+      continue;
+    }
+    if (entry.isFile()) {
+      out.push(fullPath);
+    }
   }
 }
 
