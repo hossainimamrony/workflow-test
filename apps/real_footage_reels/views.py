@@ -409,6 +409,12 @@ class RunsTrashCleanupApiView(APIView):
 class RunDetailApiView(APIView):
     def get(self, request, run_id):
         run = get_object_or_404(ReelRun, run_id=run_id)
+        stock_record = (
+            ReelStockVideoRecord.objects
+            .filter(run_id=run_id)
+            .order_by("-updated_at", "-id")
+            .first()
+        )
         report = dict(run.report or {})
         run_dir_path = _resolve_run_dir_path(report.get("runDir")) or (_WORKFLOW_ROOT / "runs" / run_id)
         try:
@@ -454,6 +460,17 @@ class RunDetailApiView(APIView):
         final_reel_webm_path = _resolve_report_asset_path(run_dir_value, report.get("finalReelWebmUrl"))
         main_reel_path = _resolve_report_asset_path(run_dir_value, report.get("mainReelUrl"))
         thumbnail_path = _resolve_report_asset_path(run_dir_value, report.get("thumbnailUrl"))
+        thumbnail_remote_url = str(report.get("thumbnailRemoteUrl") or "").strip()
+        thumbnail_object_key = str(report.get("thumbnailObjectKey") or "").strip()
+        if not thumbnail_remote_url and stock_record:
+            thumbnail_remote_url = str(stock_record.thumbnail_image_url or "").strip()
+        if not thumbnail_object_key and stock_record:
+            thumbnail_object_key = str(stock_record.thumbnail_object_key or "").strip()
+        if not thumbnail_path and stock_record and not thumbnail_remote_url:
+            # Last-resort fallback for legacy runs that only stored local URL in record.
+            fallback_url = str(stock_record.thumbnail_image_url or "").strip()
+            if fallback_url.startswith("/"):
+                thumbnail_path = _resolve_report_asset_path(run_dir_value, fallback_url)
         final_reel_url_value = str(report.get("finalReelUrl") or "").strip()
         remote_upload_ok_value = report.get("finalReelRemoteUploadOk")
         remote_upload_ok = None if remote_upload_ok_value is None else bool(remote_upload_ok_value)
@@ -486,8 +503,8 @@ class RunDetailApiView(APIView):
                 "finalReelPreviewUrl": _as_public_asset_url(run_id, final_reel_preview_path) if final_reel_preview_path else "",
                 "finalReelWebmUrl": _as_public_asset_url(run_id, final_reel_webm_path) if final_reel_webm_path else "",
                 "thumbnailUrl": _as_public_asset_url(run_id, thumbnail_path) if thumbnail_path else "",
-                "thumbnailRemoteUrl": str(report.get("thumbnailRemoteUrl") or "").strip(),
-                "thumbnailObjectKey": str(report.get("thumbnailObjectKey") or "").strip(),
+                "thumbnailRemoteUrl": thumbnail_remote_url,
+                "thumbnailObjectKey": thumbnail_object_key,
                 "videos": decorated_videos,
                 "plan": {
                     **plan,
