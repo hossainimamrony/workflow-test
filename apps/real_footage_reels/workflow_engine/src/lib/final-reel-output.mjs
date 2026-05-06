@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { spawn } from "node:child_process";
-import { createHash, createHmac } from "node:crypto";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const PREVIEW_FILE_NAME = "final-reel-preview.mp4";
 const FINAL_REEL_PUBLISH_MANIFEST = "final-reel-publish.json";
@@ -248,7 +248,7 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     config.finalReelUploadEndpoint ??
       process.env.FINAL_REEL_UPLOAD_ENDPOINT ??
       process.env.S3_UPLOAD_URL ??
-      "https://www.cbs.s1.carbarn.com.au/carbarnau/s3/uploadfiles",
+      "",
   ).trim();
   const directory = String(
     config.finalReelUploadDirectory ??
@@ -256,12 +256,6 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
       process.env.S3_UPLOAD_DIRECTORY ??
       "social-media-content/reels",
   ).trim().replace(/^\/+|\/+$/gu, "");
-  const cdnBase = String(
-    config.finalReelCdnBase ??
-      process.env.FINAL_REEL_CDN_BASE ??
-      process.env.S3_CDN_BASE_URL ??
-      "",
-  ).trim().replace(/\/+$/gu, "");
   const rawBaseUrl = String(
     config.finalReelRawBaseUrl ??
       config.finalReelS3RawBaseUrl ??
@@ -291,10 +285,10 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
       process.env.FINAL_REEL_REMOTE_PROVIDER ??
       "",
   ).trim().toLowerCase();
-  // Prefer multipart endpoint uploads whenever an endpoint is configured.
-  const provider = endpoint
-    ? "multipart"
-    : ((providerFromConfig === "s3" || providerFromConfig === "multipart") ? providerFromConfig : "multipart");
+  const provider =
+    (providerFromConfig === "s3" || providerFromConfig === "multipart")
+      ? providerFromConfig
+      : (s3Bucket ? "s3" : (endpoint ? "multipart" : "s3"));
 
   if (!directory) {
     throw new Error("Remote upload directory is empty. Set FINAL_REEL_UPLOAD_DIRECTORY.");
@@ -309,9 +303,9 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     String(existing.provider || "") === provider &&
     Number(existing.sourceMtimeMs) === sourceMtime &&
     Number(existing.previewSourceMtimeMs || 0) === previewMtime &&
-    String(existing.cdnUrl || "").startsWith("http")
+    String(existing.remoteUrl || existing.cdnUrl || "").startsWith("http")
   ) {
-    return existing.cdnUrl;
+    return String(existing.remoteUrl || existing.cdnUrl || "");
   }
 
   const runId = path.basename(path.resolve(runDir));
@@ -331,7 +325,6 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     directory,
     provider,
     endpoint: endpoint || "",
-    cdnBase,
     rawBaseUrl,
     s3Bucket,
     s3Region,
@@ -347,7 +340,6 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
             fileName,
             previewFileName,
             directory,
-            cdnBase,
             timeoutMs,
             config,
             log,
@@ -357,7 +349,6 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
             fileName,
             directory,
             endpoint,
-            cdnBase,
             rawBaseUrl,
             s3Bucket,
             s3Region,
@@ -370,8 +361,8 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
       ok: true,
       ...uploadResult,
     });
-    log(`Remote final reel ready: ${uploadResult.cdnUrl}`);
-    return uploadResult.cdnUrl;
+    log(`Remote final reel ready: ${uploadResult.remoteUrl || uploadResult.cdnUrl || "(no-url)"}`);
+    return String(uploadResult.remoteUrl || uploadResult.cdnUrl || "");
   } catch (error) {
     const uploadDebug =
       error && typeof error === "object" && error.uploadDebug && typeof error.uploadDebug === "object"
@@ -392,7 +383,6 @@ async function publishFinalReelToMultipartApi({
   fileName,
   directory,
   endpoint,
-  cdnBase,
   rawBaseUrl,
   s3Bucket,
   s3Region,
@@ -444,43 +434,35 @@ async function publishFinalReelToMultipartApi({
     rawBaseUrl,
     s3Bucket,
     s3Region,
-    cdnBase,
   });
   const fallbackCandidates = buildMultipartPublicFallbackCandidates({
     rawBaseUrl,
     s3Bucket,
     s3Region,
-    cdnBase,
     directory,
     fileName,
   });
   const candidateUrls = uniqueNonEmpty([resolvedUrl, ...fallbackCandidates]);
-  const cdnUrl = await findFirstReachableVideoUrl(candidateUrls, timeoutMs);
-  if (!cdnUrl) {
-    const hasUrlBases = fallbackCandidates.length > 0;
-    const error = new Error(
-      "Remote upload accepted (HTTP 200), but no valid public video URL could be derived. " +
-        (hasUrlBases
-          ? "The upload API returned no URL metadata and all raw-S3/CDN fallback URLs failed validation."
-          : "No URL metadata or raw-S3 base details were available to build a downloadable video URL."),
-    );
-    error.uploadDebug = {
-      uploadAccepted: true,
-      uploadResponseStatus: response.status,
-      uploadResponseHeaders: responseHeaders,
-      uploadResponseText: String(responseText || "").slice(0, 4000),
-      candidateUrls,
-      provider: "multipart",
-    };
-    throw error;
-  }
+  const reachableRemoteUrl = await findFirstReachableVideoUrl(candidateUrls, timeoutMs);
+  const remoteUrl = reachableRemoteUrl || candidateUrls[0] || "";
+  const downloadCheckOk = Boolean(reachableRemoteUrl);
+  const downloadCheckError = downloadCheckOk
+    ? ""
+    : "Upload accepted but no candidate public URL returned a video payload.";
   return {
-    cdnUrl,
+    remoteUrl,
+    previewRemoteUrl: "",
+    cdnUrl: remoteUrl,
     previewCdnUrl: "",
     remoteResponse,
+    uploadAccepted: true,
+    uploadOk: true,
+    downloadCheckOk,
+    downloadCheckError,
     uploadResponseStatus: response.status,
     uploadResponseHeaders: responseHeaders,
     uploadResponseText: String(responseText || "").slice(0, 4000),
+    candidateUrls,
   };
 }
 
@@ -488,11 +470,10 @@ function buildMultipartPublicFallbackCandidates({
   rawBaseUrl,
   s3Bucket,
   s3Region,
-  cdnBase,
   directory,
   fileName,
 }) {
-  const bases = buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase });
+  const bases = buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region });
   const cleanDir = String(directory || "").trim().replace(/^\/+|\/+$/gu, "");
   const encodedFile = encodeURIComponent(String(fileName || "").trim());
   if (!encodedFile) return [];
@@ -534,7 +515,6 @@ async function publishFinalReelToS3({
   fileName,
   previewFileName,
   directory,
-  cdnBase,
   timeoutMs,
   config,
   log = () => {},
@@ -595,65 +575,90 @@ async function publishFinalReelToS3({
     throw new Error("Missing S3 credentials (access key / secret key) for S3 remote provider.");
   }
 
-  const reelKey = buildS3Key(uploadPrefix, fileName);
-  const previewKey = previewPath ? buildS3Key(uploadPrefix, previewFileName) : "";
-  log(`Uploading final reel to S3 (s3://${bucket}/${reelKey})...`);
-  await uploadBytesToS3({
-    sourcePath,
-    bucket,
-    key: reelKey,
+  const s3 = new S3Client({
     region,
-    accessKeyId,
-    secretAccessKey,
-    sessionToken,
-    contentType: "video/mp4",
-    acl,
-    timeoutMs,
-    cacheControl: "public, max-age=31536000, immutable",
-  });
-  if (previewPath && previewKey) {
-    log(`Uploading preview reel to S3 (s3://${bucket}/${previewKey})...`);
-    await uploadBytesToS3({
-      sourcePath: previewPath,
-      bucket,
-      key: previewKey,
-      region,
+    credentials: {
       accessKeyId,
       secretAccessKey,
-      sessionToken,
-      contentType: "video/mp4",
-      acl,
-      timeoutMs,
-      cacheControl: "public, max-age=31536000, immutable",
-    });
+      ...(sessionToken ? { sessionToken } : {}),
+    },
+    forcePathStyle: bucket.includes("."),
+  });
+
+  const reelKey = buildS3Key(uploadPrefix, fileName);
+  const previewKey = previewPath ? buildS3Key(uploadPrefix, previewFileName) : "";
+  const reelBytes = await fs.readFile(sourcePath);
+  log(`Uploading final reel to S3 (s3://${bucket}/${reelKey})...`);
+  let reelUpload;
+  try {
+    reelUpload = await s3.send(new PutObjectCommand({
+      Bucket: bucket,
+      Key: reelKey,
+      Body: reelBytes,
+      ContentType: "video/mp4",
+      CacheControl: "public, max-age=31536000, immutable",
+      ...(acl ? { ACL: acl } : {}),
+    }));
+  } catch (error) {
+    throw new Error(
+      `S3 SDK upload failed for s3://${bucket}/${reelKey}: ${String(error?.message || error || "unknown error")}`,
+    );
+  }
+  if (previewPath && previewKey) {
+    const previewBytes = await fs.readFile(previewPath);
+    log(`Uploading preview reel to S3 (s3://${bucket}/${previewKey})...`);
+    try {
+      await s3.send(new PutObjectCommand({
+        Bucket: bucket,
+        Key: previewKey,
+        Body: previewBytes,
+        ContentType: "video/mp4",
+        CacheControl: "public, max-age=31536000, immutable",
+        ...(acl ? { ACL: acl } : {}),
+      }));
+    } catch (error) {
+      throw new Error(
+        `S3 SDK upload failed for preview s3://${bucket}/${previewKey}: ${String(error?.message || error || "unknown error")}`,
+      );
+    }
   }
 
   const publicBase = explicitPublicBaseUrl;
   const s3ObjectBase = `https://${bucket}.s3.${region}.amazonaws.com`;
   const s3PathStyleBase = `https://s3.${region}.amazonaws.com/${encodeURIComponent(bucket)}`;
   const shouldUsePathStyle = bucket.includes(".");
-  const cdnUrl = publicBase
+  const remoteUrl = publicBase
     ? `${publicBase}/${encodeURIComponent(fileName)}`
     : `${shouldUsePathStyle ? s3PathStyleBase : s3ObjectBase}/${encodeS3Key(reelKey)}`;
-  const previewCdnUrl = previewKey
+  const previewRemoteUrl = previewKey
     ? (publicBase
         ? `${publicBase}/${encodeURIComponent(previewFileName)}`
         : `${shouldUsePathStyle ? s3PathStyleBase : s3ObjectBase}/${encodeS3Key(previewKey)}`)
     : "";
-
-  await validateRemoteVideoUrl(cdnUrl, timeoutMs);
-  if (previewCdnUrl) {
-    await validateRemoteVideoUrl(previewCdnUrl, timeoutMs);
-  }
+  const { ok: downloadCheckOk, error: downloadCheckError } = await tryValidateRemoteVideoUrl(remoteUrl, timeoutMs);
+  const previewDownloadCheck = previewRemoteUrl
+    ? await tryValidateRemoteVideoUrl(previewRemoteUrl, timeoutMs)
+    : { ok: true, error: "" };
 
   return {
-    cdnUrl,
-    previewCdnUrl,
+    remoteUrl,
+    previewRemoteUrl,
+    cdnUrl: remoteUrl,
+    previewCdnUrl: previewRemoteUrl,
     objectKey: reelKey,
     previewObjectKey: previewKey,
     bucket,
     region,
     publicBaseUrl: publicBase,
+    uploadAccepted: true,
+    uploadOk: true,
+    uploadETag: String(reelUpload?.ETag || "").trim(),
+    uploadVersionId: String(reelUpload?.VersionId || "").trim(),
+    downloadCheckOk: downloadCheckOk && previewDownloadCheck.ok,
+    downloadCheckError: joinNonEmpty(
+      downloadCheckError,
+      previewDownloadCheck.ok ? "" : `Preview URL validation failed: ${previewDownloadCheck.error}`,
+    ),
     provider: "s3",
   };
 }
@@ -674,7 +679,6 @@ function resolveUploadPublicUrl({
   rawBaseUrl,
   s3Bucket,
   s3Region,
-  cdnBase,
 }) {
   const responseCandidates = [];
   const addCandidate = (value) => {
@@ -721,7 +725,7 @@ function resolveUploadPublicUrl({
 
   const relPath = selectBestPathCandidate(responseCandidates, directory, fileName);
   if (relPath) {
-    const baseCandidates = buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase });
+    const baseCandidates = buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region });
     for (const base of baseCandidates) {
       return joinBaseUrl(base, relPath);
     }
@@ -778,7 +782,7 @@ function joinBaseUrl(base, relPath) {
     .join("/")}`;
 }
 
-function buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase }) {
+function buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region }) {
   const bases = [];
   const cleanedRawBase = String(rawBaseUrl || "").trim().replace(/\/+$/gu, "");
   if (cleanedRawBase) {
@@ -797,11 +801,6 @@ function buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase }) {
       // Keep path-style as a fallback for S3-compatible backends/fronting proxies.
       bases.push(pathStyleBase);
     }
-  }
-
-  const cleanedCdnBase = String(cdnBase || "").trim().replace(/\/+$/gu, "");
-  if (cleanedCdnBase) {
-    bases.push(cleanedCdnBase);
   }
 
   return uniqueNonEmpty(bases);
@@ -848,17 +847,30 @@ async function validateRemoteVideoUrl(url, timeoutMs) {
     const contentType = String(response.headers.get("content-type") || "").toLowerCase();
     if (!response.ok) {
       const body = await safeReadBody(response);
-      throw new Error(`CDN URL returned ${response.status}. Body: ${body.slice(0, 300)}`);
+      throw new Error(`Remote URL returned ${response.status}. Body: ${body.slice(0, 300)}`);
     }
     if (contentType.includes("application/json") || contentType.includes("text/html")) {
       const body = await safeReadBody(response);
       throw new Error(
-        `CDN URL is not serving a video payload (content-type: ${contentType || "unknown"}). ` +
+        `Remote URL is not serving a video payload (content-type: ${contentType || "unknown"}). ` +
           `Body: ${body.slice(0, 300)}`,
       );
     }
   } finally {
     clearTimeout(timer);
+  }
+}
+
+async function tryValidateRemoteVideoUrl(url, timeoutMs) {
+  const normalized = String(url || "").trim();
+  if (!normalized) {
+    return { ok: false, error: "No remote URL was provided for validation." };
+  }
+  try {
+    await validateRemoteVideoUrl(normalized, timeoutMs);
+    return { ok: true, error: "" };
+  } catch (error) {
+    return { ok: false, error: String(error?.message || error || "validation failed") };
   }
 }
 
@@ -868,130 +880,6 @@ async function safeReadBody(response) {
   } catch {
     return "";
   }
-}
-
-async function uploadBytesToS3({
-  sourcePath,
-  bucket,
-  key,
-  region,
-  accessKeyId,
-  secretAccessKey,
-  sessionToken = "",
-  contentType = "application/octet-stream",
-  acl = "",
-  timeoutMs = 180000,
-  cacheControl = "",
-}) {
-  const body = await fs.readFile(sourcePath);
-  const amzDate = toAmzDate(new Date());
-  const shortDate = amzDate.slice(0, 8);
-  const forcePathStyle = bucket.includes(".");
-  const host = forcePathStyle ? `s3.${region}.amazonaws.com` : `${bucket}.s3.${region}.amazonaws.com`;
-  const uriPath = forcePathStyle
-    ? `/${encodeURIComponent(bucket)}/${encodeS3Key(key)}`
-    : `/${encodeS3Key(key)}`;
-  const payloadHash = sha256Hex(body);
-  const credentialScope = `${shortDate}/${region}/s3/aws4_request`;
-
-  const headers = {
-    host,
-    "content-type": contentType,
-    "x-amz-content-sha256": payloadHash,
-    "x-amz-date": amzDate,
-  };
-  if (cacheControl) {
-    headers["cache-control"] = cacheControl;
-  }
-  if (sessionToken) {
-    headers["x-amz-security-token"] = sessionToken;
-  }
-  if (acl) {
-    headers["x-amz-acl"] = acl;
-  }
-
-  const signedHeaderKeys = Object.keys(headers).sort();
-  const canonicalHeaders = signedHeaderKeys
-    .map((name) => `${name}:${String(headers[name]).trim().replace(/\s+/gu, " ")}`)
-    .join("\n");
-  const signedHeaders = signedHeaderKeys.join(";");
-  const canonicalRequest = [
-    "PUT",
-    uriPath,
-    "",
-    `${canonicalHeaders}\n`,
-    signedHeaders,
-    payloadHash,
-  ].join("\n");
-  const stringToSign = [
-    "AWS4-HMAC-SHA256",
-    amzDate,
-    credentialScope,
-    sha256Hex(Buffer.from(canonicalRequest, "utf8")),
-  ].join("\n");
-  const signature = hmacHex(
-    getSignatureKey(secretAccessKey, shortDate, region, "s3"),
-    stringToSign,
-  );
-  const authorization = `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
-
-  const requestHeaders = {
-    ...headers,
-    Authorization: authorization,
-    "Content-Length": String(body.byteLength),
-  };
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Math.max(5000, timeoutMs || 180000));
-  let response;
-  try {
-    response = await fetch(`https://${host}${uriPath}`, {
-      method: "PUT",
-      headers: requestHeaders,
-      body,
-      redirect: "manual",
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timer);
-  }
-
-  if (!response?.ok) {
-    const bodyText = await safeReadBody(response);
-    const awsError = parseAwsXmlError(bodyText);
-    const bucketRegionHint = String(response.headers.get("x-amz-bucket-region") || "").trim();
-    const requestId = String(response.headers.get("x-amz-request-id") || "").trim();
-    const hostId = String(response.headers.get("x-amz-id-2") || "").trim();
-    const details = [
-      awsError.code ? `code=${awsError.code}` : "",
-      awsError.message ? `message=${awsError.message}` : "",
-      awsError.bucketName ? `bucket=${awsError.bucketName}` : "",
-      awsError.resource ? `resource=${awsError.resource}` : "",
-      bucketRegionHint ? `bucket-region=${bucketRegionHint}` : "",
-      requestId ? `request-id=${requestId}` : "",
-      hostId ? `host-id=${hostId}` : "",
-    ].filter(Boolean).join(", ");
-    throw new Error(
-      `S3 upload failed for ${key} (${response?.status || "no-status"})` +
-        (details ? ` [${details}]` : "") +
-        `: ${String(bodyText || "").slice(0, 500)}`,
-    );
-  }
-}
-
-function parseAwsXmlError(xmlText) {
-  const text = String(xmlText || "");
-  const getTag = (tagName) => {
-    const re = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, "i");
-    const match = text.match(re);
-    return match ? String(match[1] || "").trim() : "";
-  };
-  return {
-    code: getTag("Code"),
-    message: getTag("Message"),
-    resource: getTag("Resource"),
-    bucketName: getTag("BucketName"),
-  };
 }
 
 function buildS3Key(prefix, fileName) {
@@ -1008,33 +896,11 @@ function encodeS3Key(key) {
     .join("/");
 }
 
-function toAmzDate(date) {
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(date.getUTCDate()).padStart(2, "0");
-  const hh = String(date.getUTCHours()).padStart(2, "0");
-  const mm = String(date.getUTCMinutes()).padStart(2, "0");
-  const ss = String(date.getUTCSeconds()).padStart(2, "0");
-  return `${y}${m}${d}T${hh}${mm}${ss}Z`;
-}
-
-function sha256Hex(value) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
-function hmac(key, value, encoding = undefined) {
-  return createHmac("sha256", key).update(value, encoding).digest();
-}
-
-function hmacHex(key, value) {
-  return createHmac("sha256", key).update(value, "utf8").digest("hex");
-}
-
-function getSignatureKey(secretAccessKey, dateStamp, regionName, serviceName) {
-  const kDate = hmac(Buffer.from(`AWS4${secretAccessKey}`, "utf8"), dateStamp, "utf8");
-  const kRegion = hmac(kDate, regionName, "utf8");
-  const kService = hmac(kRegion, serviceName, "utf8");
-  return hmac(kService, "aws4_request", "utf8");
+function joinNonEmpty(...parts) {
+  return parts
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .join(" ");
 }
 
 async function writePublishManifest(manifestPath, payload) {

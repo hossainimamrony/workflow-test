@@ -46,10 +46,16 @@ export async function buildRunReport(runDir, rootDir) {
   const finalReelWebmPath = await fileIfExists(path.join(runDir, "final-reel.webm"));
   const finalReelMp4Path = await fileIfExists(path.join(runDir, "final-reel.mp4"));
   const finalReelPreviewPath = await fileIfExists(path.join(runDir, "final-reel-preview.mp4"));
-  const finalReelRemoteUrl = normalizeRemoteUrl(finalReelPublishManifest?.cdnUrl);
-  const finalReelPreviewRemoteUrl = normalizeRemoteUrl(finalReelPublishManifest?.previewCdnUrl);
+  const finalReelRemoteUrl = normalizeRemoteUrl(
+    finalReelPublishManifest?.remoteUrl || finalReelPublishManifest?.cdnUrl,
+  );
+  const finalReelPreviewRemoteUrl = normalizeRemoteUrl(
+    finalReelPublishManifest?.previewRemoteUrl || finalReelPublishManifest?.previewCdnUrl,
+  );
   const finalReelRemoteError = normalizeText(finalReelPublishManifest?.error ?? "");
-  const finalReelRemoteUploadOk = finalReelPublishManifest?.ok === true && Boolean(finalReelRemoteUrl);
+  const finalReelRemoteUploadOk =
+    (finalReelPublishManifest?.uploadOk === true || finalReelPublishManifest?.ok === true) &&
+    Boolean(finalReelRemoteUrl);
   const finalReelPath = finalReelMp4Path ?? finalReelWebmPath;
   const finalReelVersion = finalReelPath ? await fileVersionIfExists(finalReelPath) : null;
   const finalReelWebmVersion = finalReelWebmPath ? await fileVersionIfExists(finalReelWebmPath) : null;

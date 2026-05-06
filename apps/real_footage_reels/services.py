@@ -750,13 +750,33 @@ class ReelRenderService:
             run.report = final_report
             run.save(update_fields=["report"])
 
-        cdn_url = str((publish_manifest or {}).get("cdnUrl", "")).strip()
-        preview_cdn_url = str((publish_manifest or {}).get("previewCdnUrl", "")).strip()
+        remote_url = str(
+            (publish_manifest or {}).get("remoteUrl")
+            or (publish_manifest or {}).get("cdnUrl")
+            or ""
+        ).strip()
+        preview_remote_url = str(
+            (publish_manifest or {}).get("previewRemoteUrl")
+            or (publish_manifest or {}).get("previewCdnUrl")
+            or ""
+        ).strip()
         upload_accepted = bool(
             (publish_manifest or {}).get("uploadAccepted")
+            or (publish_manifest or {}).get("uploadOk")
             or str((publish_manifest or {}).get("uploadResponseStatus", "")).strip() == "200"
+            or bool((publish_manifest or {}).get("ok"))
         )
-        upload_ok = bool((publish_manifest or {}).get("ok") is True and cdn_url)
+        upload_ok = bool(
+            (publish_manifest or {}).get("uploadOk")
+            if "uploadOk" in (publish_manifest or {})
+            else bool((publish_manifest or {}).get("ok"))
+        )
+        download_check_ok = bool(
+            (publish_manifest or {}).get("downloadCheckOk")
+            if "downloadCheckOk" in (publish_manifest or {})
+            else (upload_ok and bool(remote_url))
+        )
+        download_check_error = str((publish_manifest or {}).get("downloadCheckError", "")).strip()
         error_text = str((publish_manifest or {}).get("error", "")).strip()
 
         return {
@@ -764,11 +784,12 @@ class ReelRenderService:
             "runDir": str(resolved_run_dir),
             "uploadAccepted": upload_accepted,
             "uploadOk": upload_ok,
-            "downloadCheckOk": upload_ok,  # uploader validates remote URL by HEAD/GET before success.
-            "remoteUrl": cdn_url,
-            "previewRemoteUrl": preview_cdn_url,
-            "cdnUrl": cdn_url,
-            "previewCdnUrl": preview_cdn_url,
+            "downloadCheckOk": download_check_ok,
+            "downloadCheckError": download_check_error,
+            "remoteUrl": remote_url,
+            "previewRemoteUrl": preview_remote_url,
+            "cdnUrl": remote_url,
+            "previewCdnUrl": preview_remote_url,
             "error": error_text,
             "provider": str((publish_manifest or {}).get("provider", "")).strip(),
             "endpoint": str((publish_manifest or {}).get("endpoint", "")).strip(),
@@ -1026,12 +1047,20 @@ class ReelRenderService:
         )
         has_voiceover = isinstance(voiceover_manifest, dict) and bool(voiceover_manifest)
         remote_final_url = (
-            str((publish_manifest or {}).get("cdnUrl", "")).strip()
+            str(
+                (publish_manifest or {}).get("remoteUrl")
+                or (publish_manifest or {}).get("cdnUrl")
+                or ""
+            ).strip()
             if isinstance(publish_manifest, dict)
             else ""
         )
         remote_preview_url = (
-            str((publish_manifest or {}).get("previewCdnUrl", "")).strip()
+            str(
+                (publish_manifest or {}).get("previewRemoteUrl")
+                or (publish_manifest or {}).get("previewCdnUrl")
+                or ""
+            ).strip()
             if isinstance(publish_manifest, dict)
             else ""
         )
@@ -1039,11 +1068,13 @@ class ReelRenderService:
             remote_final_url = ""
         if not remote_preview_url.lower().startswith(("http://", "https://")):
             remote_preview_url = ""
-        remote_publish_ok = (
-            bool((publish_manifest or {}).get("ok"))
+        remote_publish_ok = bool(
+            ((publish_manifest or {}).get("uploadOk"))
+            if isinstance(publish_manifest, dict) and "uploadOk" in (publish_manifest or {})
+            else bool((publish_manifest or {}).get("ok"))
             if isinstance(publish_manifest, dict)
             else False
-        ) and bool(remote_final_url)
+        )
         remote_publish_error = (
             str((publish_manifest or {}).get("error", "")).strip()
             if isinstance(publish_manifest, dict)

@@ -219,7 +219,7 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
       env.S3_UPLOAD_URL,
       process.env.FINAL_REEL_UPLOAD_ENDPOINT,
       process.env.S3_UPLOAD_URL,
-      "https://www.cbs.s1.carbarn.com.au/carbarnau/s3/uploadfiles",
+      "",
     ),
   ).trim();
   const finalReelUploadDirectory = String(
@@ -349,16 +349,13 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
       "",
     ),
   ).trim();
-  const normalizedRemoteProvider = (
+  const normalizedRemoteProvider =
     finalReelRemoteProvider === "s3" || finalReelRemoteProvider === "multipart"
-  )
-    ? finalReelRemoteProvider
-    : "";
-  // Safety default: when an upload endpoint is available, use multipart API mode.
-  // This avoids accidental direct-S3 uploads when stale env vars still contain bucket settings.
-  const finalReelRemoteProviderFinal = finalReelUploadEndpoint
-    ? "multipart"
-    : (normalizedRemoteProvider || "multipart");
+      ? finalReelRemoteProvider
+      : "";
+  const finalReelRemoteProviderFinal =
+    normalizedRemoteProvider ||
+    (finalReelS3Bucket ? "s3" : (finalReelUploadEndpoint ? "multipart" : "s3"));
 
   if (strictEndScene) {
     composeWidth = Math.max(1080, Number(composeWidth) || 1080);

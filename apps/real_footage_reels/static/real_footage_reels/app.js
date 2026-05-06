@@ -880,13 +880,16 @@
         remoteUrl: String(payload.remoteUrl || payload.cdnUrl || ''),
         previewRemoteUrl: String(payload.previewRemoteUrl || payload.previewCdnUrl || ''),
         uploadResponseStatus: payload.uploadResponseStatus ?? null,
+        downloadCheckError: String(payload.downloadCheckError || ''),
         error: String(payload.error || ''),
       };
       const tone = details.uploadOk ? 'info' : 'warning';
       const summaryText = details.uploadOk
-        ? 'Upload + remote download validation passed.'
+        ? (details.downloadCheckOk
+          ? 'Upload succeeded and remote URL validation passed.'
+          : ('Upload succeeded, but remote URL validation failed. ' + (details.downloadCheckError || '')))
         : (details.uploadAccepted
-          ? 'Upload was accepted by remote API, but download validation failed.'
+          ? 'Upload was accepted by remote API, but final upload status is not confirmed.'
           : (details.error || 'Upload debug did not pass.'));
       debugRemoteUploadWrap.innerHTML = `
         <div class="callout callout--${tone}">
