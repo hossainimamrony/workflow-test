@@ -273,10 +273,10 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelS3Bucket,
       env.FINAL_REEL_S3_BUCKET,
-      env.S3_BUCKET,
-      env["cloud.aws.s3.bucket"],
       process.env.FINAL_REEL_S3_BUCKET,
+      env.S3_BUCKET,
       process.env.S3_BUCKET,
+      env["cloud.aws.s3.bucket"],
       process.env["cloud.aws.s3.bucket"],
     ),
   ).trim();
@@ -284,12 +284,12 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelS3Region,
       env.FINAL_REEL_S3_REGION,
-      env.AWS_REGION,
-      env.AWS_DEFAULT_REGION,
-      env["cloud.aws.region.static"],
       process.env.FINAL_REEL_S3_REGION,
+      env.AWS_REGION,
       process.env.AWS_REGION,
+      env.AWS_DEFAULT_REGION,
       process.env.AWS_DEFAULT_REGION,
+      env["cloud.aws.region.static"],
       process.env["cloud.aws.region.static"],
       "ap-southeast-2",
     ),
@@ -298,10 +298,10 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelS3AccessKeyId,
       env.FINAL_REEL_S3_ACCESS_KEY_ID,
-      env.AWS_ACCESS_KEY_ID,
-      env["cloud.aws.credentials.accessKey"],
       process.env.FINAL_REEL_S3_ACCESS_KEY_ID,
+      env.AWS_ACCESS_KEY_ID,
       process.env.AWS_ACCESS_KEY_ID,
+      env["cloud.aws.credentials.accessKey"],
       process.env["cloud.aws.credentials.accessKey"],
     ),
   ).trim();
@@ -309,10 +309,10 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     firstEnv(
       input.finalReelS3SecretAccessKey,
       env.FINAL_REEL_S3_SECRET_ACCESS_KEY,
-      env.AWS_SECRET_ACCESS_KEY,
-      env["cloud.aws.credentials.secretKey"],
       process.env.FINAL_REEL_S3_SECRET_ACCESS_KEY,
+      env.AWS_SECRET_ACCESS_KEY,
       process.env.AWS_SECRET_ACCESS_KEY,
+      env["cloud.aws.credentials.secretKey"],
       process.env["cloud.aws.credentials.secretKey"],
     ),
   ).trim();
