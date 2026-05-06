@@ -526,6 +526,11 @@ video {
   gap: 12px;
   flex-wrap: wrap;
 }
+.dashboard__library-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .hero-metrics,
 .hero-metrics--dense,
 .dashboard__overview-metrics,

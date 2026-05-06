@@ -351,6 +351,16 @@ class RunDeleteApiView(APIView):
         return Response({"ok": True, "runId": run_id})
 
 
+class RunsTrashCleanupApiView(APIView):
+    def post(self, request):
+        payload = request.data if isinstance(request.data, dict) else {}
+        confirmed = bool(payload.get("confirmed", False))
+        if not confirmed:
+            return Response({"error": "Confirmation required."}, status=400)
+        result = ReelRenderService.cleanup_trash_files()
+        return Response(result, status=200)
+
+
 class RunDetailApiView(APIView):
     def get(self, request, run_id):
         run = get_object_or_404(ReelRun, run_id=run_id)

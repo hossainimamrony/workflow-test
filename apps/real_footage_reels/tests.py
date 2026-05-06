@@ -163,6 +163,48 @@ class RunDeletionCleanupTests(TestCase):
         self.assertTrue(deleted)
         self.assertFalse(run_dir.exists())
 
+    def test_cleanup_trash_files_keeps_final_video_and_deletes_raw_files(self):
+        run_id = f"cleanup-trash-{uuid.uuid4().hex[:8]}"
+        run_dir = Path(__file__).resolve().parent / "workflow_engine" / "runs" / run_id
+        downloads_dir = run_dir / "downloads"
+        downloads_dir.mkdir(parents=True, exist_ok=True)
+
+        final_video = run_dir / "final-reel.mp4"
+        raw_mov = downloads_dir / "001-raw.mov"
+        broken_sample = run_dir / "broken-sample.mp4"
+        final_video.write_bytes(b"final")
+        raw_mov.write_bytes(b"rawmov")
+        broken_sample.write_bytes(b"broken")
+
+        result = ReelRenderService.cleanup_trash_files()
+
+        self.assertTrue(result.get("ok"))
+        self.assertTrue(final_video.exists())
+        self.assertFalse(raw_mov.exists())
+        self.assertFalse(broken_sample.exists())
+
+
+class RunsTrashCleanupApiTests(TestCase):
+    def test_cleanup_requires_confirmation(self):
+        response = self.client.post(
+            "/workflows/real-footage-reels/api/runs/trash-cleanup",
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.json())
+
+    def test_cleanup_endpoint_runs_when_confirmed(self):
+        response = self.client.post(
+            "/workflows/real-footage-reels/api/runs/trash-cleanup",
+            data=json.dumps({"confirmed": True}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("ok"))
+        self.assertIn("deletedFiles", payload)
+
 
 @override_settings(ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])
 class RunDetailAssetResolutionTests(TestCase):

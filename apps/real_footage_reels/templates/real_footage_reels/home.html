@@ -81,7 +81,10 @@
     <section class="panel dashboard__library" id="runs-panel">
       <div class="dashboard__library-head">
         <h3 class="dashboard__panel-title">Runs</h3>
-        <button id="runs-refresh" class="button button--secondary" type="button">Refresh</button>
+        <div class="dashboard__library-actions">
+          <button id="runs-refresh" class="button button--secondary" type="button">Refresh</button>
+          <button id="runs-trash-delete" class="button button--danger" type="button">Delete Trash</button>
+        </div>
       </div>
       <div id="runs-list" class="run-table"></div>
     </section>
@@ -92,5 +95,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'real_footage_reels/app.js' %}?v=20260505a"></script>
+<script src="{% static 'real_footage_reels/app.js' %}?v=20260505b"></script>
 {% endblock %}

@@ -4,6 +4,7 @@
   const formStatus = document.getElementById('form-status');
   const runsList = document.getElementById('runs-list');
   const runsRefresh = document.getElementById('runs-refresh');
+  const runsTrashDelete = document.getElementById('runs-trash-delete');
   const appMain = document.getElementById('app-main');
   const pageTitle = document.getElementById('page-title');
   const navStudio = document.getElementById('nav-studio');
@@ -506,6 +507,31 @@
       await api(base + '/runs/' + encodeURIComponent(b.dataset.del), { method: 'DELETE' });
       await loadRuns();
     });
+  }
+
+  async function deleteTrash() {
+    const firstConfirm = window.confirm('Delete all downloaded raw footage and broken temp videos from runs? Final videos will be kept.');
+    if (!firstConfirm) return;
+    const secondConfirm = window.confirm('This is aggressive cleanup and cannot be undone. Continue?');
+    if (!secondConfirm) return;
+    if (runsTrashDelete) runsTrashDelete.disabled = true;
+    try {
+      const result = await api(`${base}/runs/trash-cleanup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmed: true }),
+      });
+      const deletedFiles = Number(result.deletedFiles || 0);
+      const deletedDirs = Number(result.deletedDirs || 0);
+      const deletedBytes = Number(result.deletedBytes || 0);
+      const deletedMb = (deletedBytes / (1024 * 1024)).toFixed(1);
+      window.alert(`Trash cleaned.\nDeleted files: ${deletedFiles}\nDeleted folders: ${deletedDirs}\nFreed: ${deletedMb} MB`);
+      await loadRuns();
+    } catch (err) {
+      window.alert(err.message || 'Trash cleanup failed.');
+    } finally {
+      if (runsTrashDelete) runsTrashDelete.disabled = false;
+    }
   }
 
   async function loadRunDetail(runId) {
@@ -1074,6 +1100,7 @@
 
   invRefresh.addEventListener('click', () => refreshInventory().catch(e => invNote.textContent = e.message));
   runsRefresh.addEventListener('click', () => loadRuns().catch(e => formStatus.textContent = e.message));
+  if (runsTrashDelete) runsTrashDelete.addEventListener('click', () => deleteTrash().catch(e => formStatus.textContent = e.message));
   form.addEventListener('submit', submitRun);
 
   if (currentRunId) {
