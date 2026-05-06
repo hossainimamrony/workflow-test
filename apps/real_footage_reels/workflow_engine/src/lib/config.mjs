@@ -239,7 +239,18 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
       env.S3_CDN_BASE_URL,
       process.env.FINAL_REEL_CDN_BASE,
       process.env.S3_CDN_BASE_URL,
-      "https://www.storage.importautos.com.au/social-media-content/reels",
+      "",
+    ),
+  ).trim();
+  const finalReelRawBaseUrl = String(
+    firstEnv(
+      input.finalReelRawBaseUrl,
+      input.finalReelS3RawBaseUrl,
+      env.FINAL_REEL_RAW_BASE_URL,
+      env.S3_RAW_BASE_URL,
+      process.env.FINAL_REEL_RAW_BASE_URL,
+      process.env.S3_RAW_BASE_URL,
+      "",
     ),
   ).trim();
   const finalReelUploadTimeoutMs = numberValue(
@@ -449,6 +460,7 @@ export function createRuntimeConfig(input = {}, env = loadEnvConfig(process.cwd(
     finalReelUploadEndpoint,
     finalReelUploadDirectory,
     finalReelCdnBase,
+    finalReelRawBaseUrl,
     finalReelUploadTimeoutMs,
     finalReelS3Bucket,
     finalReelS3Region,

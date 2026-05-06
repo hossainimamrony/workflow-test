@@ -877,8 +877,8 @@
         provider: String(payload.provider || ''),
         directory: String(payload.directory || ''),
         endpoint: String(payload.endpoint || ''),
-        cdnUrl: String(payload.cdnUrl || ''),
-        previewCdnUrl: String(payload.previewCdnUrl || ''),
+        remoteUrl: String(payload.remoteUrl || payload.cdnUrl || ''),
+        previewRemoteUrl: String(payload.previewRemoteUrl || payload.previewCdnUrl || ''),
         uploadResponseStatus: payload.uploadResponseStatus ?? null,
         error: String(payload.error || ''),
       };

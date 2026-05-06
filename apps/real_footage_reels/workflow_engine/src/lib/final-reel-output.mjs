@@ -260,8 +260,32 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     config.finalReelCdnBase ??
       process.env.FINAL_REEL_CDN_BASE ??
       process.env.S3_CDN_BASE_URL ??
-      "https://www.storage.importautos.com.au/social-media-content/reels",
+      "",
   ).trim().replace(/\/+$/gu, "");
+  const rawBaseUrl = String(
+    config.finalReelRawBaseUrl ??
+      config.finalReelS3RawBaseUrl ??
+      process.env.FINAL_REEL_RAW_BASE_URL ??
+      process.env.S3_RAW_BASE_URL ??
+      config.finalReelS3PublicBaseUrl ??
+      process.env.FINAL_REEL_S3_PUBLIC_BASE_URL ??
+      "",
+  ).trim().replace(/\/+$/gu, "");
+  const s3Bucket = String(
+    config.finalReelS3Bucket ??
+      process.env.FINAL_REEL_S3_BUCKET ??
+      process.env.S3_BUCKET ??
+      process.env["cloud.aws.s3.bucket"] ??
+      "",
+  ).trim();
+  const s3Region = String(
+    config.finalReelS3Region ??
+      process.env.FINAL_REEL_S3_REGION ??
+      process.env.AWS_REGION ??
+      process.env.AWS_DEFAULT_REGION ??
+      process.env["cloud.aws.region.static"] ??
+      "ap-southeast-2",
+  ).trim() || "ap-southeast-2";
   const providerFromConfig = String(
     config.finalReelRemoteProvider ??
       process.env.FINAL_REEL_REMOTE_PROVIDER ??
@@ -308,6 +332,9 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
     provider,
     endpoint: endpoint || "",
     cdnBase,
+    rawBaseUrl,
+    s3Bucket,
+    s3Region,
   };
 
   try {
@@ -331,6 +358,9 @@ async function publishFinalReelToRemote(runDir, log = () => {}, config = {}) {
             directory,
             endpoint,
             cdnBase,
+            rawBaseUrl,
+            s3Bucket,
+            s3Region,
             timeoutMs,
             log,
           });
@@ -363,14 +393,14 @@ async function publishFinalReelToMultipartApi({
   directory,
   endpoint,
   cdnBase,
+  rawBaseUrl,
+  s3Bucket,
+  s3Region,
   timeoutMs,
   log = () => {},
 }) {
   if (!endpoint) {
     throw new Error("Remote upload endpoint is empty. Set FINAL_REEL_UPLOAD_ENDPOINT or S3_UPLOAD_URL.");
-  }
-  if (!cdnBase) {
-    throw new Error("Remote CDN base is empty. Set FINAL_REEL_CDN_BASE or S3_CDN_BASE_URL.");
   }
 
   log(`Uploading final reel to remote API (${directory}/${fileName})...`);
@@ -406,46 +436,40 @@ async function publishFinalReelToMultipartApi({
   }
 
   const remoteResponse = tryParseJson(responseText) ?? responseText.slice(0, 4000);
-  let cdnUrl = resolveUploadCdnUrl({
+  const resolvedUrl = resolveUploadPublicUrl({
     remoteResponse,
     responseText,
     directory,
     fileName,
+    rawBaseUrl,
+    s3Bucket,
+    s3Region,
     cdnBase,
   });
-  const fallbackCandidates = buildMultipartCdnFallbackCandidates({ cdnBase, directory, fileName });
+  const fallbackCandidates = buildMultipartPublicFallbackCandidates({
+    rawBaseUrl,
+    s3Bucket,
+    s3Region,
+    cdnBase,
+    directory,
+    fileName,
+  });
+  const candidateUrls = uniqueNonEmpty([resolvedUrl, ...fallbackCandidates]);
+  const cdnUrl = await findFirstReachableVideoUrl(candidateUrls, timeoutMs);
   if (!cdnUrl) {
-    cdnUrl = await findFirstReachableVideoUrl(fallbackCandidates, timeoutMs);
-  }
-  if (!cdnUrl) {
+    const hasUrlBases = fallbackCandidates.length > 0;
     const error = new Error(
       "Remote upload accepted (HTTP 200), but no valid public video URL could be derived. " +
-        "The upload API returned no URL metadata and fallback CDN candidates were not reachable as video.",
+        (hasUrlBases
+          ? "The upload API returned no URL metadata and all raw-S3/CDN fallback URLs failed validation."
+          : "No URL metadata or raw-S3 base details were available to build a downloadable video URL."),
     );
     error.uploadDebug = {
       uploadAccepted: true,
       uploadResponseStatus: response.status,
       uploadResponseHeaders: responseHeaders,
       uploadResponseText: String(responseText || "").slice(0, 4000),
-      candidateUrls: fallbackCandidates,
-      provider: "multipart",
-    };
-    throw error;
-  }
-
-  try {
-    await validateRemoteVideoUrl(cdnUrl, timeoutMs);
-  } catch (validationError) {
-    const error = new Error(
-      `Remote upload accepted (HTTP 200), but CDN download validation failed for ${cdnUrl}: ` +
-        `${String(validationError?.message || validationError || "unknown error")}`,
-    );
-    error.uploadDebug = {
-      uploadAccepted: true,
-      uploadResponseStatus: response.status,
-      uploadResponseHeaders: responseHeaders,
-      uploadResponseText: String(responseText || "").slice(0, 4000),
-      candidateUrls: [cdnUrl, ...fallbackCandidates.filter((url) => url !== cdnUrl)],
+      candidateUrls,
       provider: "multipart",
     };
     throw error;
@@ -460,22 +484,33 @@ async function publishFinalReelToMultipartApi({
   };
 }
 
-function buildMultipartCdnFallbackCandidates({ cdnBase, directory, fileName }) {
-  const base = String(cdnBase || "").trim().replace(/\/+$/gu, "");
+function buildMultipartPublicFallbackCandidates({
+  rawBaseUrl,
+  s3Bucket,
+  s3Region,
+  cdnBase,
+  directory,
+  fileName,
+}) {
+  const bases = buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase });
   const cleanDir = String(directory || "").trim().replace(/^\/+|\/+$/gu, "");
   const encodedFile = encodeURIComponent(String(fileName || "").trim());
-  if (!base || !encodedFile) return [];
+  if (!encodedFile) return [];
 
   const candidates = [];
-  candidates.push(`${base}/${encodedFile}`);
-  if (cleanDir) {
-    const dirEncoded = cleanDir
+  const dirEncoded = cleanDir
+    ? cleanDir
       .split("/")
       .map((segment) => encodeURIComponent(decodeURIComponentSafe(segment)))
-      .join("/");
-    candidates.push(`${base}/${dirEncoded}/${encodedFile}`);
+      .join("/")
+    : "";
+  for (const base of bases) {
+    candidates.push(`${base}/${encodedFile}`);
+    if (dirEncoded) {
+      candidates.push(`${base}/${dirEncoded}/${encodedFile}`);
+    }
   }
-  return [...new Set(candidates)];
+  return uniqueNonEmpty(candidates);
 }
 
 async function findFirstReachableVideoUrl(candidates, timeoutMs) {
@@ -593,7 +628,7 @@ async function publishFinalReelToS3({
     });
   }
 
-  const publicBase = explicitPublicBaseUrl || (cdnBase && !isKnownImageOnlyCdn(cdnBase) ? cdnBase : "");
+  const publicBase = explicitPublicBaseUrl;
   const s3ObjectBase = `https://${bucket}.s3.${region}.amazonaws.com`;
   const s3PathStyleBase = `https://s3.${region}.amazonaws.com/${encodeURIComponent(bucket)}`;
   const shouldUsePathStyle = bucket.includes(".");
@@ -631,7 +666,16 @@ function parseBooleanLike(value, fallback = false) {
   return fallback;
 }
 
-function resolveUploadCdnUrl({ remoteResponse, responseText, directory, fileName, cdnBase }) {
+function resolveUploadPublicUrl({
+  remoteResponse,
+  responseText,
+  directory,
+  fileName,
+  rawBaseUrl,
+  s3Bucket,
+  s3Region,
+  cdnBase,
+}) {
   const responseCandidates = [];
   const addCandidate = (value) => {
     const text = String(value ?? "").trim();
@@ -677,7 +721,10 @@ function resolveUploadCdnUrl({ remoteResponse, responseText, directory, fileName
 
   const relPath = selectBestPathCandidate(responseCandidates, directory, fileName);
   if (relPath) {
-    return joinCdnUrl(cdnBase, relPath);
+    const baseCandidates = buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase });
+    for (const base of baseCandidates) {
+      return joinBaseUrl(base, relPath);
+    }
   }
 
   return null;
@@ -721,13 +768,55 @@ function normalizeRelativePath(value) {
     .trim();
 }
 
-function joinCdnUrl(base, relPath) {
+function joinBaseUrl(base, relPath) {
   const cleanBase = String(base || "").replace(/\/+$/gu, "");
+  if (!cleanBase) return "";
   const cleanRel = String(relPath || "").replace(/^\/+/gu, "");
   return `${cleanBase}/${cleanRel
     .split("/")
     .map((segment) => encodeURIComponent(decodeURIComponentSafe(segment)))
     .join("/")}`;
+}
+
+function buildMultipartBaseUrls({ rawBaseUrl, s3Bucket, s3Region, cdnBase }) {
+  const bases = [];
+  const cleanedRawBase = String(rawBaseUrl || "").trim().replace(/\/+$/gu, "");
+  if (cleanedRawBase) {
+    bases.push(cleanedRawBase);
+  }
+
+  const bucket = String(s3Bucket || "").trim();
+  const region = String(s3Region || "").trim();
+  if (bucket && region) {
+    const virtualHostedBase = `https://${bucket}.s3.${region}.amazonaws.com`;
+    const pathStyleBase = `https://s3.${region}.amazonaws.com/${encodeURIComponent(bucket)}`;
+    bases.push(virtualHostedBase);
+    if (bucket.includes(".")) {
+      bases.push(pathStyleBase);
+    } else {
+      // Keep path-style as a fallback for S3-compatible backends/fronting proxies.
+      bases.push(pathStyleBase);
+    }
+  }
+
+  const cleanedCdnBase = String(cdnBase || "").trim().replace(/\/+$/gu, "");
+  if (cleanedCdnBase) {
+    bases.push(cleanedCdnBase);
+  }
+
+  return uniqueNonEmpty(bases);
+}
+
+function uniqueNonEmpty(values) {
+  const out = [];
+  const seen = new Set();
+  for (const value of values || []) {
+    const text = String(value || "").trim();
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    out.push(text);
+  }
+  return out;
 }
 
 function decodeURIComponentSafe(value) {
@@ -946,11 +1035,6 @@ function getSignatureKey(secretAccessKey, dateStamp, regionName, serviceName) {
   const kRegion = hmac(kDate, regionName, "utf8");
   const kService = hmac(kRegion, serviceName, "utf8");
   return hmac(kService, "aws4_request", "utf8");
-}
-
-function isKnownImageOnlyCdn(url) {
-  const text = String(url || "").toLowerCase();
-  return text.includes("storage.importautos.com.au");
 }
 
 async function writePublishManifest(manifestPath, payload) {

@@ -765,6 +765,8 @@ class ReelRenderService:
             "uploadAccepted": upload_accepted,
             "uploadOk": upload_ok,
             "downloadCheckOk": upload_ok,  # uploader validates remote URL by HEAD/GET before success.
+            "remoteUrl": cdn_url,
+            "previewRemoteUrl": preview_cdn_url,
             "cdnUrl": cdn_url,
             "previewCdnUrl": preview_cdn_url,
             "error": error_text,
