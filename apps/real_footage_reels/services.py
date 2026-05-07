@@ -1542,47 +1542,61 @@ class ReelRenderService:
             latest_jobs_by_run_id = cls._latest_jobs_by_run_id(limit=500)
         except (OperationalError, ProgrammingError):
             return {"runs": []}
-        return {
-            "runs": [
+        serialized_runs = []
+        for r in runs:
+            report = dict(r.report or {})
+            downloads_manifest = report.get("downloadsManifest") or {}
+            listing_title = cls._first_non_empty(
+                r.listing_title,
+                report.get("listingTitle"),
+                downloads_manifest.get("listingTitle"),
+            )
+            stock_id = cls._first_non_empty(
+                r.stock_id,
+                report.get("stockId"),
+                downloads_manifest.get("stockId"),
+            )
+            listing_price = cls._first_non_empty(
+                r.listing_price,
+                report.get("listingPrice"),
+                downloads_manifest.get("listingPrice"),
+            )
+            run_error = (
+                str(getattr(r, "error", "") or "").strip()
+                or str(report.get("error", "")).strip()
+                or str(report.get("lastError", "")).strip()
+            )
+            serialized_runs.append(
                 {
                     "runId": r.run_id,
                     "createdAt": r.created_at.isoformat(),
                     "updatedAt": r.updated_at.isoformat(),
-                    "listingTitle": r.listing_title,
-                    "stockId": r.stock_id,
-                    "listingPrice": r.listing_price,
+                    "listingTitle": listing_title,
+                    "stockId": stock_id,
+                    "listingPrice": listing_price,
                     "status": r.status,
                     # ReelRun has no DB-level `error` field in older/live schemas.
                     # Keep API backward-compatible by deriving error text safely.
-                    "error": (
-                        str(getattr(r, "error", "") or "").strip()
-                        or str((r.report or {}).get("error", "")).strip()
-                        or str((r.report or {}).get("lastError", "")).strip()
-                    ),
-                    "pipeline": (r.report or {}).get("pipeline", {}),
+                    "error": run_error,
+                    "pipeline": report.get("pipeline", {}),
                     "stats": {
-                        "downloads": int((r.report or {}).get("stats", {}).get("downloads", 0)),
-                        "frames": int((r.report or {}).get("stats", {}).get("frames", 0)),
-                        "analyzed": int((r.report or {}).get("stats", {}).get("analyzed", 0)),
-                        "planned": int((r.report or {}).get("stats", {}).get("planned", 0)),
+                        "downloads": int(report.get("stats", {}).get("downloads", 0)),
+                        "frames": int(report.get("stats", {}).get("frames", 0)),
+                        "analyzed": int(report.get("stats", {}).get("analyzed", 0)),
+                        "planned": int(report.get("stats", {}).get("planned", 0)),
                     },
-                    "voiceoverDraft": (r.report or {}).get("voiceoverDraft", {"variants": []}),
-                    "voiceoverStatus": (r.report or {}).get("voiceoverStatus", ""),
-                    "hasVoiceover": bool((r.report or {}).get("hasVoiceover", False)),
+                    "voiceoverDraft": report.get("voiceoverDraft", {"variants": []}),
+                    "voiceoverStatus": report.get("voiceoverStatus", ""),
+                    "hasVoiceover": bool(report.get("hasVoiceover", False)),
                     "lastJob": cls._job_summary(latest_jobs_by_run_id.get(r.run_id)),
                     "debugReason": cls._derive_debug_reason(
                         run=r,
-                        run_error=(
-                            str(getattr(r, "error", "") or "").strip()
-                            or str((r.report or {}).get("error", "")).strip()
-                            or str((r.report or {}).get("lastError", "")).strip()
-                        ),
+                        run_error=run_error,
                         latest_job=latest_jobs_by_run_id.get(r.run_id),
                     ),
                 }
-                for r in runs
-            ]
-        }
+            )
+        return {"runs": serialized_runs}
 
     @staticmethod
     def delete_run(run_id: str) -> bool:

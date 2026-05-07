@@ -796,8 +796,15 @@
       ? run.plan.composition.segments
       : (Array.isArray(run?.plan?.sequence) ? run.plan.sequence : []);
     const heroVideoUrl = run.finalReelPreviewUrl || run.finalReelUrl || run.mainReelUrl || (previewClips[0] ? previewClips[0].videoUrl : '');
-    const heroDownloadUrl = run.finalReelUrl || run.finalReelPreviewUrl || run.mainReelUrl || heroVideoUrl;
+    const heroDownloadUrl = run.finalReelDownloadUrl || run.finalReelUrl || run.finalReelPreviewUrl || run.mainReelUrl || heroVideoUrl;
     const scriptVariants = Array.isArray(run?.voiceoverDraft?.variants) ? run.voiceoverDraft.variants : [];
+    const persistedAppliedScript = String(
+      run.voiceoverScript
+      || run.approvedScript
+      || (run.voiceoverDraft && run.voiceoverDraft.appliedScript)
+      || ''
+    ).trim();
+    const defaultScriptText = persistedAppliedScript || String((scriptVariants[0] && scriptVariants[0].script) || '').trim();
     const analysisReady = Boolean(run?.pipeline?.analyze?.done);
     const priceIncludes = String(run.priceIncludes || (run.report && run.report.priceIncludes) || '').trim();
     const autoPrice = String(run.listingPrice || '').trim() || 'AU ';
@@ -878,11 +885,17 @@
 
         <section class="panel voiceover-script-panel">
           <h3 class="section-heading__title section-heading__title--panel">Video Script</h3>
-          ${scriptVariants.length ? `
+          ${(scriptVariants.length || defaultScriptText) ? `
             <div class="voiceover-script-panel__variants">
-              ${scriptVariants.map((v, i) => `<label class="voiceover-variant"><input type="radio" name="script-variant" data-script="${esc(v.script || '')}" ${i === 0 ? 'checked' : ''}><span class="voiceover-variant__label">${esc(v.label || v.id || 'Option')}</span><span class="voiceover-variant__preview">${esc(v.script || '')}</span></label>`).join('')}
+              ${scriptVariants.map((v, i) => {
+                const optionScript = String(v.script || '').trim();
+                const isSelected = defaultScriptText
+                  ? optionScript === defaultScriptText
+                  : i === 0;
+                return `<label class="voiceover-variant"><input type="radio" name="script-variant" data-script="${esc(v.script || '')}" ${isSelected ? 'checked' : ''}><span class="voiceover-variant__label">${esc(v.label || v.id || 'Option')}</span><span class="voiceover-variant__preview">${esc(v.script || '')}</span></label>`;
+              }).join('')}
             </div>
-            <label class="field"><span class="field__label">Script to stitch</span><textarea id="script-to-stitch" class="field__input field__input--textarea" rows="4">${esc((scriptVariants[0] && scriptVariants[0].script) || run.voiceoverScript || '')}</textarea></label>
+            <label class="field"><span class="field__label">Script to stitch</span><textarea id="script-to-stitch" class="field__input field__input--textarea" rows="4">${esc(defaultScriptText)}</textarea></label>
           ` : '<div class="empty-block"><strong>No script options yet</strong></div>'}
           <div class="voiceover-script-panel__row">
             <button id="btn-regenerate-scripts" class="button button--secondary" type="button">Regenerate options</button>

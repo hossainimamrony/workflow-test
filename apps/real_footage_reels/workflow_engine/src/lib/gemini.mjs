@@ -505,6 +505,7 @@ Rules:
 - Pace the content so vehicle facts and features land during the opening, then flow into availability, value, and a confident close that still works when the viewer reads the end card.
 - Style: factual and punchy, similar to the samples. Use the listing title as the vehicle opener when it fits.
 - Work from the car description: include drivetrain, transmission, odometer (KM), engine size/type, stand-out features, and price if given.
+- Write all numbers as words (no numeric digits anywhere). Example style: "two thousand twenty one", "thirty two thousand nine hundred", "three hundred and sixty", "eighty two thousand kilometres".
 - Do not invent a price; only include "Priced at ..." if a price appears in the car description.
 - If listing price is provided below, include exactly: "Priced at ${enforcedScriptPrice || "<listing price>"}." right before the closing line.
 - Always end the script with: Check details at carbarn.com.au
@@ -674,6 +675,7 @@ Rules:
 - Always end each script with: Check details at carbarn.com.au
 - Style: factual and punchy, similar to the samples. Use the listing title as the vehicle opener when it fits.
 - Work from the car description: include drivetrain, transmission, odometer (KM), engine size/type, stand-out features, and price if given.
+- Write all numbers as words (no numeric digits anywhere). Example style: "two thousand twenty one", "thirty two thousand nine hundred", "three hundred and sixty", "eighty two thousand kilometres".
 - Do not invent a price; only include "Priced at ..." if a price appears in the car description.
 - If listing price is provided below, you must include exactly: "Priced at ${enforcedScriptPrice || "<listing price>"}." right before the closing line.
 - Stock ID ${stockId || "(none)"} may be ignored for the VO unless useful.

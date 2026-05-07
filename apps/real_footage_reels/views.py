@@ -88,6 +88,14 @@ def _asset_url(run_id: str, abs_path: str) -> str:
     return f"/workflows/real-footage-reels/api/runs/{run_id}/asset?path={encoded}"
 
 
+def _asset_download_url(run_id: str, abs_path: str, filename: str = "") -> str:
+    base = _asset_url(run_id, abs_path)
+    if not filename:
+        return f"{base}&download=1"
+    encoded_name = quote(str(filename), safe="")
+    return f"{base}&download=1&filename={encoded_name}"
+
+
 def _as_public_asset_url(run_id: str, resolved_path_or_url: str) -> str:
     value = str(resolved_path_or_url or "").strip()
     if not value:
@@ -194,6 +202,8 @@ def _merge_report_prefer_non_empty(base_report: dict, live_report: dict) -> dict
         "videos",
         "plan",
         "voiceoverDraft",
+        "voiceoverScript",
+        "approvedScript",
     )
     for key in preserve_if_live_empty:
         live_value = live_report.get(key)
@@ -497,8 +507,28 @@ class RunDetailApiView(APIView):
         remote_upload_ok_value = report.get("finalReelRemoteUploadOk")
         remote_upload_ok = None if remote_upload_ok_value is None else bool(remote_upload_ok_value)
         version_token = run.updated_at.isoformat() if run.updated_at else run.created_at.isoformat()
+        download_filename_base = str(run.listing_title or run.stock_id or run_id or "final-reel").strip()
+        safe_download_name = re.sub(r"[^a-zA-Z0-9._-]+", "-", download_filename_base).strip("-") or "final-reel"
+        if not safe_download_name.lower().endswith(".mp4"):
+            safe_download_name = f"{safe_download_name}.mp4"
+        local_final_reel_path = ""
+        local_final_mp4 = (run_dir_path / "final-reel.mp4").resolve()
+        local_final_webm = (run_dir_path / "final-reel.webm").resolve()
+        if local_final_mp4.exists():
+            local_final_reel_path = str(local_final_mp4)
+        elif local_final_webm.exists():
+            local_final_reel_path = str(local_final_webm)
+        elif final_reel_path and not _is_remote_http_url(final_reel_path):
+            local_final_reel_path = final_reel_path
+        final_reel_download_url = (
+            _asset_download_url(run_id, local_final_reel_path, safe_download_name)
+            if local_final_reel_path
+            else ""
+        )
         final_reel_url = ""
-        if _is_remote_http_url(final_reel_url_value) and remote_upload_ok is not False:
+        if local_final_reel_path:
+            final_reel_url = _as_public_asset_url(run_id, local_final_reel_path)
+        elif _is_remote_http_url(final_reel_url_value) and remote_upload_ok is not False:
             final_reel_url = _versioned_remote_url(final_reel_url_value, version_token)
         elif final_reel_path:
             final_reel_url = _as_public_asset_url(run_id, final_reel_path)
@@ -516,10 +546,12 @@ class RunDetailApiView(APIView):
                 "createdAt": run.created_at.isoformat(),
                 "stats": report.get("stats", {"downloads": 0, "frames": 0, "analyzed": 0, "planned": 0}),
                 "voiceoverDraft": report.get("voiceoverDraft", {"variants": []}),
+                "approvedScript": str(report.get("approvedScript") or "").strip(),
                 "voiceoverStatus": report.get("voiceoverStatus", ""),
                 "hasVoiceover": bool(report.get("hasVoiceover", False)),
                 "mainReelUrl": _as_public_asset_url(run_id, main_reel_path) if main_reel_path else "",
                 "finalReelUrl": final_reel_url,
+                "finalReelDownloadUrl": final_reel_download_url,
                 "finalReelRemoteUrl": _versioned_remote_url(str(report.get("finalReelRemoteUrl") or "").strip(), version_token),
                 "finalReelRemoteUploadOk": bool(report.get("finalReelRemoteUploadOk", False)),
                 "finalReelRemoteError": str(report.get("finalReelRemoteError") or "").strip(),
@@ -775,6 +807,15 @@ class RunAssetApiView(APIView):
         content_type, _encoding = mimetypes.guess_type(str(candidate))
         if not content_type:
             content_type = "application/octet-stream"
+        download_requested = str(request.query_params.get("download", "")).strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "y",
+            "on",
+        }
+        requested_name = str(request.query_params.get("filename", "")).strip()
+        download_name = requested_name or candidate.name
 
         range_header = request.headers.get("Range") or request.META.get("HTTP_RANGE", "")
         try:
@@ -786,7 +827,12 @@ class RunAssetApiView(APIView):
             return response
 
         if byte_range is None:
-            response = FileResponse(candidate.open("rb"), as_attachment=False, content_type=content_type)
+            response = FileResponse(
+                candidate.open("rb"),
+                as_attachment=download_requested,
+                filename=download_name if download_requested else None,
+                content_type=content_type,
+            )
             response["Accept-Ranges"] = "bytes"
             return response
 
@@ -799,4 +845,6 @@ class RunAssetApiView(APIView):
         response["Accept-Ranges"] = "bytes"
         response["Content-Range"] = f"bytes {start}-{end}/{file_size}"
         response["Content-Length"] = str(end - start + 1)
+        if download_requested:
+            response["Content-Disposition"] = f'attachment; filename="{download_name}"'
         return response

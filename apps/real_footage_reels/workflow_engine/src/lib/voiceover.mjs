@@ -53,6 +53,10 @@ export async function draftVoiceoverScripts(runDir, config, log = () => {}, opti
     },
     3,
   );
+  const normalizedVariants = variants.map((entry) => ({
+    ...entry,
+    script: normalizeScriptForSpeech(String(entry?.script ?? "").trim()),
+  }));
 
   const draftPath = path.join(normalizedDir, "voiceover-script-draft.json");
   await writeJson(draftPath, {
@@ -61,11 +65,11 @@ export async function draftVoiceoverScripts(runDir, config, log = () => {}, opti
     mainMontageDurationSeconds: mainSeconds,
     endSceneDurationSeconds: endSeconds,
     targetDurationSeconds: totalSeconds,
-    variants,
+    variants: normalizedVariants,
   });
 
-  log(`Saved script drafts to voiceover-script-draft.json (${variants.length} options).`);
-  return { variants, draftPath };
+  log(`Saved script drafts to voiceover-script-draft.json (${normalizedVariants.length} options).`);
+  return { variants: normalizedVariants, draftPath };
 }
 
 /**
@@ -108,10 +112,11 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
     return null;
   }
 
-  const script = approvedScript.replace(/\s+/gu, " ").trim();
-  const spokenScript = normalizeScriptForSpeech(script);
+  const rawScript = approvedScript.replace(/\s+/gu, " ").trim();
+  const spokenScript = normalizeScriptForSpeech(rawScript);
+  const script = spokenScript;
   log("Using approved/edited voice-over script (skipping Gemini).");
-  if (spokenScript !== script) {
+  if (spokenScript !== rawScript) {
     log("Normalized script for speech-friendly ElevenLabs input.");
   }
 
@@ -171,6 +176,7 @@ export async function applyVoiceoverToReel(runDir, config, log = () => {}, optio
     createdAt: new Date().toISOString(),
     script,
     spokenScript,
+    rawScript,
     mainMontageDurationSeconds: mainSeconds,
     endSceneDurationSeconds: endSeconds,
     targetDurationSeconds: totalSeconds,
@@ -450,6 +456,10 @@ export function normalizeScriptForSpeech(script) {
     .replace(/\babs\b/giu, "A B S");
 
   text = text.replace(/\b(19\d{2}|20\d{2})\b/gu, (match) => yearToWords(Number(match)));
+  text = text.replace(
+    /\b(\d[\d,]*)(?:\.(\d+))?\b/gu,
+    (_, wholePart, decimalPart) => numberStringToSpeech(wholePart, decimalPart),
+  );
   text = text.replace(/\s+([,.;:!?])/gu, "$1");
   text = text.replace(/\s*\.\s*/gu, ". ");
   text = text.replace(/\s+/gu, " ").trim();
@@ -480,6 +490,18 @@ function numberStringToSpeech(wholePart, decimalPart) {
 
   if (decimalPart) {
     return decimalNumberToWords(`${whole}.${decimalPart}`);
+  }
+
+  if (whole >= 100 && whole <= 999) {
+    const hundreds = Math.floor(whole / 100);
+    const remainder = whole % 100;
+    if (remainder === 0) {
+      return `${integerToWords(hundreds)} hundred`;
+    }
+    if (remainder < 10) {
+      return `${integerToWords(hundreds)} oh ${integerToWords(remainder)}`;
+    }
+    return `${integerToWords(hundreds)} ${integerToWords(remainder)}`;
   }
 
   return integerToWords(whole);
@@ -515,7 +537,7 @@ function yearToWords(year) {
 
   if (year >= 2010 && year <= 2099) {
     const suffix = year % 100;
-    return suffix === 0 ? "twenty hundred" : `twenty ${integerToWords(suffix)}`;
+    return suffix === 0 ? "two thousand" : `two thousand ${integerToWords(suffix)}`;
   }
 
   if (year >= 1900 && year <= 1999) {
