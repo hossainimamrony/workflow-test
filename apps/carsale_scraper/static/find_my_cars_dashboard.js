@@ -4,6 +4,11 @@ const els = {
   loadDefaultBtn: document.getElementById("loadDefaultBtn"),
   jsonUpload: document.getElementById("jsonUpload"),
   searchInput: document.getElementById("searchInput"),
+  statusFilter: document.getElementById("statusFilter"),
+  makeFilter: document.getElementById("makeFilter"),
+  modelFilter: document.getElementById("modelFilter"),
+  minPrice: document.getElementById("minPrice"),
+  maxPrice: document.getElementById("maxPrice"),
 };
 
 const state = {
@@ -56,7 +61,25 @@ function cardHtml(sideLabel, row, status) {
 }
 
 function rowMatches(entry, query) {
-  if (!query) return true;
+  const status = els.statusFilter.value;
+  const make = els.makeFilter.value;
+  const model = els.modelFilter.value;
+  const minPrice = Number(els.minPrice.value || 0) || null;
+  const maxPrice = Number(els.maxPrice.value || 0) || null;
+
+  if (status !== "all" && String(entry?.status || "") !== status) return false;
+
+  const mk = String(entry?.carbarn?.make || entry?.carsales?.make || "");
+  if (make !== "all" && mk.toLowerCase() !== make.toLowerCase()) return false;
+
+  const md = String(entry?.carbarn?.model || entry?.carsales?.model || "");
+  if (model !== "all" && md.toLowerCase() !== model.toLowerCase()) return false;
+
+  const priceRaw = entry?.carbarn?.price ?? entry?.carsales?.price;
+  const price = Number(priceRaw || 0) || null;
+  if (minPrice !== null && (price === null || price < minPrice)) return false;
+  if (maxPrice !== null && (price === null || price > maxPrice)) return false;
+
   const blob = [
     entry?.status,
     entry?.carbarn?.title,
@@ -69,6 +92,28 @@ function rowMatches(entry, query) {
     entry?.carsales?.stock_no,
   ].join(" ").toLowerCase();
   return blob.includes(query);
+}
+
+function rebuildFilters() {
+  const makeSet = new Set();
+  const modelSet = new Set();
+  for (const entry of state.rows) {
+    const m1 = String(entry?.carbarn?.make || "").trim();
+    const m2 = String(entry?.carsales?.make || "").trim();
+    const d1 = String(entry?.carbarn?.model || "").trim();
+    const d2 = String(entry?.carsales?.model || "").trim();
+    if (m1) makeSet.add(m1);
+    if (m2) makeSet.add(m2);
+    if (d1) modelSet.add(d1);
+    if (d2) modelSet.add(d2);
+  }
+
+  const currentMake = els.makeFilter.value;
+  const currentModel = els.modelFilter.value;
+  els.makeFilter.innerHTML = `<option value="all">All Makes</option>${[...makeSet].sort().map((v) => `<option value="${esc(v)}">${esc(v)}</option>`).join("")}`;
+  els.modelFilter.innerHTML = `<option value="all">All Models</option>${[...modelSet].sort().map((v) => `<option value="${esc(v)}">${esc(v)}</option>`).join("")}`;
+  if ([...makeSet].includes(currentMake)) els.makeFilter.value = currentMake;
+  if ([...modelSet].includes(currentModel)) els.modelFilter.value = currentModel;
 }
 
 function render() {
@@ -93,6 +138,7 @@ function setData(payload, sourceLabel) {
   state.rows = normalizeRows(payload);
   state.updatedAt = payload?.updated_at || null;
   state.source = sourceLabel;
+  rebuildFilters();
   render();
 }
 
@@ -132,6 +178,11 @@ function bindEvents() {
   });
 
   els.searchInput.addEventListener("input", render);
+  els.statusFilter.addEventListener("change", render);
+  els.makeFilter.addEventListener("change", render);
+  els.modelFilter.addEventListener("change", render);
+  els.minPrice.addEventListener("input", render);
+  els.maxPrice.addEventListener("input", render);
 }
 
 (async function boot() {
