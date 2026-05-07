@@ -105,15 +105,28 @@ export async function publishFinalReelMp4(runDir, ffmpegPath, log = () => {}, co
     config.finalReelRemoteUploadRequired ?? process.env.FINAL_REEL_REMOTE_UPLOAD_REQUIRED,
     false,
   );
+  let remoteUploadUrl = "";
   if (remoteUploadEnabled) {
     try {
-      await publishFinalReelToRemote(normalizedDir, log, config);
+      remoteUploadUrl = String(await publishFinalReelToRemote(normalizedDir, log, config) || "").trim();
     } catch (error) {
       if (remoteUploadRequired) {
         throw error;
       }
       log(`Remote final-reel upload skipped: ${String(error?.message || error || "unknown error")}`);
     }
+  }
+  const deleteLocalAfterRemoteUpload = parseBooleanLike(
+    config.finalReelDeleteLocalAfterUpload ??
+      process.env.FINAL_REEL_DELETE_LOCAL_AFTER_UPLOAD,
+    true,
+  );
+  if (
+    deleteLocalAfterRemoteUpload &&
+    remoteUploadUrl &&
+    /^https?:\/\//iu.test(remoteUploadUrl)
+  ) {
+    await cleanupLocalFinalReelAfterRemoteUpload(normalizedDir, log);
   }
 
   const autoDeleteSourceFootage = parseBooleanLike(
@@ -1100,6 +1113,31 @@ async function cleanupSourceFootageAfterFinalized(runDir, log = () => {}) {
   }
   if (deletedFiles > 0 || deletedDirs > 0) {
     log(`Source footage cleanup complete: deleted ${deletedFiles} media file(s), ${deletedDirs} folder(s).`);
+  }
+}
+
+async function cleanupLocalFinalReelAfterRemoteUpload(runDir, log = () => {}) {
+  const removableFiles = [
+    "final-reel.mp4",
+    "final-reel.webm",
+    PREVIEW_FILE_NAME,
+    "main-reel.mp4",
+    "main-reel.webm",
+    "end-scene.mp4",
+    "voiceover.mp3",
+    "voiceover-raw.mp3",
+  ];
+  let deletedFiles = 0;
+  for (const name of removableFiles) {
+    try {
+      await fs.unlink(path.join(runDir, name));
+      deletedFiles += 1;
+    } catch {
+      // best-effort cleanup
+    }
+  }
+  if (deletedFiles > 0) {
+    log(`Remote upload cleanup: removed ${deletedFiles} local final media file(s).`);
   }
 }
 

@@ -281,30 +281,14 @@
     const targetUrl = String(url || '').trim();
     const targetName = String(fileName || 'video.mp4').trim() || 'video.mp4';
     if (!targetUrl) return;
-    try {
-      const resp = await fetch(targetUrl, { method: 'GET' });
-      if (!resp.ok) throw new Error(`Download failed (${resp.status})`);
-      const blob = await resp.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = targetName;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-      return;
-    } catch (_err) {
-      // Fallback if CORS/fetch is blocked: still trigger browser navigation.
-    }
-    const fallback = document.createElement('a');
-    fallback.href = targetUrl;
-    fallback.download = targetName;
-    fallback.style.display = 'none';
-    document.body.appendChild(fallback);
-    fallback.click();
-    document.body.removeChild(fallback);
+    const direct = document.createElement('a');
+    direct.href = targetUrl;
+    direct.download = targetName;
+    direct.rel = 'noopener';
+    direct.style.display = 'none';
+    document.body.appendChild(direct);
+    direct.click();
+    document.body.removeChild(direct);
   }
   function renderVideoPlayer(src, title, opts) {
     const options = opts || {};
@@ -796,7 +780,7 @@
       ? run.plan.composition.segments
       : (Array.isArray(run?.plan?.sequence) ? run.plan.sequence : []);
     const heroVideoUrl = run.finalReelPreviewUrl || run.finalReelUrl || run.mainReelUrl || (previewClips[0] ? previewClips[0].videoUrl : '');
-    const heroDownloadUrl = run.finalReelDownloadUrl || run.finalReelUrl || run.finalReelPreviewUrl || run.mainReelUrl || heroVideoUrl;
+    const heroDownloadUrl = run.finalReelDownloadUrl || run.finalReelRemoteUrl || '';
     const scriptVariants = Array.isArray(run?.voiceoverDraft?.variants) ? run.voiceoverDraft.variants : [];
     const persistedAppliedScript = String(
       run.voiceoverScript

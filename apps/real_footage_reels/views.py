@@ -3,7 +3,7 @@ import re
 import traceback
 import contextlib
 from pathlib import Path
-from urllib.parse import parse_qs, quote, unquote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse, urlencode, urlunparse
 
 from django.http import FileResponse, Http404, HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -94,6 +94,27 @@ def _asset_download_url(run_id: str, abs_path: str, filename: str = "") -> str:
         return f"{base}&download=1"
     encoded_name = quote(str(filename), safe="")
     return f"{base}&download=1&filename={encoded_name}"
+
+
+def _remote_force_download_url(remote_url: str, filename: str = "") -> str:
+    text = str(remote_url or "").strip()
+    if not text:
+        return ""
+    parsed = urlparse(text)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return text
+    query_map = parse_qs(parsed.query, keep_blank_values=True)
+    disposition = "attachment"
+    if filename:
+        safe_name = str(filename).replace('"', "").strip()
+        if safe_name:
+            disposition = f'attachment; filename="{safe_name}"'
+    query_map["response-content-disposition"] = [disposition]
+    query_map["response-content-type"] = ["video/mp4"]
+    query_text = urlencode(query_map, doseq=True)
+    return urlunparse(
+        (parsed.scheme, parsed.netloc, parsed.path, parsed.params, query_text, parsed.fragment)
+    )
 
 
 def _as_public_asset_url(run_id: str, resolved_path_or_url: str) -> str:
@@ -520,16 +541,17 @@ class RunDetailApiView(APIView):
             local_final_reel_path = str(local_final_webm)
         elif final_reel_path and not _is_remote_http_url(final_reel_path):
             local_final_reel_path = final_reel_path
-        final_reel_download_url = (
-            _asset_download_url(run_id, local_final_reel_path, safe_download_name)
-            if local_final_reel_path
-            else ""
-        )
+        remote_final_url = _versioned_remote_url(str(report.get("finalReelRemoteUrl") or "").strip(), version_token)
+        if not remote_final_url and _is_remote_http_url(final_reel_url_value):
+            remote_final_url = _versioned_remote_url(final_reel_url_value, version_token)
+        final_reel_download_url = ""
         final_reel_url = ""
-        if local_final_reel_path:
+        # Prefer remote S3 playback + download whenever upload succeeded.
+        if remote_final_url and remote_upload_ok is not False:
+            final_reel_url = remote_final_url
+            final_reel_download_url = _remote_force_download_url(remote_final_url, safe_download_name)
+        elif local_final_reel_path:
             final_reel_url = _as_public_asset_url(run_id, local_final_reel_path)
-        elif _is_remote_http_url(final_reel_url_value) and remote_upload_ok is not False:
-            final_reel_url = _versioned_remote_url(final_reel_url_value, version_token)
         elif final_reel_path:
             final_reel_url = _as_public_asset_url(run_id, final_reel_path)
         return Response(
@@ -552,7 +574,7 @@ class RunDetailApiView(APIView):
                 "mainReelUrl": _as_public_asset_url(run_id, main_reel_path) if main_reel_path else "",
                 "finalReelUrl": final_reel_url,
                 "finalReelDownloadUrl": final_reel_download_url,
-                "finalReelRemoteUrl": _versioned_remote_url(str(report.get("finalReelRemoteUrl") or "").strip(), version_token),
+                "finalReelRemoteUrl": remote_final_url,
                 "finalReelRemoteUploadOk": bool(report.get("finalReelRemoteUploadOk", False)),
                 "finalReelRemoteError": str(report.get("finalReelRemoteError") or "").strip(),
                 "finalReelPreviewUrl": (
