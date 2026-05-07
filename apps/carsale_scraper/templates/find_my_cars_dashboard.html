@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Car Comparison Dashboard{% endblock %}
+{% block title %}Carbarn vs Carsales{% endblock %}
 {% block body_class %}workflow-body workflow-body--carsale{% endblock %}
 {% block page_shell_class %}page-shell--wide page-shell--flush{% endblock %}
 
@@ -12,13 +12,12 @@
 {% block content %}
 <div class="main">
   <header class="topbar">
-    <h1>Car Comparison Dashboard</h1>
-    <p>Data source: <code>apps/carsale_scraper/full_comparisons.json</code></p>
+    <h1>Carbarn vs Carsales</h1>
   </header>
 
   <section class="toolbar">
     <button id="loadDefaultBtn" class="btn">Reload Data</button>
-    <input id="searchInput" type="text" placeholder="Search make, model, stock, title..." />
+    <input id="searchInput" type="text" placeholder="Search by title, make, model, stock..." />
     <select id="statusFilter">
       <option value="all">All Status</option>
       <option value="identified">Identified</option>
@@ -34,9 +33,8 @@
     <select id="modelFilter">
       <option value="all">All Models</option>
     </select>
-    <input id="minPrice" type="number" placeholder="Min Price" />
-    <input id="maxPrice" type="number" placeholder="Max Price" />
-    <span id="metaText" class="meta">No data loaded</span>
+    <input id="minPrice" type="number" placeholder="Min Price (AUD)" />
+    <input id="maxPrice" type="number" placeholder="Max Price (AUD)" />
   </section>
 
   <section id="rows" class="rows"></section>

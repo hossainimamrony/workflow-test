@@ -12,5 +12,5 @@ urlpatterns = [
     path("dashboard/", include("apps.common.urls")),
     path("workflows/global-make-model-video/", include("apps.global_make_model_video.urls")),
     path("workflows/real-footage-reels/", include("apps.real_footage_reels.urls")),
-    path("workflows/car-comparison/", include("apps.carsale_scraper.urls")),
+    path("workflows/carbarn-vs-carsales/", include("apps.carsale_scraper.urls")),
 ]

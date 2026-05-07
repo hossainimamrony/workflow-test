@@ -28,7 +28,7 @@ body {
 .toolbar {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: auto 1.6fr repeat(5, minmax(120px, 1fr)) auto;
+  grid-template-columns: auto 1.8fr repeat(5, minmax(130px, 1fr));
   gap: 10px;
   align-items: center;
 }
@@ -60,8 +60,6 @@ body {
   width: 100%;
   background: #fff;
 }
-
-.meta { color: var(--muted); font-size: 13px; }
 
 .rows {
   margin-top: 16px;

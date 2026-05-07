@@ -1,6 +1,5 @@
 const els = {
   rows: document.getElementById("rows"),
-  metaText: document.getElementById("metaText"),
   loadDefaultBtn: document.getElementById("loadDefaultBtn"),
   searchInput: document.getElementById("searchInput"),
   statusFilter: document.getElementById("statusFilter"),
@@ -260,7 +259,6 @@ function render() {
     `).join("");
   }
 
-  els.metaText.textContent = `${rows.length}/${state.rows.length} rows | Updated: ${state.updatedAt || "unknown"} | Source: ${state.source || "-"}`;
 }
 
 function setData(payload, sourceLabel) {
@@ -283,7 +281,7 @@ function bindEvents() {
     try {
       await loadDefaultJson();
     } catch (err) {
-      els.metaText.textContent = `Error: ${err.message}`;
+      console.error(err);
     }
   });
 
@@ -300,7 +298,7 @@ function bindEvents() {
   try {
     await loadDefaultJson();
   } catch (err) {
-    els.metaText.textContent = `Startup error: ${err.message}`;
+    console.error(err);
     render();
   }
 })();
