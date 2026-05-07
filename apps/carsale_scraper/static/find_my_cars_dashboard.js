@@ -2,7 +2,6 @@ const els = {
   rows: document.getElementById("rows"),
   metaText: document.getElementById("metaText"),
   loadDefaultBtn: document.getElementById("loadDefaultBtn"),
-  jsonUpload: document.getElementById("jsonUpload"),
   searchInput: document.getElementById("searchInput"),
   statusFilter: document.getElementById("statusFilter"),
   makeFilter: document.getElementById("makeFilter"),
@@ -120,8 +119,6 @@ function buildDerivedMismatchMessages(entry) {
     out.push(`Make mismatch: Carsales ${cleanText(s.make)} vs Carbarn ${cleanText(c.make)}`);
   }
 
-  // Model mismatch is intentionally ignored to match original workflow behavior.
-
   return out;
 }
 
@@ -145,7 +142,12 @@ function cardHtml(sideLabel, row, status, entry) {
   const title = row?.title || "No title";
   const images = normalizeImageList(row || {});
   const firstImage = images[0] || "";
-  const img = firstImage ? `<img src="${esc(firstImage)}" alt="${esc(title)}" loading="lazy" />` : "";
+  const priceBadge = sideLabel === "Carsales" && cleanText(row?.price_badge_label)
+    ? `<div class="image-price-badge">${esc(row.price_badge_label)}</div>`
+    : "";
+  const img = firstImage
+    ? `<div class="card-image-wrap"><img src="${esc(firstImage)}" alt="${esc(title)}" loading="lazy" />${priceBadge}</div>`
+    : "";
   const thumbs = images.slice(1, 9).map((url) => (
     `<img class="thumb" src="${esc(url)}" alt="photo" loading="lazy" />`
   )).join("");
@@ -188,7 +190,13 @@ function rowMatches(entry, query) {
   const minPrice = Number(els.minPrice.value || 0) || null;
   const maxPrice = Number(els.maxPrice.value || 0) || null;
 
-  if (status !== "all" && String(entry?.status || "") !== status) return false;
+  const entryStatus = String(entry?.status || "");
+  const soldFlag = !!entry?.carsales?.is_sold;
+  if (status === "sold") {
+    if (!(entryStatus === "sold" || soldFlag)) return false;
+  } else if (status !== "all" && entryStatus !== status) {
+    return false;
+  }
 
   const mk = String(entry?.carbarn?.make || entry?.carsales?.make || "");
   if (make !== "all" && mk.toLowerCase() !== make.toLowerCase()) return false;
@@ -267,16 +275,7 @@ async function loadDefaultJson() {
   const res = await fetch("/api/comparisons");
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || "Failed to load JSON");
-  setData(data, "server full_comparisons.json");
-}
-
-async function handleUpload(file) {
-  const text = await file.text();
-  const parsed = JSON.parse(text);
-  if (!Array.isArray(parsed?.rows)) {
-    throw new Error("Invalid JSON format. Expected { rows: [] }.");
-  }
-  setData(parsed, `uploaded: ${file.name}`);
+  setData(data, "filesystem: apps/carsale_scraper/full_comparisons.json");
 }
 
 function bindEvents() {
@@ -285,16 +284,6 @@ function bindEvents() {
       await loadDefaultJson();
     } catch (err) {
       els.metaText.textContent = `Error: ${err.message}`;
-    }
-  });
-
-  els.jsonUpload.addEventListener("change", async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      await handleUpload(file);
-    } catch (err) {
-      els.metaText.textContent = `Upload error: ${err.message}`;
     }
   });
 

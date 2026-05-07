@@ -28,12 +28,12 @@ body {
 .toolbar {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: auto auto 1.3fr repeat(5, minmax(120px, 1fr)) auto;
+  grid-template-columns: auto 1.6fr repeat(5, minmax(120px, 1fr)) auto;
   gap: 10px;
   align-items: center;
 }
 
-.btn, .upload-label {
+.btn {
   border: 1px solid var(--line);
   background: #fff;
   border-radius: 10px;
@@ -41,9 +41,6 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
-
-.upload-label { text-align: center; }
-#jsonUpload { display: none; }
 
 #searchInput {
   border: 1px solid var(--line);
@@ -96,6 +93,25 @@ body {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f7f9fe;
+}
+
+.card-image-wrap {
+  position: relative;
+}
+
+.image-price-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: rgba(8, 32, 66, 0.84);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .thumb-grid {

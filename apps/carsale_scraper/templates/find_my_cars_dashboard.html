@@ -13,17 +13,16 @@
 <div class="main">
   <header class="topbar">
     <h1>Car Comparison Dashboard</h1>
-    <p>Data source: <code>full_comparisons.json</code> or uploaded JSON file.</p>
+    <p>Data source: <code>apps/carsale_scraper/full_comparisons.json</code></p>
   </header>
 
   <section class="toolbar">
-    <button id="loadDefaultBtn" class="btn">Load Default JSON</button>
-    <label class="upload-label" for="jsonUpload">Upload full_comparisons.json</label>
-    <input id="jsonUpload" type="file" accept="application/json,.json" />
+    <button id="loadDefaultBtn" class="btn">Reload Data</button>
     <input id="searchInput" type="text" placeholder="Search make, model, stock, title..." />
     <select id="statusFilter">
       <option value="all">All Status</option>
       <option value="identified">Identified</option>
+      <option value="sold">Sold</option>
       <option value="not_found">Not Found</option>
       <option value="error">Error</option>
       <option value="on_offer">On Offer</option>
@@ -45,5 +44,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260507-1"></script>
+<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260507-2"></script>
 {% endblock %}
