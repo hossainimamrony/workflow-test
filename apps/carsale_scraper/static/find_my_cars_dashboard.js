@@ -38,23 +38,137 @@ function chipsFor(row) {
     row.make ? `Make: ${row.make}` : "",
     row.model ? `Model: ${row.model}` : "",
     row.price_text ? `Price: ${row.price_text}` : "",
+    row.odometer_text ? `${row.odometer_text}` : "",
     row.stock_no ? `Stock: ${row.stock_no}` : "",
     row.chassis ? `Chassis: ${row.chassis}` : "",
+    row.car_code ? `Car Code: ${row.car_code}` : "",
+    row.photo_count ? `Images: ${row.photo_count}` : "",
+    row.image_count ? `Captured URLs: ${row.image_count}` : "",
+    row.vin ? `VIN: ${row.vin}` : "",
+    row.registration_plate ? `Plate: ${row.registration_plate}` : "",
+    row.body_type ? `Body: ${row.body_type}` : "",
+    row.fuel ? `Fuel: ${row.fuel}` : "",
+    row.transmission ? `Trans: ${row.transmission}` : "",
+    row.match_score ? `Score: ${row.match_score}` : "",
   ].filter(Boolean);
 }
 
-function cardHtml(sideLabel, row, status) {
+function normalizeImageList(row) {
+  let images = [];
+  if (Array.isArray(row?.all_image_urls)) {
+    images = row.all_image_urls;
+  }
+  if (row?.image_url) {
+    images = [row.image_url, ...images];
+  }
+  const out = [];
+  const seen = new Set();
+  for (const url of images) {
+    const clean = String(url || "").trim();
+    if (!clean) continue;
+    const key = clean.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(clean);
+  }
+  return out;
+}
+
+function cleanText(v) {
+  return String(v ?? "").trim();
+}
+
+function normText(v) {
+  return cleanText(v).toLowerCase().replace(/\s+/g, " ");
+}
+
+function normDigits(v) {
+  return cleanText(v).replace(/[^\d]/g, "");
+}
+
+function buildDerivedMismatchMessages(entry) {
+  const c = entry?.carbarn || {};
+  const s = entry?.carsales || {};
+  const out = [];
+
+  const addTextMismatch = (label, left, right) => {
+    const a = cleanText(left);
+    const b = cleanText(right);
+    if (!a || !b) return;
+    if (normText(a) !== normText(b)) {
+      out.push(`${label} mismatch: Carsales ${b} vs Carbarn ${a}`);
+    }
+  };
+
+  const addNumberMismatch = (label, left, right) => {
+    const a = normDigits(left);
+    const b = normDigits(right);
+    if (!a || !b) return;
+    if (a !== b) {
+      out.push(`${label} mismatch: Carsales ${right} vs Carbarn ${left}`);
+    }
+  };
+
+  addNumberMismatch("Price", c.price_text || c.price, s.price_text || s.price);
+  addNumberMismatch("Odometer", c.odometer_text || c.odometer, s.odometer_text || s.odometer);
+  addTextMismatch("Year", c.year, s.year);
+  addTextMismatch("Make", c.make, s.make);
+  addTextMismatch("Model", c.model, s.model);
+  addTextMismatch("Stock", c.stock_no, s.stock_no);
+  addTextMismatch("Chassis", c.chassis, s.chassis);
+  addTextMismatch("VIN", c.vin, s.vin);
+
+  return out;
+}
+
+function buildAllMismatchMessages(entry) {
+  const src = Array.isArray(entry?.carsales?.mismatch_messages) ? entry.carsales.mismatch_messages : [];
+  const derived = buildDerivedMismatchMessages(entry);
+  const seen = new Set();
+  const merged = [];
+  for (const msg of [...src, ...derived]) {
+    const m = cleanText(msg);
+    if (!m) continue;
+    const k = m.toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    merged.push(m);
+  }
+  return merged;
+}
+
+function cardHtml(sideLabel, row, status, entry) {
   const title = row?.title || "No title";
-  const img = row?.image_url ? `<img src="${esc(row.image_url)}" alt="${esc(title)}" loading="lazy" />` : "";
+  const images = normalizeImageList(row || {});
+  const firstImage = images[0] || "";
+  const img = firstImage ? `<img src="${esc(firstImage)}" alt="${esc(title)}" loading="lazy" />` : "";
+  const thumbs = images.slice(1, 9).map((url) => (
+    `<img class="thumb" src="${esc(url)}" alt="photo" loading="lazy" />`
+  )).join("");
   const chips = chipsFor(row || {}).map((x) => `<span class="chip">${esc(x)}</span>`).join("");
   const link = row?.detail_url ? `<a href="${esc(row.detail_url)}" target="_blank" rel="noopener">Open listing</a>` : "";
+  const mismatchMessages = sideLabel === "Carsales" ? buildAllMismatchMessages(entry) : [];
+  const mismatchBlock = mismatchMessages.length
+    ? `<div class="detail-box warn"><div class="detail-title">Data Mismatches</div>${mismatchMessages.map((m) => `<div>${esc(m)}</div>`).join("")}</div>`
+    : "";
+  const warranty = row?.warranty || null;
+  const warrantyBlock = warranty
+    ? `<div class="detail-box ok">
+        <div class="detail-title">${esc(warranty.rule_label || "Warranty Rule")}</div>
+        <div>3-Month Dealer Warranty: ${warranty.dealer_warranty ? "YES" : "NO"}</div>
+        <div>5-Years Integrity Warranty: ${warranty.integrity_warranty ? "YES" : "NO"}</div>
+      </div>`
+    : "";
 
   return `
     <article class="card">
       <span class="status">${esc(sideLabel)} | ${esc(status || "unknown")}</span>
       <h3>${esc(title)}</h3>
       ${img}
+      ${thumbs ? `<div class="thumb-grid">${thumbs}</div>` : ""}
       <div class="chips">${chips}</div>
+      ${mismatchBlock}
+      ${warrantyBlock}
       ${link}
     </article>
   `;
@@ -125,8 +239,8 @@ function render() {
   } else {
     els.rows.innerHTML = rows.map((entry) => `
       <section class="row">
-        ${cardHtml("Carbarn", entry.carbarn || {}, entry.status)}
-        ${cardHtml("Carsales", entry.carsales || {}, entry.status)}
+        ${cardHtml("Carbarn", entry.carbarn || {}, entry.status, entry)}
+        ${cardHtml("Carsales", entry.carsales || {}, entry.status, entry)}
       </section>
     `).join("");
   }
