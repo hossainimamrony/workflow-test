@@ -281,14 +281,37 @@
     const targetUrl = String(url || '').trim();
     const targetName = String(fileName || 'video.mp4').trim() || 'video.mp4';
     if (!targetUrl) return;
-    const direct = document.createElement('a');
-    direct.href = targetUrl;
-    direct.download = targetName;
-    direct.rel = 'noopener';
-    direct.style.display = 'none';
-    document.body.appendChild(direct);
-    direct.click();
-    document.body.removeChild(direct);
+    try {
+      const isHttp = /^https?:\/\//iu.test(targetUrl);
+      const resp = await fetch(targetUrl, {
+        method: 'GET',
+        mode: isHttp ? 'cors' : 'same-origin',
+        credentials: 'omit',
+      });
+      if (!resp.ok) throw new Error(`Download failed (${resp.status})`);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = targetName;
+      link.rel = 'noopener';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+      return;
+    } catch (_err) {
+      // Fallback: attempt direct browser download/navigation.
+    }
+    const fallback = document.createElement('a');
+    fallback.href = targetUrl;
+    fallback.download = targetName;
+    fallback.rel = 'noopener';
+    fallback.style.display = 'none';
+    document.body.appendChild(fallback);
+    fallback.click();
+    document.body.removeChild(fallback);
   }
   function renderVideoPlayer(src, title, opts) {
     const options = opts || {};

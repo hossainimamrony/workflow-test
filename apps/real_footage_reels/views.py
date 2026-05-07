@@ -1,9 +1,10 @@
 import mimetypes
+import os
 import re
 import traceback
 import contextlib
 from pathlib import Path
-from urllib.parse import parse_qs, quote, unquote, urlparse, urlencode, urlunparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from django.http import FileResponse, Http404, HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -103,18 +104,91 @@ def _remote_force_download_url(remote_url: str, filename: str = "") -> str:
     parsed = urlparse(text)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         return text
-    query_map = parse_qs(parsed.query, keep_blank_values=True)
-    disposition = "attachment"
-    if filename:
-        safe_name = str(filename).replace('"', "").strip()
-        if safe_name:
-            disposition = f'attachment; filename="{safe_name}"'
-    query_map["response-content-disposition"] = [disposition]
-    query_map["response-content-type"] = ["video/mp4"]
-    query_text = urlencode(query_map, doseq=True)
-    return urlunparse(
-        (parsed.scheme, parsed.netloc, parsed.path, parsed.params, query_text, parsed.fragment)
+
+    host = str(parsed.netloc or "").split(":", 1)[0].strip().lower()
+    path_value = str(parsed.path or "").lstrip("/")
+    bucket = ""
+    object_key = ""
+    region = ""
+
+    # Virtual-hosted style: <bucket>.s3.<region>.amazonaws.com/<key>
+    # Also supports legacy dashed host: <bucket>.s3-<region>.amazonaws.com/<key>
+    if ".s3." in host:
+        bucket = host.split(".s3.", 1)[0].strip()
+        object_key = unquote(path_value)
+        region = host.split(".s3.", 1)[1].split(".", 1)[0].strip()
+    elif ".s3-" in host:
+        bucket = host.split(".s3-", 1)[0].strip()
+        object_key = unquote(path_value)
+        region = host.split(".s3-", 1)[1].split(".", 1)[0].strip()
+    # Path style: s3.<region>.amazonaws.com/<bucket>/<key>
+    elif host.startswith("s3.") or host.startswith("s3-") or host == "s3.amazonaws.com":
+        parts = path_value.split("/", 1)
+        if len(parts) == 2:
+            bucket = unquote(parts[0]).strip()
+            object_key = unquote(parts[1]).strip()
+        if host.startswith("s3.") and ".amazonaws.com" in host:
+            region = host.split("s3.", 1)[1].split(".amazonaws.com", 1)[0].strip()
+        elif host.startswith("s3-") and ".amazonaws.com" in host:
+            region = host.split("s3-", 1)[1].split(".amazonaws.com", 1)[0].strip()
+
+    if not bucket or not object_key:
+        return text
+
+    region = (
+        region
+        or str(os.environ.get("FINAL_REEL_S3_REGION") or "").strip()
+        or str(os.environ.get("AWS_REGION") or "").strip()
+        or str(os.environ.get("AWS_DEFAULT_REGION") or "").strip()
+        or "ap-southeast-2"
     )
+    access_key = str(
+        os.environ.get("FINAL_REEL_S3_ACCESS_KEY_ID")
+        or os.environ.get("AWS_ACCESS_KEY_ID")
+        or ""
+    ).strip()
+    secret_key = str(
+        os.environ.get("FINAL_REEL_S3_SECRET_ACCESS_KEY")
+        or os.environ.get("AWS_SECRET_ACCESS_KEY")
+        or ""
+    ).strip()
+    session_token = str(
+        os.environ.get("FINAL_REEL_S3_SESSION_TOKEN")
+        or os.environ.get("AWS_SESSION_TOKEN")
+        or ""
+    ).strip()
+
+    safe_name = str(filename).replace('"', "").strip() or "video.mp4"
+    try:
+        import boto3  # type: ignore
+        from botocore.config import Config  # type: ignore
+
+        client_kwargs = {
+            "service_name": "s3",
+            "region_name": region,
+            "config": Config(signature_version="s3v4"),
+        }
+        if access_key and secret_key:
+            client_kwargs["aws_access_key_id"] = access_key
+            client_kwargs["aws_secret_access_key"] = secret_key
+            if session_token:
+                client_kwargs["aws_session_token"] = session_token
+        s3_client = boto3.client(**client_kwargs)
+        return str(
+            s3_client.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": bucket,
+                    "Key": object_key,
+                    "ResponseContentDisposition": f'attachment; filename="{safe_name}"',
+                    "ResponseContentType": "video/mp4",
+                },
+                ExpiresIn=3600,
+            )
+        )
+    except Exception:
+        # Fallback to plain remote URL (never append unsigned response-content-* params).
+        return text
 
 
 def _as_public_asset_url(run_id: str, resolved_path_or_url: str) -> str:
