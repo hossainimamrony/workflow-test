@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Unified Workflows{% endblock %}</title>
+  <title>{% block title %}Carbarn Operations Suite{% endblock %}</title>
   <style>
     :root {
       --hub-bg: #f3f6fb;
@@ -235,11 +235,10 @@
 <body class="{% block body_class %}workflow-body{% endblock %}">
   <header class="global-header">
     <div class="global-header__inner">
-      <a href="/dashboard/" class="global-brand" aria-label="Unified Workflows Dashboard">
+      <a href="/dashboard/" class="global-brand" aria-label="Carbarn Operations Suite Dashboard">
         <span class="global-brand__dot" aria-hidden="true"></span>
         <span class="global-brand__copy">
-          <strong>Unified Workflows</strong>
-          <small>Carbarn Operations Suite</small>
+          <strong>Carbarn Operations Suite</strong>
         </span>
       </a>
       {% with path=request.path|default:'' %}
@@ -250,10 +249,6 @@
         <a class="global-nav__link {% if '/workflows/global-make-model-video/' in path %}is-active{% endif %}" href="/workflows/global-make-model-video/">Global Make Model Video</a>
       </nav>
       {% endwith %}
-      <div class="global-status">
-        <span class="global-status__pulse" aria-hidden="true"></span>
-        <span>Shared Project UI</span>
-      </div>
     </div>
   </header>
 

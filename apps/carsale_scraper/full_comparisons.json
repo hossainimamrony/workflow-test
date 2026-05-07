@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-07T12:01:09",
+  "updated_at": "2026-05-07T12:43:48",
   "rows_count": 57,
   "rows": [
     {
@@ -62,71 +62,6 @@
         "is_sold": false,
         "match_score": 100.0,
         "match_reason": "stock_tail4_match:1058",
-        "mismatch_fields": [],
-        "mismatch_messages": [],
-        "mismatch_count": 0
-      }
-    },
-    {
-      "status": "identified",
-      "carbarn": {
-        "title": "2013 Toyota Hiace 4WD Extra High Roof SLWB (Ex Ambulance)",
-        "year": "2013",
-        "make": "TOYOTA",
-        "model": "Hiace",
-        "price_text": "33900",
-        "price": 33900,
-        "odometer_text": "222468",
-        "description": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM\n5-Year Extended Warranty Available!\n\nA reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needin...",
-        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/trh226s/605",
-        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/TRH226-0011595/3Q7djCvdDO8zQsShMICvoA/TRH226-0011595-01.jpg",
-        "stock_no": "605",
-        "stock_candidates": [
-          "605"
-        ],
-        "chassis": "TRH226-0011595",
-        "warranty": {
-          "vehicle_year": "2013",
-          "vehicle_age": 13,
-          "rule_label": "Up To 25 Years Vehicle",
-          "dealer_warranty": false,
-          "integrity_warranty": true
-        }
-      },
-      "carsales": {
-        "title": "2013 Toyota Hiace DX Super LWB Auto 4WD",
-        "year": "2013",
-        "make": "Toyota",
-        "model": "Hiace DX Super LWB Auto 4WD",
-        "price_text": "$33,900",
-        "price": 33900,
-        "odometer_text": "222,468km",
-        "description": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM 5-Year Extended Warranty Available! A reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needing a tough and practical van. Known for its durability, easy maintenance, and strong everyday usability, this Hiace is ready to get back on the road and keep moving. Key Features: Petrol engine Automatic transmission Air Conditioning Apple CarPlay and Android Auto Reversing Camera Windshield Wiper Rear Wiper Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Hiace Stands Out: Toyota Hiace is one of Australias most trusted camper & commercial vans Strong reputation for reliability and long-term value Great option for trades, courier work, transport, or camper conversion plans Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: Newcastle and Wollongong area $200 Canberra $300 Melbourne $450 Brisbane $550 Adelaide $1200 Tasmania $1400 Perth $1600 #AU #ToyotaHiace #HiaceVan #4x4 #WorkVan #Camper Show more",
-        "detail_url": "https://www.carsales.com.au/cars/details/2013-toyota-hiace-dx-super-lwb-auto-4wd/OAG-AD-24937831/",
-        "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/3jkj1win68tjfgn0g9wjiwr6t.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
-        "all_image_urls": [
-          "https://carsales.pxcrush.net/carsales/car/dealer/3jkj1win68tjfgn0g9wjiwr6t.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
-        ],
-        "image_count": 1,
-        "stock_no": "2013605",
-        "dealer_stock_ids": [
-          "2013605"
-        ],
-        "chassis": "",
-        "car_code": "1187",
-        "photo_count": 22,
-        "vin": "6ZZDTRH2260011595",
-        "registration_plate": "Check with seller",
-        "body_type": "Van",
-        "fuel": "Petrol",
-        "transmission": "Automatic",
-        "dealer_comments": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM 5-Year Extended Warranty Available! A reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needing a tough and practical van. Known for its durability, easy maintenance, and strong everyday usability, this Hiace is ready to get back on the road and keep moving. Key Features: Petrol engine Automatic transmission Air Conditioning Apple CarPlay and Android Auto Reversing Camera Windshield Wiper Rear Wiper Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Hiace Stands Out: Toyota Hiace is one of Australias most trusted camper & commercial vans Strong reputation for reliability and long-term value Great option for trades, courier work, transport, or camper conversion plans Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: Newcastle and Wollongong area $200 Canberra $300 Melbourne $450 Brisbane $550 Adelaide $1200 Tasmania $1400 Perth $1600 #AU #ToyotaHiace #HiaceVan #4x4 #WorkVan #Camper Show more",
-        "status_label": "",
-        "status_tooltip": "",
-        "price_badge_label": "",
-        "is_sold": false,
-        "match_score": 95.0,
-        "match_reason": "stock_tail3_match:605",
         "mismatch_fields": [],
         "mismatch_messages": [],
         "mismatch_count": 0
@@ -265,71 +200,6 @@
     {
       "status": "identified",
       "carbarn": {
-        "title": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater (Adjustable Suspension)",
-        "year": "2000",
-        "make": "TOYOTA",
-        "model": "Land Cruiser",
-        "price_text": "29900",
-        "price": 29900,
-        "odometer_text": "217819",
-        "description": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater | Adjustable Suspension | Petrol | 217,819 KM\n\nA strong and comfortable V8 Land Cruiser VX Limited built for family use, touring, towing, weekend trips, and everyday...",
-        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/land cruiser/uzj100w/804",
-        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/UZJ100-0105063/3Q7djCvdDO8zQsShMICvoA/UZJ100-0105063-01.jpg",
-        "stock_no": "804",
-        "stock_candidates": [
-          "804"
-        ],
-        "chassis": "UZJ100-0105063",
-        "warranty": {
-          "vehicle_year": "2000",
-          "vehicle_age": 26,
-          "rule_label": "Above 25 Years Vehicle",
-          "dealer_warranty": false,
-          "integrity_warranty": false
-        }
-      },
-      "carsales": {
-        "title": "2000 Toyota Landcruiser Cygnus Auto 4x4",
-        "year": "2000",
-        "make": "Toyota",
-        "model": "Landcruiser Cygnus Auto 4x4",
-        "price_text": "$29,900",
-        "price": 29900,
-        "odometer_text": "217,819km",
-        "description": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater | Adjustable Suspension | Petrol | 217,819 KM A strong and comfortable V8 Land Cruiser VX Limited built for family use, touring, towing, weekend trips, and everyday driving. With 4WD capability, 8-seat practicality, adjustable suspension, and classic Toyota Land Cruiser reliability, this is a great option for anyone wanting a tough SUV with comfort and road presence. Key Features: V8 Petrol engine 4WD 8 Seater Height Adjustable Suspension Airbags Power Steering Fog Lights Sunroof Bluetooth Connectivity Power Windows Cruise Control Reversing Camera Parking Assist Camera Foldable Rear Seat Rear Wiper Alloy Wheels Electric Folding Mirrors Dual AC Controller Recently serviced and professionally detailed 6 months NSW registration included Why This Land Cruiser Stands Out: VX Limited package with premium comfort features Strong V8 petrol performance 4WD capability for touring, family trips, and outdoor use Practical 8-seat layout with foldable rear seats Adjustable suspension for added comfort and usability Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #ToyotaLandCruiser #LandCruiserVX #V8SUV #4WD #FamilySUV Show more",
-        "detail_url": "https://www.carsales.com.au/cars/details/2000-toyota-landcruiser-cygnus-auto-4x4/OAG-AD-25437171/",
-        "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2plzb82wn186ff00rra20uudb.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
-        "all_image_urls": [
-          "https://carsales.pxcrush.net/carsales/car/dealer/2plzb82wn186ff00rra20uudb.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
-        ],
-        "image_count": 1,
-        "stock_no": "2000804",
-        "dealer_stock_ids": [
-          "2000804"
-        ],
-        "chassis": "",
-        "car_code": "1289",
-        "photo_count": 31,
-        "vin": "6ZZYUZJ1000105063",
-        "registration_plate": "Check with seller",
-        "body_type": "SUV",
-        "fuel": "Petrol",
-        "transmission": "Automatic",
-        "dealer_comments": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater | Adjustable Suspension | Petrol | 217,819 KM A strong and comfortable V8 Land Cruiser VX Limited built for family use, touring, towing, weekend trips, and everyday driving. With 4WD capability, 8-seat practicality, adjustable suspension, and classic Toyota Land Cruiser reliability, this is a great option for anyone wanting a tough SUV with comfort and road presence. Key Features: V8 Petrol engine 4WD 8 Seater Height Adjustable Suspension Airbags Power Steering Fog Lights Sunroof Bluetooth Connectivity Power Windows Cruise Control Reversing Camera Parking Assist Camera Foldable Rear Seat Rear Wiper Alloy Wheels Electric Folding Mirrors Dual AC Controller Recently serviced and professionally detailed 6 months NSW registration included Why This Land Cruiser Stands Out: VX Limited package with premium comfort features Strong V8 petrol performance 4WD capability for touring, family trips, and outdoor use Practical 8-seat layout with foldable rear seats Adjustable suspension for added comfort and usability Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #ToyotaLandCruiser #LandCruiserVX #V8SUV #4WD #FamilySUV Show more",
-        "status_label": "",
-        "status_tooltip": "",
-        "price_badge_label": "",
-        "is_sold": false,
-        "match_score": 95.0,
-        "match_reason": "stock_tail3_match:804",
-        "mismatch_fields": [],
-        "mismatch_messages": [],
-        "mismatch_count": 0
-      }
-    },
-    {
-      "status": "identified",
-      "carbarn": {
         "title": "1999 Mitsubishi Strada 4WD Diesel Motorhome",
         "year": "1999",
         "make": "MITSUBISHI",
@@ -387,6 +257,136 @@
         "is_sold": false,
         "match_score": 95.0,
         "match_reason": "stock_tail3_match:824",
+        "mismatch_fields": [],
+        "mismatch_messages": [],
+        "mismatch_count": 0
+      }
+    },
+    {
+      "status": "identified",
+      "carbarn": {
+        "title": "2013 Toyota Hiace 4WD Extra High Roof SLWB (Ex Ambulance)",
+        "year": "2013",
+        "make": "TOYOTA",
+        "model": "Hiace",
+        "price_text": "33900",
+        "price": 33900,
+        "odometer_text": "222468",
+        "description": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM\n5-Year Extended Warranty Available!\n\nA reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needin...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/hiace/trh226s/605",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/TRH226-0011595/3Q7djCvdDO8zQsShMICvoA/TRH226-0011595-01.jpg",
+        "stock_no": "605",
+        "stock_candidates": [
+          "605"
+        ],
+        "chassis": "TRH226-0011595",
+        "warranty": {
+          "vehicle_year": "2013",
+          "vehicle_age": 13,
+          "rule_label": "Up To 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": true
+        }
+      },
+      "carsales": {
+        "title": "2013 Toyota Hiace DX Super LWB Auto 4WD",
+        "year": "2013",
+        "make": "Toyota",
+        "model": "Hiace DX Super LWB Auto 4WD",
+        "price_text": "$33,900",
+        "price": 33900,
+        "odometer_text": "222,468km",
+        "description": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM 5-Year Extended Warranty Available! A reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needing a tough and practical van. Known for its durability, easy maintenance, and strong everyday usability, this Hiace is ready to get back on the road and keep moving. Key Features: Petrol engine Automatic transmission Air Conditioning Apple CarPlay and Android Auto Reversing Camera Windshield Wiper Rear Wiper Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Hiace Stands Out: Toyota Hiace is one of Australias most trusted camper & commercial vans Strong reputation for reliability and long-term value Great option for trades, courier work, transport, or camper conversion plans Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: Newcastle and Wollongong area $200 Canberra $300 Melbourne $450 Brisbane $550 Adelaide $1200 Tasmania $1400 Perth $1600 #AU #ToyotaHiace #HiaceVan #4x4 #WorkVan #Camper Show more",
+        "detail_url": "https://www.carsales.com.au/cars/details/2013-toyota-hiace-dx-super-lwb-auto-4wd/OAG-AD-24937831/",
+        "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/3jkj1win68tjfgn0g9wjiwr6t.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/3jkj1win68tjfgn0g9wjiwr6t.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "stock_no": "2013605",
+        "dealer_stock_ids": [
+          "2013605"
+        ],
+        "chassis": "",
+        "car_code": "1187",
+        "photo_count": 22,
+        "vin": "6ZZDTRH2260011595",
+        "registration_plate": "Check with seller",
+        "body_type": "Van",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "dealer_comments": "2013 TOYOTA Hiace 4WD DX | Extra Highroof | Ex-Ambulance | 222,468 KM 5-Year Extended Warranty Available! A reliable Toyota Hiace DX built for camper conversion, work, delivery, trades, business use, or anyone needing a tough and practical van. Known for its durability, easy maintenance, and strong everyday usability, this Hiace is ready to get back on the road and keep moving. Key Features: Petrol engine Automatic transmission Air Conditioning Apple CarPlay and Android Auto Reversing Camera Windshield Wiper Rear Wiper Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Hiace Stands Out: Toyota Hiace is one of Australias most trusted camper & commercial vans Strong reputation for reliability and long-term value Great option for trades, courier work, transport, or camper conversion plans Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: Newcastle and Wollongong area $200 Canberra $300 Melbourne $450 Brisbane $550 Adelaide $1200 Tasmania $1400 Perth $1600 #AU #ToyotaHiace #HiaceVan #4x4 #WorkVan #Camper Show more",
+        "status_label": "",
+        "status_tooltip": "",
+        "price_badge_label": "",
+        "is_sold": false,
+        "match_score": 95.0,
+        "match_reason": "stock_tail3_match:605",
+        "mismatch_fields": [],
+        "mismatch_messages": [],
+        "mismatch_count": 0
+      }
+    },
+    {
+      "status": "identified",
+      "carbarn": {
+        "title": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater (Adjustable Suspension)",
+        "year": "2000",
+        "make": "TOYOTA",
+        "model": "Land Cruiser",
+        "price_text": "29900",
+        "price": 29900,
+        "odometer_text": "217819",
+        "description": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater | Adjustable Suspension | Petrol | 217,819 KM\n\nA strong and comfortable V8 Land Cruiser VX Limited built for family use, touring, towing, weekend trips, and everyday...",
+        "detail_url": "https://www.carbarn.com.au/vehicles/toyota/land cruiser/uzj100w/804",
+        "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/UZJ100-0105063/3Q7djCvdDO8zQsShMICvoA/UZJ100-0105063-01.jpg",
+        "stock_no": "804",
+        "stock_candidates": [
+          "804"
+        ],
+        "chassis": "UZJ100-0105063",
+        "warranty": {
+          "vehicle_year": "2000",
+          "vehicle_age": 26,
+          "rule_label": "Above 25 Years Vehicle",
+          "dealer_warranty": false,
+          "integrity_warranty": false
+        }
+      },
+      "carsales": {
+        "title": "2000 Toyota Landcruiser Cygnus Auto 4x4",
+        "year": "2000",
+        "make": "Toyota",
+        "model": "Landcruiser Cygnus Auto 4x4",
+        "price_text": "$29,900",
+        "price": 29900,
+        "odometer_text": "217,819km",
+        "description": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater | Adjustable Suspension | Petrol | 217,819 KM A strong and comfortable V8 Land Cruiser VX Limited built for family use, touring, towing, weekend trips, and everyday driving. With 4WD capability, 8-seat practicality, adjustable suspension, and classic Toyota Land Cruiser reliability, this is a great option for anyone wanting a tough SUV with comfort and road presence. Key Features: V8 Petrol engine 4WD 8 Seater Height Adjustable Suspension Airbags Power Steering Fog Lights Sunroof Bluetooth Connectivity Power Windows Cruise Control Reversing Camera Parking Assist Camera Foldable Rear Seat Rear Wiper Alloy Wheels Electric Folding Mirrors Dual AC Controller Recently serviced and professionally detailed 6 months NSW registration included Why This Land Cruiser Stands Out: VX Limited package with premium comfort features Strong V8 petrol performance 4WD capability for touring, family trips, and outdoor use Practical 8-seat layout with foldable rear seats Adjustable suspension for added comfort and usability Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #ToyotaLandCruiser #LandCruiserVX #V8SUV #4WD #FamilySUV Show more",
+        "detail_url": "https://www.carsales.com.au/cars/details/2000-toyota-landcruiser-cygnus-auto-4x4/OAG-AD-25437171/",
+        "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2plzb82wn186ff00rra20uudb.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
+        "all_image_urls": [
+          "https://carsales.pxcrush.net/carsales/car/dealer/2plzb82wn186ff00rra20uudb.jpg?pxc_format=jpeg&pxc_size=1200%2C630"
+        ],
+        "image_count": 1,
+        "stock_no": "2000804",
+        "dealer_stock_ids": [
+          "2000804"
+        ],
+        "chassis": "",
+        "car_code": "1289",
+        "photo_count": 31,
+        "vin": "6ZZYUZJ1000105063",
+        "registration_plate": "Check with seller",
+        "body_type": "SUV",
+        "fuel": "Petrol",
+        "transmission": "Automatic",
+        "dealer_comments": "2000 Toyota Land Cruiser V8 4WD VX Limited 8 Seater | Adjustable Suspension | Petrol | 217,819 KM A strong and comfortable V8 Land Cruiser VX Limited built for family use, touring, towing, weekend trips, and everyday driving. With 4WD capability, 8-seat practicality, adjustable suspension, and classic Toyota Land Cruiser reliability, this is a great option for anyone wanting a tough SUV with comfort and road presence. Key Features: V8 Petrol engine 4WD 8 Seater Height Adjustable Suspension Airbags Power Steering Fog Lights Sunroof Bluetooth Connectivity Power Windows Cruise Control Reversing Camera Parking Assist Camera Foldable Rear Seat Rear Wiper Alloy Wheels Electric Folding Mirrors Dual AC Controller Recently serviced and professionally detailed 6 months NSW registration included Why This Land Cruiser Stands Out: VX Limited package with premium comfort features Strong V8 petrol performance 4WD capability for touring, family trips, and outdoor use Practical 8-seat layout with foldable rear seats Adjustable suspension for added comfort and usability Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #ToyotaLandCruiser #LandCruiserVX #V8SUV #4WD #FamilySUV Show more",
+        "status_label": "",
+        "status_tooltip": "",
+        "price_badge_label": "",
+        "is_sold": false,
+        "match_score": 95.0,
+        "match_reason": "stock_tail3_match:804",
         "mismatch_fields": [],
         "mismatch_messages": [],
         "mismatch_count": 0
@@ -792,7 +792,7 @@
         "price_text": "28900",
         "price": 28900,
         "odometer_text": "77158",
-        "description": "Stock - 20171054\n\n2017 HONDA Odyssey EX  | Hybrid | 77158 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warning\n\u2022 Front Vehicle Colli...",
+        "description": "2017 HONDA Odyssey EX | Hybrid | 77,158 KM\n5-Year Hybrid Battery Warranty!\n\nA premium Honda Odyssey EX Hybrid built for family comfort, daily driving, school runs, business use, and long-distance travel. With hybrid f...",
         "detail_url": "https://www.carbarn.com.au/vehicles/honda/odyssey/rc4/1054",
         "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RC4-1027907/3Q7djCvdDO8zQsShMICvoA/Wx1xGDNrSH-1.jpg",
         "stock_no": "1054",
@@ -816,7 +816,7 @@
         "price_text": "$28,900",
         "price": 28900,
         "odometer_text": "77,158km",
-        "description": "Stock - HONDA Odyssey EX Absolute | Hybrid | 77158 KM We are open every day, including the upcoming Easter holidays. Key Features: Air Conditioning Traction Control System Lane Departure Warning Front Vehicle Collision Warning ECO Mode for Top-Notch Fuel Saving Power steering Multi-Function Steering Wheel Airbags 10 Power Windows Cruise Control Half Leather Seats Reversing Camera Parking assist camera Rear Wiper Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "description": "2017 HONDA Odyssey EX | Hybrid | 77,158 KM 5-Year Hybrid Battery Warranty! A premium Honda Odyssey EX Hybrid built for family comfort, daily driving, school runs, business use, and long-distance travel. With hybrid fuel efficiency, dual electric sliding doors, 10 airbags, half leather seats, and advanced safety features, this Odyssey is a smart and practical people mover for everyday use. Key Features: \u2022 Hybrid engine \u2022 EX package \u2022 Traction Control System \u2022 Lane Departure Warning \u2022 Front Vehicle Collision Warning \u2022 ECO Mode for top-notch fuel saving \u2022 10 Airbags \u2022 Power Steering \u2022 Multi-Function Steering Wheel \u2022 Cruise Control \u2022 Half Leather Seats \u2022 Parking Assist Camera \u2022 Dual Electric Sliding Doors \u2022 Push Start and Keyless Entry \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Valid across Australia Why This Odyssey Stands Out: \u2022 Premium hybrid people mover with strong family appeal \u2022 Dual electric sliding doors for easy access \u2022 10 airbags and modern safety features \u2022 Great option for families, business, travel, or daily comfort \u2022 Clean interior and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2017-honda-odyssey-hybrid-absolute-auto/OAG-AD-25705793/",
         "image_url": "https://carsales.pxcrush.net/carsales/cars/dealer/4qp16hppiirmbh8lsqo5527vl.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -835,7 +835,7 @@
         "body_type": "People Mover",
         "fuel": "Hybrid",
         "transmission": "Automatic",
-        "dealer_comments": "Stock - HONDA Odyssey EX Absolute | Hybrid | 77158 KM We are open every day, including the upcoming Easter holidays. Key Features: Air Conditioning Traction Control System Lane Departure Warning Front Vehicle Collision Warning ECO Mode for Top-Notch Fuel Saving Power steering Multi-Function Steering Wheel Airbags 10 Power Windows Cruise Control Half Leather Seats Reversing Camera Parking assist camera Rear Wiper Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "dealer_comments": "2017 HONDA Odyssey EX | Hybrid | 77,158 KM 5-Year Hybrid Battery Warranty! A premium Honda Odyssey EX Hybrid built for family comfort, daily driving, school runs, business use, and long-distance travel. With hybrid fuel efficiency, dual electric sliding doors, 10 airbags, half leather seats, and advanced safety features, this Odyssey is a smart and practical people mover for everyday use. Key Features: \u2022 Hybrid engine \u2022 EX package \u2022 Traction Control System \u2022 Lane Departure Warning \u2022 Front Vehicle Collision Warning \u2022 ECO Mode for top-notch fuel saving \u2022 10 Airbags \u2022 Power Steering \u2022 Multi-Function Steering Wheel \u2022 Cruise Control \u2022 Half Leather Seats \u2022 Parking Assist Camera \u2022 Dual Electric Sliding Doors \u2022 Push Start and Keyless Entry \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Valid across Australia Why This Odyssey Stands Out: \u2022 Premium hybrid people mover with strong family appeal \u2022 Dual electric sliding doors for easy access \u2022 10 airbags and modern safety features \u2022 Great option for families, business, travel, or daily comfort \u2022 Clean interior and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "Around market price",
@@ -857,7 +857,7 @@
         "price_text": "28900",
         "price": 28900,
         "odometer_text": "16396",
-        "description": "Stock - 20191057\n\n2019 HONDA Vezel X | Hybrid | 16396 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warning\n\u2022 Front Vehicle Collision...",
+        "description": "2019 HONDA Vezel X | Hybrid | 16,396 KM\n5-Year Hybrid Battery Warranty!\n\nA clean, low-kilometre Honda Vezel X Hybrid built for fuel-saving daily driving, family use, and comfortable city or highway trips. With modern...",
         "detail_url": "https://www.carbarn.com.au/vehicles/honda/vezel/ru3/1057",
         "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RU3-1360659/3Q7djCvdDO8zQsShMICvoA/Ui5fqEajSx-8.jpg",
         "stock_no": "1057",
@@ -881,7 +881,7 @@
         "price_text": "$28,900",
         "price": 28900,
         "odometer_text": "16,396km",
-        "description": "Stock - HONDA Vezel X | Hybrid | 16396 KM We are open on public holidays and 7 days a week Key Features: Air Conditioning Traction Control System Lane Departure Warning Front Vehicle Collision Warning Power steering Multi-Function Steering Wheel Cruise Control Airbags 8 Power Windows Rear Wiper Reversing Camera ECO Mode for Top-Notch Fuel Saving Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "description": "2019 HONDA Vezel X | Hybrid | 16,396 KM 5-Year Hybrid Battery Warranty! A clean, low-kilometre Honda Vezel X Hybrid built for fuel-saving daily driving, family use, and comfortable city or highway trips. With modern safety features, hybrid efficiency, excellent interior condition, and practical SUV space, this Vezel is a smart choice for anyone wanting comfort, reliability, and low running costs. Key Features: \u2022 Hybrid engine \u2022 Low 16,396 KM \u2022 Traction Control System \u2022 Lane Departure Warning \u2022 Front Vehicle Collision Warning \u2022 8 Airbags \u2022 Multi-Function Steering Wheel \u2022 Cruise Control \u2022 Reversing Camera \u2022 Parking Assist Camera \u2022 ECO Mode for top-notch fuel saving \u2022 Push Start and Keyless Entry \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Vezel Stands Out: \u2022 Low-kilometre hybrid SUV \u2022 Excellent fuel-saving option for everyday use \u2022 Safety features including Lane Departure Warning and Front Vehicle Collision Warning \u2022 Clean interior, practical size, and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #HondaVezel #HybridSUV Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2019-honda-vezel-hybrid-z-honda-sensing-auto-4wd/OAG-AD-25754119/",
         "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/5c01a5a428919ec2da7f8a2374a1232f.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -900,7 +900,7 @@
         "body_type": "SUV",
         "fuel": "Hybrid",
         "transmission": "Automatic",
-        "dealer_comments": "Stock - HONDA Vezel X | Hybrid | 16396 KM We are open on public holidays and 7 days a week Key Features: Air Conditioning Traction Control System Lane Departure Warning Front Vehicle Collision Warning Power steering Multi-Function Steering Wheel Cruise Control Airbags 8 Power Windows Rear Wiper Reversing Camera ECO Mode for Top-Notch Fuel Saving Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "dealer_comments": "2019 HONDA Vezel X | Hybrid | 16,396 KM 5-Year Hybrid Battery Warranty! A clean, low-kilometre Honda Vezel X Hybrid built for fuel-saving daily driving, family use, and comfortable city or highway trips. With modern safety features, hybrid efficiency, excellent interior condition, and practical SUV space, this Vezel is a smart choice for anyone wanting comfort, reliability, and low running costs. Key Features: \u2022 Hybrid engine \u2022 Low 16,396 KM \u2022 Traction Control System \u2022 Lane Departure Warning \u2022 Front Vehicle Collision Warning \u2022 8 Airbags \u2022 Multi-Function Steering Wheel \u2022 Cruise Control \u2022 Reversing Camera \u2022 Parking Assist Camera \u2022 ECO Mode for top-notch fuel saving \u2022 Push Start and Keyless Entry \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Vezel Stands Out: \u2022 Low-kilometre hybrid SUV \u2022 Excellent fuel-saving option for everyday use \u2022 Safety features including Lane Departure Warning and Front Vehicle Collision Warning \u2022 Clean interior, practical size, and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #HondaVezel #HybridSUV Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "",
@@ -922,7 +922,7 @@
         "price_text": "24900",
         "price": 24900,
         "odometer_text": "112678",
-        "description": "Stock - 20171056\n\n2017 HONDA Odyssey Absolute | Hybrid | 112678 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Traction Control System\n\u2022 Lane Departure Warning\n\u2022 Front Vehicle...",
+        "description": "2017 HONDA Odyssey Absolute | Hybrid | 112,678 KM\n5-Year Hybrid Battery Warranty!\n\nA spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-dist...",
         "detail_url": "https://www.carbarn.com.au/vehicles/honda/odyssey/rc4/1056",
         "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/RC4-1023465/3Q7djCvdDO8zQsShMICvoA/You_made_the_202604221129.jpg",
         "stock_no": "1056",
@@ -946,7 +946,7 @@
         "price_text": "$24,900",
         "price": 24900,
         "odometer_text": "112,678km",
-        "description": "Stock - HONDA Odyssey Absolute | Hybrid | 112678 KM We are open on public holidays and 7 days a week Key Features: Air Conditioning Traction Control System Lane Departure Warning Front Vehicle Collision Warning Electronic Parking Sensor ECO Mode for Top-Notch Fuel Saving Power steering Multi-Function Steering Wheel Fog Lights Airbags 6 Power Windows Rear Wiper Reversing Camera Parking assist camera Cruise Control Half Leather Seats Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "description": "2017 HONDA Odyssey Absolute | Hybrid | 112,678 KM 5-Year Hybrid Battery Warranty! A spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-distance trips. With hybrid fuel efficiency, dual electric sliding doors, half leather seats, modern safety features, and excellent interior condition, this Odyssey is a practical people mover with comfort and style. Key Features: \u2022 Hybrid engine \u2022 Absolute package \u2022 Traction Control System \u2022 Lane Departure Warning \u2022 Front Vehicle Collision Warning \u2022 Electronic Parking Sensor \u2022 ECO Mode for top-notch fuel saving \u2022 Multi-Function Steering Wheel \u2022 Parking Assist Camera \u2022 Cruise Control \u2022 Half Leather Seats \u2022 Dual Electric Sliding Doors \u2022 Push Start and Keyless Entry \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Odyssey Stands Out: \u2022 Premium hybrid people mover with strong family appeal \u2022 Dual electric sliding doors for easy access \u2022 Safety features including Lane Departure Warning and Front Vehicle Collision Warning \u2022 Clean interior and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2017-honda-odyssey-hybrid-absolute-auto/OAG-AD-25744494/",
         "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/2n9p4qerq0wdbz4jemlroudun.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -965,7 +965,7 @@
         "body_type": "People Mover",
         "fuel": "Hybrid",
         "transmission": "Automatic",
-        "dealer_comments": "Stock - HONDA Odyssey Absolute | Hybrid | 112678 KM We are open on public holidays and 7 days a week Key Features: Air Conditioning Traction Control System Lane Departure Warning Front Vehicle Collision Warning Electronic Parking Sensor ECO Mode for Top-Notch Fuel Saving Power steering Multi-Function Steering Wheel Fog Lights Airbags 6 Power Windows Rear Wiper Reversing Camera Parking assist camera Cruise Control Half Leather Seats Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "dealer_comments": "2017 HONDA Odyssey Absolute | Hybrid | 112,678 KM 5-Year Hybrid Battery Warranty! A spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-distance trips. With hybrid fuel efficiency, dual electric sliding doors, half leather seats, modern safety features, and excellent interior condition, this Odyssey is a practical people mover with comfort and style. Key Features: \u2022 Hybrid engine \u2022 Absolute package \u2022 Traction Control System \u2022 Lane Departure Warning \u2022 Front Vehicle Collision Warning \u2022 Electronic Parking Sensor \u2022 ECO Mode for top-notch fuel saving \u2022 Multi-Function Steering Wheel \u2022 Parking Assist Camera \u2022 Cruise Control \u2022 Half Leather Seats \u2022 Dual Electric Sliding Doors \u2022 Push Start and Keyless Entry \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Odyssey Stands Out: \u2022 Premium hybrid people mover with strong family appeal \u2022 Dual electric sliding doors for easy access \u2022 Safety features including Lane Departure Warning and Front Vehicle Collision Warning \u2022 Clean interior and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "Around market price",
@@ -1011,7 +1011,7 @@
         "price_text": "$28,900",
         "price": 28900,
         "odometer_text": "69,040km",
-        "description": "2017 HONDA Odyssey Absolute | Hybrid | 69,040 KM 5-Year Hybrid Battery Warranty! A spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-distance trips. With hybrid fuel efficiency, dual electric sliding doors, 10 airbags, modern safety features, and excellent interior condition, this Odyssey is a smart people mover with comfort and practicality. Key Features: \u2022 Hybrid engine \u2022 Absolute package \u2022 Half Leather Seats \u2022 Parking Assist Camera \u2022 Front Vehicle Collision Warning \u2022 Lane Departure Warning \u2022 Traction Control System \u2022 Multi-Function Steering Wheel \u2022 ECO Mode for top-notch fuel saving \u2022 Push Start and Keyless Entry \u2022 Dual Electric Sliding Doors \u2022 Cruise Control \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Odyssey Stands Out: \u2022 Premium hybrid people mover with strong family appeal \u2022 Dual electric sliding doors for easy access \u2022 10 airbags and modern safety features \u2022 Great option for families, travel, business, or daily comfort \u2022 Clean interior and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
+        "description": "2017 HONDA Odyssey Absolute | Hybrid | 69,040 KM 5-Year Hybrid Battery Warranty! A spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-distance trips. With hybrid fuel efficiency, dual electric sliding doors, 10 airbags, modern safety features, and excellent interior condition, this Odyssey is a smart people mover with comfort and practicality. Key Features: Hybrid engine Absolute package Half Leather Seats Parking Assist Camera Front Vehicle Collision Warning Lane Departure Warning Traction Control System Multi-Function Steering Wheel ECO Mode for top-notch fuel saving Push Start and Keyless Entry Dual Electric Sliding Doors Cruise Control Interior in excellent condition without any tears or marks 6 months NSW registration included Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Odyssey Stands Out: Premium hybrid people mover with strong family appeal Dual electric sliding doors for easy access 10 airbags and modern safety features Great option for families, travel, business, or daily comfort Clean interior and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2017-honda-odyssey-hybrid-absolute-auto/OAG-AD-25744498/",
         "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/btil99wxs3u6bcfm2wtafa2tq.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -1030,7 +1030,7 @@
         "body_type": "People Mover",
         "fuel": "Hybrid",
         "transmission": "Automatic",
-        "dealer_comments": "2017 HONDA Odyssey Absolute | Hybrid | 69,040 KM 5-Year Hybrid Battery Warranty! A spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-distance trips. With hybrid fuel efficiency, dual electric sliding doors, 10 airbags, modern safety features, and excellent interior condition, this Odyssey is a smart people mover with comfort and practicality. Key Features: \u2022 Hybrid engine \u2022 Absolute package \u2022 Half Leather Seats \u2022 Parking Assist Camera \u2022 Front Vehicle Collision Warning \u2022 Lane Departure Warning \u2022 Traction Control System \u2022 Multi-Function Steering Wheel \u2022 ECO Mode for top-notch fuel saving \u2022 Push Start and Keyless Entry \u2022 Dual Electric Sliding Doors \u2022 Cruise Control \u2022 Interior in excellent condition without any tears or marks \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Warranty: Hybrid Battery, Electrical and Mechanical \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Odyssey Stands Out: \u2022 Premium hybrid people mover with strong family appeal \u2022 Dual electric sliding doors for easy access \u2022 10 airbags and modern safety features \u2022 Great option for families, travel, business, or daily comfort \u2022 Clean interior and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
+        "dealer_comments": "2017 HONDA Odyssey Absolute | Hybrid | 69,040 KM 5-Year Hybrid Battery Warranty! A spacious and premium Honda Odyssey Absolute Hybrid built for family comfort, daily driving, school runs, business use, and long-distance trips. With hybrid fuel efficiency, dual electric sliding doors, 10 airbags, modern safety features, and excellent interior condition, this Odyssey is a smart people mover with comfort and practicality. Key Features: Hybrid engine Absolute package Half Leather Seats Parking Assist Camera Front Vehicle Collision Warning Lane Departure Warning Traction Control System Multi-Function Steering Wheel ECO Mode for top-notch fuel saving Push Start and Keyless Entry Dual Electric Sliding Doors Cruise Control Interior in excellent condition without any tears or marks 6 months NSW registration included Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Odyssey Stands Out: Premium hybrid people mover with strong family appeal Dual electric sliding doors for easy access 10 airbags and modern safety features Great option for families, travel, business, or daily comfort Clean interior and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "Around market price",
@@ -1707,7 +1707,7 @@
         "price_text": "30900",
         "price": 30900,
         "odometer_text": "26000",
-        "description": "Stock - 20211072\n\n2021 NISSAN Serena Highway Star V | Hybrid | 26000 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Power Windows\n\u2022 Traction Control System\n\u2022 Fog Lights\n\u2022 Rear Wiper\n\u2022 Pro-Pilot...",
+        "description": "2021 NISSAN Serena Highway Star V | Hybrid | 26,000 KM\n5-Year Hybrid Battery Warranty!\n\nA low-kilometre Nissan Serena Highway Star V Hybrid built for family use, school runs, rideshare, and comfortable daily driving....",
         "detail_url": "https://www.carbarn.com.au/vehicles/nissan/serena/gfc27/1072",
         "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GFC27-224929/3Q7djCvdDO8zQsShMICvoA/1.jpeg",
         "stock_no": "1072",
@@ -1731,7 +1731,7 @@
         "price_text": "$30,900",
         "price": 30900,
         "odometer_text": "26,000km",
-        "description": "Stock - NISSAN Serena Highway Star V | Hybrid | 26000 KM We are open on public holidays and 7 days a week Key Features: Power Windows Traction Control System Fog Lights Rear Wiper Pro-Pilot Assist Cruise Control Power steering Air Conditioning Dual Electric Sliding Door Multi-Function Steering Wheel Airbags Reversing Camera Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "description": "2021 NISSAN Serena Highway Star V | Hybrid | 26,000 KM 5-Year Hybrid Battery Warranty! A low-kilometre Nissan Serena Highway Star V Hybrid built for family use, school runs, rideshare, and comfortable daily driving. With Pro-Pilot Assist, dual electric sliding doors, reversing camera, and excellent interior condition, this Serena is a practical and fuel-efficient people mover ready for inspection. Key Features: Hybrid engine Highway Star V package Low 26,000 KM Pro-Pilot Assist Cruise Control Dual Electric Sliding Doors Reversing Camera Traction Control System Air Conditioning Power Steering Multi-Function Steering Wheel Power Windows Fog Lights Rear Wiper Airbags Interior in excellent condition without any tears or marks 6 months NSW registration included Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers 1 Year FREE Roadside Assistance Valid across Australia Why This Serena Stands Out: Popular hybrid family people mover Low kilometres for a 2021 model Dual electric sliding doors for easy family access Pro-Pilot Assist and reversing camera for confident driving Great for families, rideshare, school runs, or weekend trips Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle/Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #NissanSerena #SerenaHybrid #FamilyCar #HybridPeopleMover #UsedHybrid Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2021-nissan-serena-highway-star-s-hybrid-c27-auto/OAG-AD-25780113/",
         "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/5a7nhjgm71e2g93wzdozf6b61.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -1750,7 +1750,7 @@
         "body_type": "Wagon",
         "fuel": "Petrol",
         "transmission": "Automatic",
-        "dealer_comments": "Stock - NISSAN Serena Highway Star V | Hybrid | 26000 KM We are open on public holidays and 7 days a week Key Features: Power Windows Traction Control System Fog Lights Rear Wiper Pro-Pilot Assist Cruise Control Power steering Air Conditioning Dual Electric Sliding Door Multi-Function Steering Wheel Airbags Reversing Camera Interior in excellent condition without any tears or marks 6 months NSW registration is on us Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "dealer_comments": "2021 NISSAN Serena Highway Star V | Hybrid | 26,000 KM 5-Year Hybrid Battery Warranty! A low-kilometre Nissan Serena Highway Star V Hybrid built for family use, school runs, rideshare, and comfortable daily driving. With Pro-Pilot Assist, dual electric sliding doors, reversing camera, and excellent interior condition, this Serena is a practical and fuel-efficient people mover ready for inspection. Key Features: Hybrid engine Highway Star V package Low 26,000 KM Pro-Pilot Assist Cruise Control Dual Electric Sliding Doors Reversing Camera Traction Control System Air Conditioning Power Steering Multi-Function Steering Wheel Power Windows Fog Lights Rear Wiper Airbags Interior in excellent condition without any tears or marks 6 months NSW registration included Warranty & Coverage: 5 Years Warranty: Hybrid Battery, Electrical and Mechanical Coverage of up to $5,000 per claim Unlimited claims and kilometers 1 Year FREE Roadside Assistance Valid across Australia Why This Serena Stands Out: Popular hybrid family people mover Low kilometres for a 2021 model Dual electric sliding doors for easy family access Pro-Pilot Assist and reversing camera for confident driving Great for families, rideshare, school runs, or weekend trips Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle/Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #NissanSerena #SerenaHybrid #FamilyCar #HybridPeopleMover #UsedHybrid Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "",
@@ -1837,7 +1837,7 @@
         "price_text": "21400",
         "price": 21400,
         "odometer_text": "97848",
-        "description": "Stock - 20091070\n\n2009 SUBARU Impreza WRX STI 4WD | Petrol | 97848 KM\n\nWe are open on public holidays and 7 days a week\n\nKey Features:\n\u2022 Air Conditioning\n\u2022 Power steering\n\u2022 Half Leather Seats\n\u2022 Cruise Control\n\u2022 Multi-...",
+        "description": "2009 SUBARU Impreza WRX STI 4WD | Petrol | 97,848 KM\n5-Year Extended Warranty Available!\n\nA performance-focused Subaru Impreza WRX STI 4WD built for driving enthusiasts who want power, control, and classic STI charact...",
         "detail_url": "https://www.carbarn.com.au/vehicles/subaru/impreza/grf/1070",
         "image_url": "https://www.storage.importautos.com.au/h1r-ukBtbwcd8JVxP5TySA/GRF-004024/3Q7djCvdDO8zQsShMICvoA/Can_you_remove_202604151307.png",
         "stock_no": "1070",
@@ -1861,7 +1861,7 @@
         "price_text": "$21,400",
         "price": 21400,
         "odometer_text": "97,848km",
-        "description": "Stock - SUBARU Impreza WRX STI 4WD | Petrol | 97848 KM We are open on public holidays and 7 days a week Key Features: Air Conditioning Power steering Half Leather Seats Cruise Control Multi-Function Steering Wheel Power Windows Rear Wiper Reversing Camera Fog Lights Recently serviced and professionally detailed 6 months NSW registration is on us Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Warranty! Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "description": "2009 SUBARU Impreza WRX STI 4WD | Petrol | 97,848 KM 5-Year Extended Warranty Available! A performance-focused Subaru Impreza WRX STI 4WD built for driving enthusiasts who want power, control, and classic STI character. With Subaru Intelligent Drive, 4WD grip, sporty half leather seats, and everyday comfort features, this WRX STI is a great choice for weekend drives, enthusiast ownership, or anyone wanting a serious performance hatch. Key Features: Petrol engine 4WD WRX STI performance package Subaru Intelligent Drive Half Leather Seats Cruise Control Multi-Function Steering Wheel Push Start and Keyless Entry Traction Control System Air Conditioning Power Steering Power Windows Fog Lights Rear Wiper Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers 1 Year FREE Roadside Assistance Valid across Australia Why This WRX STI Stands Out: Iconic Subaru performance model with strong enthusiast appeal 4WD grip for confident handling Subaru Intelligent Drive for a more engaging driving feel Sporty interior with half leather seats Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle/Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #SubaruWRXSTI #WRXSTI #SubaruImpreza #PerformanceCar #4WD Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2009-subaru-impreza-wrx-sti-a-line-grf-auto-awd/OAG-AD-25744499/",
         "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/9dtcwew47affeykmbwrtm5yan.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -1880,7 +1880,7 @@
         "body_type": "Hatch",
         "fuel": "Petrol",
         "transmission": "Automatic",
-        "dealer_comments": "Stock - SUBARU Impreza WRX STI 4WD | Petrol | 97848 KM We are open on public holidays and 7 days a week Key Features: Air Conditioning Power steering Half Leather Seats Cruise Control Multi-Function Steering Wheel Power Windows Rear Wiper Reversing Camera Fog Lights Recently serviced and professionally detailed 6 months NSW registration is on us Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Warranty! Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: - Location: - 128 , , NSW Contact for Inspection: - WhatsApp: https:/// - Call: - Open 7 days a week DOOR DELIVERY IS AVAILABLE TO ALL STATES We work with over 30 leading Australian carriers and get the best delivery rates from us: - Newcastle and Wollongong area $200 - Canberra $300 - Melbourne $450 - Brisbane $550 - Adelaide $1200 - Tasmania $1400 - Perth $1600 Show more",
+        "dealer_comments": "2009 SUBARU Impreza WRX STI 4WD | Petrol | 97,848 KM 5-Year Extended Warranty Available! A performance-focused Subaru Impreza WRX STI 4WD built for driving enthusiasts who want power, control, and classic STI character. With Subaru Intelligent Drive, 4WD grip, sporty half leather seats, and everyday comfort features, this WRX STI is a great choice for weekend drives, enthusiast ownership, or anyone wanting a serious performance hatch. Key Features: Petrol engine 4WD WRX STI performance package Subaru Intelligent Drive Half Leather Seats Cruise Control Multi-Function Steering Wheel Push Start and Keyless Entry Traction Control System Air Conditioning Power Steering Power Windows Fog Lights Rear Wiper Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers 1 Year FREE Roadside Assistance Valid across Australia Why This WRX STI Stands Out: Iconic Subaru performance model with strong enthusiast appeal 4WD grip for confident handling Subaru Intelligent Drive for a more engaging driving feel Sporty interior with half leather seats Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: https:/// Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle/Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 #AU #SubaruWRXSTI #WRXSTI #SubaruImpreza #PerformanceCar #4WD Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "Below market price",
@@ -2306,7 +2306,7 @@
         "price_text": "$22,900",
         "price": 22900,
         "odometer_text": "67,593km",
-        "description": "2013 TOYOTA Alphard S | Petrol | 67,593 KM 5-Year Extended Warranty Available! A premium Toyota Alphard S built for family comfort, business use, airport runs, and long-distance travel. With a spacious cabin, dual electric sliding doors, smooth petrol performance, and Toyota reliability, this Alphard is a great choice for anyone wanting a comfortable and practical luxury people mover. Key Features: \u2022 Petrol engine \u2022 Alphard S package \u2022 Traction Control System \u2022 6 Airbags \u2022 Multi-Function Steering Wheel \u2022 Fog Lights \u2022 ECO Mode for top-notch fuel saving \u2022 Electronic Parking Sensor \u2022 Cruise Control \u2022 Alloy Wheels \u2022 Dual Electric Sliding Doors \u2022 Reversing Camera \u2022 Parking Assist Camera \u2022 Push Start and Keyless Entry \u2022 Recently serviced and professionally detailed \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Comprehensive Mechanical and Electrical Extended Warranty \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Alphard Stands Out: \u2022 Premium people mover with strong comfort and space \u2022 Dual electric sliding doors for easy family access \u2022 Great option for family use, business, travel, or daily comfort \u2022 Practical safety and convenience features \u2022 Clean, serviced, detailed, and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
+        "description": "2013 TOYOTA Alphard S | Petrol | 67,593 KM 5-Year Extended Warranty Available! A premium Toyota Alphard S built for family comfort, business use, airport runs, and long-distance travel. With a spacious cabin, dual electric sliding doors, smooth petrol performance, and Toyota reliability, this Alphard is a great choice for anyone wanting a comfortable and practical luxury people mover. Key Features: Petrol engine Alphard S package Traction Control System 6 Airbags Multi-Function Steering Wheel Fog Lights ECO Mode for top-notch fuel saving Electronic Parking Sensor Cruise Control Alloy Wheels Dual Electric Sliding Doors Reversing Camera Parking Assist Camera Push Start and Keyless Entry Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Alphard Stands Out: Premium people mover with strong comfort and space Dual electric sliding doors for easy family access Great option for family use, business, travel, or daily comfort Practical safety and convenience features Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
         "detail_url": "https://www.carsales.com.au/cars/details/2013-toyota-alphard-240s-type-gold-auto/OAG-AD-25709368/",
         "image_url": "https://carsales.pxcrush.net/carsales/car/dealer/awdxan0nba2l7q4h7wun7myja.jpg?pxc_format=jpeg&pxc_size=1200%2C630",
         "all_image_urls": [
@@ -2325,7 +2325,7 @@
         "body_type": "People Mover",
         "fuel": "Petrol",
         "transmission": "Automatic",
-        "dealer_comments": "2013 TOYOTA Alphard S | Petrol | 67,593 KM 5-Year Extended Warranty Available! A premium Toyota Alphard S built for family comfort, business use, airport runs, and long-distance travel. With a spacious cabin, dual electric sliding doors, smooth petrol performance, and Toyota reliability, this Alphard is a great choice for anyone wanting a comfortable and practical luxury people mover. Key Features: \u2022 Petrol engine \u2022 Alphard S package \u2022 Traction Control System \u2022 6 Airbags \u2022 Multi-Function Steering Wheel \u2022 Fog Lights \u2022 ECO Mode for top-notch fuel saving \u2022 Electronic Parking Sensor \u2022 Cruise Control \u2022 Alloy Wheels \u2022 Dual Electric Sliding Doors \u2022 Reversing Camera \u2022 Parking Assist Camera \u2022 Push Start and Keyless Entry \u2022 Recently serviced and professionally detailed \u2022 6 months NSW registration included Warranty & Coverage: \u2022 5 Years Comprehensive Mechanical and Electrical Extended Warranty \u2022 Coverage of up to $5,000 per claim \u2022 Unlimited claims and kilometers \u2022 Car rental and accommodation included for breakdowns \u2022 1 Year FREE Roadside Assistance \u2022 Simple, hassle-free claims process \u2022 Valid across Australia Why This Alphard Stands Out: \u2022 Premium people mover with strong comfort and space \u2022 Dual electric sliding doors for easy family access \u2022 Great option for family use, business, travel, or daily comfort \u2022 Practical safety and convenience features \u2022 Clean, serviced, detailed, and ready for inspection Pricing: \u2022 We offer the most competitive prices in Australia \u2022 Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
+        "dealer_comments": "2013 TOYOTA Alphard S | Petrol | 67,593 KM 5-Year Extended Warranty Available! A premium Toyota Alphard S built for family comfort, business use, airport runs, and long-distance travel. With a spacious cabin, dual electric sliding doors, smooth petrol performance, and Toyota reliability, this Alphard is a great choice for anyone wanting a comfortable and practical luxury people mover. Key Features: Petrol engine Alphard S package Traction Control System 6 Airbags Multi-Function Steering Wheel Fog Lights ECO Mode for top-notch fuel saving Electronic Parking Sensor Cruise Control Alloy Wheels Dual Electric Sliding Doors Reversing Camera Parking Assist Camera Push Start and Keyless Entry Recently serviced and professionally detailed 6 months NSW registration included Warranty & Coverage: 5 Years Comprehensive Mechanical and Electrical Extended Warranty Coverage of up to $5,000 per claim Unlimited claims and kilometers Car rental and accommodation included for breakdowns 1 Year FREE Roadside Assistance Simple, hassle-free claims process Valid across Australia Why This Alphard Stands Out: Premium people mover with strong comfort and space Dual electric sliding doors for easy family access Great option for family use, business, travel, or daily comfort Practical safety and convenience features Clean, serviced, detailed, and ready for inspection Pricing: We offer the most competitive prices in Australia Price match available on similar listings Website: []( Location: Unit D3, 128 , , NSW Contact for Inspection: WhatsApp: [https:///](https:///) Call: Open 7 days a week, from 8 am to 5 pm, including public holidays DOOR DELIVERY IS AVAILABLE TO ALL STATES Newcastle and Wollongong $200 | Canberra $300 | Melbourne $450 | Brisbane $550 | Adelaide $1200 | Tasmania $1400 | Perth $1600 Show more",
         "status_label": "",
         "status_tooltip": "",
         "price_badge_label": "",
@@ -3707,7 +3707,7 @@
     "unpublished_total": 0,
     "excluded_other_total": 0,
     "inventory_error": "",
-    "inventory_cached_at": 1778133665.0194666,
+    "inventory_cached_at": 1778136226.561417,
     "published_only": true,
     "manual_mode": true,
     "stale_identified_skipped_total": 0

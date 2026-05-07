@@ -1411,6 +1411,9 @@ video {
   background: rgba(7, 18, 36, 0.48);
   pointer-events: auto;
 }
+.app-popup-backdrop[hidden] {
+  display: none !important;
+}
 .app-popup {
   position: absolute;
   left: 50%;
@@ -1425,6 +1428,9 @@ video {
   display: grid;
   gap: 12px;
   pointer-events: auto;
+}
+.app-popup[hidden] {
+  display: none !important;
 }
 .app-popup__title {
   margin: 0;
