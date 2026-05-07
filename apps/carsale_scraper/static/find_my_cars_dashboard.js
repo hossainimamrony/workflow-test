@@ -86,37 +86,41 @@ function normDigits(v) {
   return cleanText(v).replace(/[^\d]/g, "");
 }
 
+function toInt(v) {
+  const s = normDigits(v);
+  return s ? Number(s) : null;
+}
+
 function buildDerivedMismatchMessages(entry) {
   const c = entry?.carbarn || {};
   const s = entry?.carsales || {};
   const out = [];
 
-  const addTextMismatch = (label, left, right) => {
-    const a = cleanText(left);
-    const b = cleanText(right);
-    if (!a || !b) return;
-    if (normText(a) !== normText(b)) {
-      out.push(`${label} mismatch: Carsales ${b} vs Carbarn ${a}`);
-    }
-  };
+  const csPrice = toInt(s.price ?? s.price_text);
+  const cbPrice = toInt(c.price ?? c.price_text);
+  if (csPrice !== null && cbPrice !== null && csPrice !== cbPrice) {
+    out.push(`Price mismatch: Carsales $${csPrice.toLocaleString()} vs Carbarn $${cbPrice.toLocaleString()}`);
+  }
 
-  const addNumberMismatch = (label, left, right) => {
-    const a = normDigits(left);
-    const b = normDigits(right);
-    if (!a || !b) return;
-    if (a !== b) {
-      out.push(`${label} mismatch: Carsales ${right} vs Carbarn ${left}`);
-    }
-  };
+  const csOdo = toInt(s.odometer_km ?? s.odometer_text);
+  const cbOdo = toInt(c.odometer_text);
+  if (csOdo !== null && cbOdo !== null && csOdo !== cbOdo) {
+    out.push(`Odometer mismatch: Carsales ${csOdo.toLocaleString()}km vs Carbarn ${cbOdo.toLocaleString()}km`);
+  }
 
-  addNumberMismatch("Price", c.price_text || c.price, s.price_text || s.price);
-  addNumberMismatch("Odometer", c.odometer_text || c.odometer, s.odometer_text || s.odometer);
-  addTextMismatch("Year", c.year, s.year);
-  addTextMismatch("Make", c.make, s.make);
-  addTextMismatch("Model", c.model, s.model);
-  addTextMismatch("Stock", c.stock_no, s.stock_no);
-  addTextMismatch("Chassis", c.chassis, s.chassis);
-  addTextMismatch("VIN", c.vin, s.vin);
+  const csYear = normText(s.year);
+  const cbYear = normText(c.year);
+  if (csYear && cbYear && csYear !== cbYear) {
+    out.push(`Year mismatch: Carsales ${cleanText(s.year)} vs Carbarn ${cleanText(c.year)}`);
+  }
+
+  const csMake = normText(s.make);
+  const cbMake = normText(c.make);
+  if (csMake && cbMake && csMake !== cbMake) {
+    out.push(`Make mismatch: Carsales ${cleanText(s.make)} vs Carbarn ${cleanText(c.make)}`);
+  }
+
+  // Model mismatch is intentionally ignored to match original workflow behavior.
 
   return out;
 }
@@ -145,9 +149,12 @@ function cardHtml(sideLabel, row, status, entry) {
   const thumbs = images.slice(1, 9).map((url) => (
     `<img class="thumb" src="${esc(url)}" alt="photo" loading="lazy" />`
   )).join("");
-  const chips = chipsFor(row || {}).map((x) => `<span class="chip">${esc(x)}</span>`).join("");
-  const link = row?.detail_url ? `<a href="${esc(row.detail_url)}" target="_blank" rel="noopener">Open listing</a>` : "";
   const mismatchMessages = sideLabel === "Carsales" ? buildAllMismatchMessages(entry) : [];
+  const mismatchChip = sideLabel === "Carsales" && mismatchMessages.length
+    ? `<span class="chip">Mismatches: ${mismatchMessages.length}</span>`
+    : "";
+  const chips = `${chipsFor(row || {}).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}${mismatchChip}`;
+  const link = row?.detail_url ? `<a href="${esc(row.detail_url)}" target="_blank" rel="noopener">Open listing</a>` : "";
   const mismatchBlock = mismatchMessages.length
     ? `<div class="detail-box warn"><div class="detail-title">Data Mismatches</div>${mismatchMessages.map((m) => `<div>${esc(m)}</div>`).join("")}</div>`
     : "";
