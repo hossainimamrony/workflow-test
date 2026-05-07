@@ -1,188 +1,33 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Carbarn - Find My Cars{% endblock %}
+{% block title %}Car Comparison Dashboard{% endblock %}
 {% block body_class %}workflow-body workflow-body--carsale{% endblock %}
 {% block page_shell_class %}page-shell--wide page-shell--flush{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'find_my_cars_dashboard.css' %}" />
-<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="layout">
-  <main class="main">
-    <header class="topbar">
-      <div class="topbar-title">
-        <h1>Find My Cars Dashboard</h1>
-        <p>Manual Carsales URL matching against Carbarn API inventory.</p>
-        <p style="font-size:12px;opacity:.75;margin-top:4px;">UI Build: 20260430-1</p>
-      </div>
-      <div class="badges">
-        <span id="statusBadge" class="badge">Status: Idle</span>
-        <span id="totalCarsBadge" class="badge">Total Cars: 0</span>
-        <span id="identifiedBadge" class="badge">Identified: 0</span>
-        <span id="notFoundBadge" class="badge">Not Found: 0</span>
-        <span id="tooManyBadge" class="badge">Errors: 0</span>
-        <span id="onOfferBadge" class="badge">Inventory Excluded: 0</span>
-        <span id="unpublishedBadge" class="badge">Inventory Unpublished: 0</span>
-      </div>
-    </header>
+<div class="main">
+  <header class="topbar">
+    <h1>Car Comparison Dashboard</h1>
+    <p>Data source: <code>full_comparisons.json</code> or uploaded JSON file.</p>
+  </header>
 
-    <section class="kpi-grid">
-      <article class="kpi-card">
-        <div class="kpi-title">Submitted URLs</div>
-        <div id="kpiSubmittedUrls" class="kpi-value">-</div>
-      </article>
-      <article class="kpi-card">
-        <div class="kpi-title">Total Cars</div>
-        <div id="kpiInventory" class="kpi-value">-</div>
-      </article>
-      <article class="kpi-card">
-        <div class="kpi-title">Identified Cars</div>
-        <div id="kpiIdentified" class="kpi-value">0</div>
-      </article>
-      <article class="kpi-card">
-        <div class="kpi-title">Not Found Cars</div>
-        <div id="kpiNotFound" class="kpi-value">0</div>
-      </article>
-      <article class="kpi-card">
-        <div class="kpi-title">Inventory Excluded</div>
-        <div id="kpiOnOffer" class="kpi-value">0</div>
-      </article>
-      <article class="kpi-card">
-        <div class="kpi-title">Inventory Unpublished</div>
-        <div id="kpiUnpublished" class="kpi-value">0</div>
-      </article>
-      <article class="kpi-card">
-        <div class="kpi-title">Last Run</div>
-        <div id="kpiLastRun" class="kpi-value small">No run yet</div>
-      </article>
-    </section>
+  <section class="toolbar">
+    <button id="loadDefaultBtn" class="btn">Load Default JSON</button>
+    <label class="upload-label" for="jsonUpload">Upload full_comparisons.json</label>
+    <input id="jsonUpload" type="file" accept="application/json,.json" />
+    <input id="searchInput" type="text" placeholder="Search make, model, stock, title..." />
+    <span id="metaText" class="meta">No data loaded</span>
+  </section>
 
-    <section class="panel-grid">
-      <article class="panel run-panel">
-        <h2>Manual URL Workflow</h2>
-        <div class="hint-box">Pick a mode, then click Run Match.</div>
-        <div class="mode-cards" role="radiogroup" aria-label="Run mode">
-          <label class="mode-card">
-            <input id="runModeAll" type="radio" name="run_mode" checked />
-            <span class="mode-card-title">All Saved URLs</span>
-            <span class="mode-card-sub">Run the full saved list.</span>
-          </label>
-          <label class="mode-card">
-            <input id="runModeNotFound" type="radio" name="run_mode" />
-            <span class="mode-card-title">Not Found URLs</span>
-            <span class="mode-card-sub">Run only previously not-found URLs.</span>
-          </label>
-          <label class="mode-card">
-            <input id="runModeStockOnly" type="radio" name="run_mode" />
-            <span class="mode-card-title">Selected Stock IDs</span>
-            <span class="mode-card-sub">Run only chosen stock IDs.</span>
-          </label>
-        </div>
-        <div class="workflow-grid single-col">
-          <div class="workflow-col">
-            <div class="form-row">
-              <label>Stock IDs (Optional)</label>
-              <div class="stock-multi">
-                <div id="stockIdSelected" class="stock-selected"></div>
-                <input id="stockIdInput" type="text" placeholder="Search and select stock IDs..." />
-                <div id="stockIdDropdown" class="stock-dropdown"></div>
-              </div>
-            </div>
-            <div class="btn-row action-row">
-              <button id="runBtn" class="btn primary">Run Match</button>
-              <button id="stopBtn" class="btn danger">Stop</button>
-              <button id="refreshBtn" class="btn">Refresh</button>
-              <button id="sessionModeBtn" class="btn">Session Reuse: ON</button>
-            </div>
-          </div>
-        </div>
-        <div id="runStatus" class="run-status">Idle (no job started yet)</div>
-        <div class="live-progress">
-          <div class="live-head">
-            <strong>Live Progress</strong>
-            <span id="liveStage" class="live-stage">Stage: idle</span>
-          </div>
-          <div class="progress-track">
-            <div id="liveProgressFill" class="progress-fill" style="width:0%"></div>
-          </div>
-          <div class="live-meta">
-            <span id="liveProgressText">0%</span>
-            <span id="liveEta">ETA: --</span>
-            <span id="liveRemaining">URLs Left: 0</span>
-          </div>
-          <div class="live-grid">
-            <div>Found: <b id="liveFound">0</b></div>
-            <div>Not Found: <b id="liveSuspected">0</b></div>
-            <div>Checked: <b id="liveVerified">0</b></div>
-            <div>URLs: <b id="liveCards">0</b></div>
-            <div>Done: <b id="liveTargets">0/0</b></div>
-            <div>Current: <b id="livePage">0</b></div>
-            <div>Errors: <b id="liveSkipped">0</b></div>
-            <div>Updated: <b id="liveUpdated">--</b></div>
-          </div>
-          <div id="liveTargetLabel" class="live-target">Target: --</div>
-        </div>
-      </article>
-    </section>
-
-    <section class="panel">
-      <div class="section-head">
-        <h2>URL Match Explorer</h2>
-        <div class="btn-row">
-          <button id="reloadDataBtn" class="btn">Reload Data</button>
-          <button id="refreshInventoryBtn" class="btn">Refresh Carbarn API</button>
-        </div>
-      </div>
-      <div class="filters">
-        <input id="searchInput" type="text" placeholder="Search title, make, model, stock, chassis..." />
-        <select id="statusFilter">
-          <option value="all">All Status</option>
-          <option value="identified">Identified</option>
-          <option value="not_found">Not Found</option>
-          <option value="error">Error</option>
-        </select>
-        <select id="makeFilter">
-          <option value="all">All Makes</option>
-        </select>
-        <select id="modelFilter">
-          <option value="all">All Models</option>
-        </select>
-        <input id="minPrice" type="number" placeholder="Min Price" />
-        <input id="maxPrice" type="number" placeholder="Max Price" />
-      </div>
-      <div id="carRows" class="rows"></div>
-    </section>
-  </main>
-</div>
-
-<div id="imageViewer" class="image-viewer" aria-hidden="true">
-  <button id="imageViewerClose" class="image-viewer-close" type="button">Close</button>
-  <img id="imageViewerImg" class="image-viewer-img" alt="Full preview" />
-</div>
-
-<button id="quickAddBtn" class="quick-add-btn" type="button">Add URL</button>
-<div id="quickAddModal" class="quick-add-modal" aria-hidden="true">
-  <div class="quick-add-card">
-    <div class="quick-add-head">
-      <h3>Add Carsales URL</h3>
-      <button id="quickAddClose" class="quick-add-close" type="button">Close</button>
-    </div>
-    <input
-      id="quickAddInput"
-      type="text"
-      placeholder="Paste Carsales detail URL (https://www.carsales.com.au/cars/details/...)"
-    />
-    <div class="quick-add-actions">
-      <button id="quickAddSave" class="btn primary" type="button">Save URL</button>
-    </div>
-  </div>
+  <section id="rows" class="rows"></section>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260430-1"></script>
+<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260507-1"></script>
 {% endblock %}

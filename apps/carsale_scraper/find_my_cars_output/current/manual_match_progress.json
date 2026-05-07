@@ -1,9 +1,0 @@
-{
-  "updated_at": "2026-05-01T10:38:40",
-  "urls_total": 46,
-  "urls_done": 46,
-  "last_processed_url": "https://www.carsales.com.au/cars/details/2013-toyota-estima-aeras-hybrid-auto-4wd/OAG-AD-25780116/",
-  "recycle_every": 10,
-  "throttle_min_seconds": 6.0,
-  "throttle_max_seconds": 12.0
-}
