@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}API Docs | caraben operations suite,{% endblock %}
+
+{% block extra_head %}
+<style>
+  .docs-wrap {
+    display: grid;
+    gap: 14px;
+  }
+
+  .docs-intro {
+    border: 1px solid var(--hub-line);
+    border-radius: var(--hub-radius);
+    background: #fff;
+    box-shadow: var(--hub-shadow);
+    padding: 16px;
+  }
+
+  .docs-intro h1 {
+    margin: 0 0 6px;
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .docs-intro p {
+    margin: 0;
+    color: var(--hub-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .docs-section {
+    border: 1px solid var(--hub-line);
+    border-radius: var(--hub-radius);
+    background: #fff;
+    box-shadow: var(--hub-shadow);
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .docs-section h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .docs-note {
+    margin: 0;
+    color: var(--hub-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .docs-table-wrap {
+    overflow-x: auto;
+  }
+
+  .docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .docs-table th,
+  .docs-table td {
+    border: 1px solid var(--hub-line);
+    padding: 9px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .docs-table th {
+    background: #f7faff;
+    color: #24406d;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .docs-path {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    color: #1b3968;
+    word-break: break-all;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="docs-wrap">
+  <section class="docs-intro">
+    <h1>API Docs</h1>
+    <p>Organized API reference for Carsale Scraper, Real Footage Reels, and Global Make Model Video workflows inside caraben operations suite,.</p>
+  </section>
+
+  <section class="docs-section">
+    <h2>Carsale Scraper APIs</h2>
+    <p class="docs-note">Base workflow path: <span class="docs-path">/workflows/carbarn-vs-carsales/</span>. API root alias is also available at <span class="docs-path">/api/comparisons</span>.</p>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Purpose</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GET</td>
+            <td class="docs-path">/workflows/carbarn-vs-carsales/api/comparisons/</td>
+            <td>Read comparison records and run results.</td>
+            <td>Supports dashboard data loading and progress views.</td>
+          </tr>
+          <tr>
+            <td>POST</td>
+            <td class="docs-path">/workflows/carbarn-vs-carsales/api/comparisons/</td>
+            <td>Start or submit comparison operations.</td>
+            <td>Use JSON request body for comparison payload.</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td class="docs-path">/api/comparisons</td>
+            <td>Root-level API alias for comparisons endpoint.</td>
+            <td>Useful for integrations using a stable global API prefix.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="docs-section">
+    <h2>Real Footage Reels APIs</h2>
+    <p class="docs-note">Base workflow path: <span class="docs-path">/workflows/real-footage-reels/</span>.</p>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Purpose</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/meta</td><td>Read app metadata and feature flags.</td><td>Used during initial frontend boot.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/jobs</td><td>List queued/running/completed jobs.</td><td>Returns active IDs and worker mode.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/jobs</td><td>Create a new workflow job.</td><td>Supports commands such as script draft and run resume flows.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/jobs/{job_id}/control</td><td>Pause, resume, stop, or remove jobs.</td><td>Action is passed in JSON body.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/runs</td><td>List runs with status, stats, and latest job summary.</td><td>Main runs grid data source.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}</td><td>Get full run detail payload.</td><td>Includes media URLs, scripts, plan, and pipeline state.</td></tr>
+          <tr><td>DELETE</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}</td><td>Delete one run and related records.</td><td>Legacy POST delete endpoint also exists.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/prepare</td><td>Queue prepare stage for an existing run.</td><td>Shortcut to resume frame preparation.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/prepare-analysis</td><td>Queue prepare plus analysis pipeline.</td><td>Supports auto-compose chaining.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/identify</td><td>Generate script options / identification stage.</td><td>Routes into job command mapping in backend.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/compose</td><td>Compose full video with approved script.</td><td>Requires `approvedScript` or `script` in body.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/voiceover/draft</td><td>Regenerate script options.</td><td>Creates draft variants for approval.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/voiceover/apply</td><td>Apply selected script and stitch voice-over.</td><td>Persists applied script for run detail view.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/thumbnail</td><td>Generate run thumbnail image.</td><td>Accepts title, subtitle, and reference image payload.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/runs/{run_id}/asset?path=...</td><td>Securely stream run assets.</td><td>Supports range requests and optional attachment download flag.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/runs/trash-cleanup</td><td>Clean temporary and trash files.</td><td>Requires confirmation flag in body or query.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/workflow-debug</td><td>Read runtime diagnostics.</td><td>Shows worker mode, node status, and key readiness.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/vehicle-inventory/status</td><td>Read inventory cache status.</td><td>Returns counts and refresh state.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/vehicle-inventory/search?q=...&limit=20</td><td>Search cached inventory.</td><td>Used by studio inventory lookup UI.</td></tr>
+          <tr><td>POST</td><td class="docs-path">/workflows/real-footage-reels/api/vehicle-inventory/refresh</td><td>Trigger inventory refresh.</td><td>Starts refresh and returns accepted response.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/public/stock-videos/endpoints</td><td>List available public stock-video APIs.</td><td>Discovery endpoint for external integrations.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/public/stock-videos</td><td>List latest record per stock or by filter.</td><td>Use `stockId` query for targeted lookup.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/public/stock-videos/{stock_id}</td><td>Get latest record for one stock ID.</td><td>Returns final reel and thumbnail metadata.</td></tr>
+          <tr><td>GET</td><td class="docs-path">/workflows/real-footage-reels/api/public/stock-videos/{stock_id}/history</td><td>Get historical records for one stock ID.</td><td>Supports `limit` query parameter.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="docs-section">
+    <h2>Global Make Model Video APIs</h2>
+    <p class="docs-note">Base workflow path: <span class="docs-path">/workflows/global-make-model-video/</span>.</p>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Purpose</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GET</td>
+            <td class="docs-path">/workflows/global-make-model-video/</td>
+            <td>Open the workflow UI page.</td>
+            <td>No dedicated JSON API routes are registered yet in the current URL config.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
