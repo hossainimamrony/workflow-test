@@ -138,6 +138,12 @@ body {
   color: #214980;
 }
 
+.chip-warn {
+  border-color: #facc15;
+  background: #fef9c3;
+  color: #713f12;
+}
+
 .detail-box {
   margin-top: 10px;
   border-radius: 10px;
@@ -155,6 +161,12 @@ body {
   border: 1px solid #fecaca;
   background: #fff1f2;
   color: #881337;
+}
+
+.detail-box.caution {
+  border: 1px solid #facc15;
+  background: #fef9c3;
+  color: #713f12;
 }
 
 .detail-title {

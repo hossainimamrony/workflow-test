@@ -51,6 +51,31 @@ function chipsFor(row) {
   ].filter(Boolean);
 }
 
+function getImageCount(row) {
+  const raw = row?.photo_count ?? row?.image_count;
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric) && numeric > 0) return numeric;
+  return normalizeImageList(row || {}).length;
+}
+
+function getImageWarning(row) {
+  const count = getImageCount(row);
+  if (!count) return null;
+  if (count < 20) {
+    return {
+      count,
+      message: "There might be less images.",
+    };
+  }
+  if (count > 30) {
+    return {
+      count,
+      message: "There might be duplicate images.",
+    };
+  }
+  return null;
+}
+
 function normalizeImageList(row) {
   let images = [];
   if (Array.isArray(row?.all_image_urls)) {
@@ -151,13 +176,22 @@ function cardHtml(sideLabel, row, status, entry) {
     `<img class="thumb" src="${esc(url)}" alt="photo" loading="lazy" />`
   )).join("");
   const mismatchMessages = sideLabel === "Carsales" ? buildAllMismatchMessages(entry) : [];
+  const imageWarning = getImageWarning(row || {});
   const mismatchChip = sideLabel === "Carsales" && mismatchMessages.length
     ? `<span class="chip">Mismatches: ${mismatchMessages.length}</span>`
     : "";
-  const chips = `${chipsFor(row || {}).map((x) => `<span class="chip">${esc(x)}</span>`).join("")}${mismatchChip}`;
+  const chips = `${chipsFor(row || {}).map((x) => {
+    if (x.startsWith("Images:") && imageWarning) {
+      return `<span class="chip chip-warn">${esc(x)}</span>`;
+    }
+    return `<span class="chip">${esc(x)}</span>`;
+  }).join("")}${mismatchChip}`;
   const link = row?.detail_url ? `<a href="${esc(row.detail_url)}" target="_blank" rel="noopener">Open listing</a>` : "";
   const mismatchBlock = mismatchMessages.length
     ? `<div class="detail-box warn"><div class="detail-title">Data Mismatches</div>${mismatchMessages.map((m) => `<div>${esc(m)}</div>`).join("")}</div>`
+    : "";
+  const imageWarningBlock = imageWarning
+    ? `<div class="detail-box caution"><div class="detail-title">Image Count Warning (${imageWarning.count})</div><div>${esc(imageWarning.message)}</div></div>`
     : "";
   const warranty = row?.warranty || null;
   const warrantyBlock = warranty
@@ -175,6 +209,7 @@ function cardHtml(sideLabel, row, status, entry) {
       ${img}
       ${thumbs ? `<div class="thumb-grid">${thumbs}</div>` : ""}
       <div class="chips">${chips}</div>
+      ${imageWarningBlock}
       ${mismatchBlock}
       ${warrantyBlock}
       ${link}
@@ -246,7 +281,14 @@ function rebuildFilters() {
 
 function render() {
   const query = (els.searchInput.value || "").trim().toLowerCase();
-  const rows = state.rows.filter((entry) => rowMatches(entry, query));
+  let rows = state.rows.filter((entry) => rowMatches(entry, query));
+  if (els.statusFilter.value === "all") {
+    rows = rows.sort((a, b) => {
+      const aMismatch = buildAllMismatchMessages(a).length > 0 ? 1 : 0;
+      const bMismatch = buildAllMismatchMessages(b).length > 0 ? 1 : 0;
+      return aMismatch - bMismatch;
+    });
+  }
 
   if (!rows.length) {
     els.rows.innerHTML = '<div class="empty">No comparison rows found.</div>';
