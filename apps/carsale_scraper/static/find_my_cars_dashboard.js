@@ -228,6 +228,8 @@ function rowMatches(entry, query) {
   const soldFlag = !!entry?.carsales?.is_sold;
   if (status === "mismatch_only") {
     if (!buildAllMismatchMessages(entry).length) return false;
+  } else if (status === "image_problem_only") {
+    if (!getImageWarning(entry?.carsales || {})) return false;
   } else if (status === "sold") {
     if (!(entryStatus === "sold" || soldFlag)) return false;
   } else if (status !== "all" && entryStatus !== status) {
