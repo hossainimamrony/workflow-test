@@ -28,7 +28,7 @@ body {
 .toolbar {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: auto 1.8fr repeat(6, minmax(130px, 1fr));
+  grid-template-columns: auto 1.8fr repeat(5, minmax(130px, 1fr));
   gap: 10px;
   align-items: center;
 }
@@ -52,7 +52,6 @@ body {
 #statusFilter,
 #makeFilter,
 #modelFilter,
-#statusLabelFilter,
 #minPrice,
 #maxPrice {
   border: 1px solid var(--line);

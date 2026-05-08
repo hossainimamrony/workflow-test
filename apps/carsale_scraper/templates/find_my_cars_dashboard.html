@@ -20,6 +20,7 @@
     <input id="searchInput" type="text" placeholder="Search by title, make, model, stock..." />
     <select id="statusFilter">
       <option value="all">All Status</option>
+      <option value="has_status_label">Has Status Label</option>
       <option value="mismatch_only">Mismatched Only</option>
       <option value="image_problem_only">Image Problem Only</option>
       <option value="identified">Identified</option>
@@ -35,10 +36,6 @@
     <select id="modelFilter">
       <option value="all">All Models</option>
     </select>
-    <select id="statusLabelFilter">
-      <option value="all">All Status Labels</option>
-      <option value="has_status_label">Has Status Label</option>
-    </select>
     <input id="minPrice" type="number" placeholder="Min Price (AUD)" />
     <input id="maxPrice" type="number" placeholder="Max Price (AUD)" />
   </section>
@@ -48,5 +45,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260508-2"></script>
+<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260508-3"></script>
 {% endblock %}
