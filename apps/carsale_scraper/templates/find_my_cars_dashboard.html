@@ -35,6 +35,10 @@
     <select id="modelFilter">
       <option value="all">All Models</option>
     </select>
+    <select id="statusLabelFilter">
+      <option value="all">All Status Labels</option>
+      <option value="has_status_label">Has Status Label</option>
+    </select>
     <input id="minPrice" type="number" placeholder="Min Price (AUD)" />
     <input id="maxPrice" type="number" placeholder="Max Price (AUD)" />
   </section>
@@ -44,5 +48,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260508-1"></script>
+<script src="{% static 'find_my_cars_dashboard.js' %}?v=20260508-2"></script>
 {% endblock %}

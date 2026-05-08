@@ -5,6 +5,7 @@ const els = {
   statusFilter: document.getElementById("statusFilter"),
   makeFilter: document.getElementById("makeFilter"),
   modelFilter: document.getElementById("modelFilter"),
+  statusLabelFilter: document.getElementById("statusLabelFilter"),
   minPrice: document.getElementById("minPrice"),
   maxPrice: document.getElementById("maxPrice"),
 };
@@ -231,6 +232,7 @@ function rowMatches(entry, query) {
   const status = els.statusFilter.value;
   const make = els.makeFilter.value;
   const model = els.modelFilter.value;
+  const statusLabelFilter = els.statusLabelFilter.value;
   const minPrice = Number(els.minPrice.value || 0) || null;
   const maxPrice = Number(els.maxPrice.value || 0) || null;
 
@@ -252,6 +254,9 @@ function rowMatches(entry, query) {
 
   const md = String(entry?.carbarn?.model || entry?.carsales?.model || "");
   if (model !== "all" && md.toLowerCase() !== model.toLowerCase()) return false;
+
+  const statusLabel = cleanText(entry?.carsales?.status_label);
+  if (statusLabelFilter === "has_status_label" && !statusLabel) return false;
 
   const priceRaw = entry?.carbarn?.price ?? entry?.carsales?.price;
   const price = Number(priceRaw || 0) || null;
@@ -349,6 +354,7 @@ function bindEvents() {
   els.statusFilter.addEventListener("change", render);
   els.makeFilter.addEventListener("change", render);
   els.modelFilter.addEventListener("change", render);
+  els.statusLabelFilter.addEventListener("change", render);
   els.minPrice.addEventListener("input", render);
   els.maxPrice.addEventListener("input", render);
 }
