@@ -38,11 +38,10 @@ body {
     radial-gradient(860px 260px at 92% -12%, #e8f0ff 0%, rgba(232, 240, 255, 0) 70%),
     var(--bg);
   color: var(--text);
-  font-family:
-    "Poppins",
-    "Montserrat",
-    "Segoe UI",
-    sans-serif;
+  font-family: "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 a {
   color: inherit;
@@ -115,7 +114,7 @@ video {
 .site-title {
   margin: 0;
   font-size: 1.7rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.1;
 }
@@ -227,7 +226,7 @@ video {
 .page-intro__title {
   margin: 0;
   font-size: 1.95rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.1;
 }
