@@ -67,7 +67,7 @@ function getImageWarning(row) {
       message: "There might be less images.",
     };
   }
-  if (count > 30) {
+  if (count > 35) {
     return {
       count,
       message: "There might be duplicate images.",
