@@ -162,6 +162,16 @@ function buildAllMismatchMessages(entry) {
   return merged;
 }
 
+function isCarbarnMissingAndCarsalesSold(entry) {
+  const carbarn = entry?.carbarn || {};
+  const carsales = entry?.carsales || {};
+  const carbarnTitle = cleanText(carbarn.title);
+  const hasCarbarnDetailUrl = cleanText(carbarn.detail_url).length > 0;
+  const carbarnMissing = !carbarnTitle || carbarnTitle.toLowerCase() === "no title";
+  const carsalesSold = !!carsales.is_sold || String(entry?.status || "").toLowerCase() === "sold";
+  return carbarnMissing && !hasCarbarnDetailUrl && carsalesSold;
+}
+
 function cardHtml(sideLabel, row, status, entry) {
   const title = row?.title || "No title";
   const images = normalizeImageList(row || {});
@@ -229,6 +239,7 @@ function rowMatches(entry, query) {
   if (status === "mismatch_only") {
     if (!buildAllMismatchMessages(entry).length) return false;
   } else if (status === "image_problem_only") {
+    if (isCarbarnMissingAndCarsalesSold(entry)) return false;
     if (!getImageWarning(entry?.carsales || {})) return false;
   } else if (status === "sold") {
     if (!(entryStatus === "sold" || soldFlag)) return false;
@@ -288,6 +299,9 @@ function render() {
   let rows = state.rows.filter((entry) => rowMatches(entry, query));
   if (els.statusFilter.value === "all") {
     rows = rows.sort((a, b) => {
+      const aSoldMissing = isCarbarnMissingAndCarsalesSold(a) ? 1 : 0;
+      const bSoldMissing = isCarbarnMissingAndCarsalesSold(b) ? 1 : 0;
+      if (aSoldMissing !== bSoldMissing) return aSoldMissing - bSoldMissing;
       const aMismatch = buildAllMismatchMessages(a).length > 0 ? 1 : 0;
       const bMismatch = buildAllMismatchMessages(b).length > 0 ? 1 : 0;
       return aMismatch - bMismatch;
