@@ -226,7 +226,9 @@ function rowMatches(entry, query) {
 
   const entryStatus = String(entry?.status || "");
   const soldFlag = !!entry?.carsales?.is_sold;
-  if (status === "sold") {
+  if (status === "mismatch_only") {
+    if (!buildAllMismatchMessages(entry).length) return false;
+  } else if (status === "sold") {
     if (!(entryStatus === "sold" || soldFlag)) return false;
   } else if (status !== "all" && entryStatus !== status) {
     return false;
