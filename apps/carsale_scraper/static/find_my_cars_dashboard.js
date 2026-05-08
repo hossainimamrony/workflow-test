@@ -176,7 +176,7 @@ function cardHtml(sideLabel, row, status, entry) {
     `<img class="thumb" src="${esc(url)}" alt="photo" loading="lazy" />`
   )).join("");
   const mismatchMessages = sideLabel === "Carsales" ? buildAllMismatchMessages(entry) : [];
-  const imageWarning = getImageWarning(row || {});
+  const imageWarning = sideLabel === "Carsales" ? getImageWarning(row || {}) : null;
   const mismatchChip = sideLabel === "Carsales" && mismatchMessages.length
     ? `<span class="chip">Mismatches: ${mismatchMessages.length}</span>`
     : "";
