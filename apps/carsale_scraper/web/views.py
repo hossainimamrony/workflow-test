@@ -66,6 +66,16 @@ def _write_my_car_list_urls(urls: list[str]) -> None:
     MY_CAR_LIST_FILE.write_text(json.dumps(urls, indent=2), encoding="utf-8")
 
 
+def _normalize_url_for_dedupe(url: str) -> str:
+    normalized = str(url or "").strip()
+    if not normalized:
+        return ""
+    normalized = normalized.lower()
+    if normalized.endswith("/"):
+        normalized = normalized.rstrip("/")
+    return normalized
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def api_my_car_list_add(request):
@@ -82,9 +92,13 @@ def api_my_car_list_add(request):
 
     try:
         urls = _read_my_car_list_urls()
-        if url not in urls:
+        incoming_normalized = _normalize_url_for_dedupe(url)
+        existing_normalized = {_normalize_url_for_dedupe(item) for item in urls}
+        if incoming_normalized not in existing_normalized:
             urls.append(url)
             _write_my_car_list_urls(urls)
+        else:
+            return JsonResponse({"ok": True, "saved_url": url, "duplicate": True, "message": "URL already exists."})
     except (OSError, json.JSONDecodeError) as exc:
         return JsonResponse({"ok": False, "error": str(exc)}, status=500)
 
