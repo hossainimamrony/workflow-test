@@ -1,12 +1,18 @@
 const els = {
   rows: document.getElementById("rows"),
   loadDefaultBtn: document.getElementById("loadDefaultBtn"),
+  addUrlBtn: document.getElementById("addUrlBtn"),
   searchInput: document.getElementById("searchInput"),
   statusFilter: document.getElementById("statusFilter"),
   makeFilter: document.getElementById("makeFilter"),
   modelFilter: document.getElementById("modelFilter"),
   minPrice: document.getElementById("minPrice"),
   maxPrice: document.getElementById("maxPrice"),
+  urlModal: document.getElementById("urlModal"),
+  urlInput: document.getElementById("urlInput"),
+  urlSaveBtn: document.getElementById("urlSaveBtn"),
+  urlCancelBtn: document.getElementById("urlCancelBtn"),
+  urlModalMessage: document.getElementById("urlModalMessage"),
 };
 
 const state = {
@@ -339,6 +345,57 @@ async function loadDefaultJson() {
   setData(data, "filesystem: apps/carsale_scraper/full_comparisons.json");
 }
 
+function setModalMessage(text, tone = "") {
+  els.urlModalMessage.textContent = text || "";
+  els.urlModalMessage.classList.remove("error", "success");
+  if (tone) {
+    els.urlModalMessage.classList.add(tone);
+  }
+}
+
+function openUrlModal() {
+  els.urlModal.classList.remove("hidden");
+  els.urlInput.value = "";
+  setModalMessage("");
+  els.urlInput.focus();
+}
+
+function closeUrlModal() {
+  els.urlModal.classList.add("hidden");
+}
+
+async function saveUrlToMyCarList() {
+  const url = (els.urlInput.value || "").trim();
+  if (!url) {
+    setModalMessage("Please enter a URL.", "error");
+    return;
+  }
+
+  els.urlSaveBtn.disabled = true;
+  setModalMessage("Saving...");
+  try {
+    const res = await fetch("api/my-car-list/add/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Failed to save URL.");
+    }
+    setModalMessage("Saved successfully.", "success");
+    setTimeout(() => {
+      closeUrlModal();
+    }, 300);
+  } catch (err) {
+    setModalMessage(err.message || "Failed to save URL.", "error");
+  } finally {
+    els.urlSaveBtn.disabled = false;
+  }
+}
+
 function bindEvents() {
   els.loadDefaultBtn.addEventListener("click", async () => {
     try {
@@ -354,6 +411,25 @@ function bindEvents() {
   els.modelFilter.addEventListener("change", render);
   els.minPrice.addEventListener("input", render);
   els.maxPrice.addEventListener("input", render);
+
+  els.addUrlBtn.addEventListener("click", openUrlModal);
+  els.urlCancelBtn.addEventListener("click", closeUrlModal);
+  els.urlSaveBtn.addEventListener("click", saveUrlToMyCarList);
+
+  els.urlModal.addEventListener("click", (event) => {
+    if (event.target === els.urlModal) {
+      closeUrlModal();
+    }
+  });
+
+  els.urlInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      saveUrlToMyCarList();
+    } else if (event.key === "Escape") {
+      closeUrlModal();
+    }
+  });
 }
 
 (async function boot() {

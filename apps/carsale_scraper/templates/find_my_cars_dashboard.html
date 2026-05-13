@@ -17,6 +17,7 @@
 
   <section class="toolbar">
     <button id="loadDefaultBtn" class="btn">Reload Data</button>
+    <button id="addUrlBtn" class="btn">Add URL</button>
     <input id="searchInput" type="text" placeholder="Search by title, make, model, stock..." />
     <select id="statusFilter">
       <option value="all">All Status</option>
@@ -39,6 +40,18 @@
     <input id="minPrice" type="number" placeholder="Min Price (AUD)" />
     <input id="maxPrice" type="number" placeholder="Max Price (AUD)" />
   </section>
+
+  <div id="urlModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="urlModalTitle">
+    <div class="modal-card">
+      <h2 id="urlModalTitle">Add Listing URL</h2>
+      <input id="urlInput" type="url" placeholder="https://example.com/car-listing" />
+      <div id="urlModalMessage" class="modal-message"></div>
+      <div class="modal-actions">
+        <button id="urlCancelBtn" class="btn">Cancel</button>
+        <button id="urlSaveBtn" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
 
   <section id="rows" class="rows"></section>
 </div>

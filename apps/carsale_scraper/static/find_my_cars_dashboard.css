@@ -42,6 +42,12 @@ body {
   cursor: pointer;
 }
 
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 #searchInput {
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -190,6 +196,63 @@ body {
   padding: 20px;
   color: var(--muted);
   background: #fff;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 18, 38, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 18px;
+}
+
+.modal-card {
+  width: min(560px, 100%);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.modal-card h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+#urlInput {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.modal-message {
+  min-height: 18px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.modal-message.error {
+  color: #b91c1c;
+}
+
+.modal-message.success {
+  color: #166534;
+}
+
+.modal-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 @media (max-width: 980px) {
