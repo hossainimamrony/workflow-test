@@ -385,6 +385,10 @@ async function saveUrlToMyCarList() {
     if (!res.ok || !data.ok) {
       throw new Error(data.error || "Failed to save URL.");
     }
+    if (data.duplicate) {
+      setModalMessage("URL already exists. Not saved again.", "error");
+      return;
+    }
     setModalMessage("Saved successfully.", "success");
     setTimeout(() => {
       closeUrlModal();
